@@ -6,17 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: 源码剖析 | Hacker Cube</title>
+  <title>muduo 网络库日志后端 | Hacker Cube</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/tags/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/index.html">
+  <meta name="description" content="AsyncLogging.{h，cc} 的实现AsyncLogging 是整个日志系统的后端线程，其中 append() 函数作为前端 Logger 类的输出回调函数。当用户使用如LOG_DEBUG &lt;&lt; &quot;Hello world&quot;语句时，会将日志信息封装为 Buffer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo 网络库日志后端">
+<meta property="og:url" content="http://example.com/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="AsyncLogging.{h，cc} 的实现AsyncLogging 是整个日志系统的后端线程，其中 append() 函数作为前端 Logger 类的输出回调函数。当用户使用如LOG_DEBUG &lt;&lt; &quot;Hello world&quot;语句时，会将日志信息封装为 Buffer">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-03T14:47:50.000Z">
+<meta property="article:modified_time" content="2020-11-03T15:21:15.849Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="日志系统">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -153,38 +159,111 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-muduo-网络库日志后端" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      muduo 网络库日志后端
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
+
+        
+        <a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
   	<time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
 </a>
 
 
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/">muduo 网络库日志后端</a>
-    </h1>
-  
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-        <div class="article-info info-on-right">
-          
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="AsyncLogging-h，cc-的实现"><a href="#AsyncLogging-h，cc-的实现" class="headerlink" title="AsyncLogging.{h，cc} 的实现"></a>AsyncLogging.{h，cc} 的实现</h4><p>AsyncLogging 是整个日志系统的后端线程，其中 <code>append()</code> 函数作为前端 Logger 类的输出回调函数。当用户使用如<code>LOG_DEBUG &lt;&lt; &quot;Hello world&quot;</code>语句时，会将日志信息封装为 Buffer</p>
+<a id="more"></a>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AsyncLogging.h 文件(节选)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AsyncLogging</span> :</span> noncopyable&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  AsyncLogging(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename,</span><br><span class="line">               <span class="keyword">off_t</span> rollSize,</span><br><span class="line">               <span class="keyword">int</span> flushInterval = <span class="number">3</span>);</span><br><span class="line">  ~AsyncLogging() &#123;</span><br><span class="line">    <span class="keyword">if</span> (running_) &#123;</span><br><span class="line">      stop();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">append</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    running_ = <span class="literal">true</span>;</span><br><span class="line">    thread_.start();</span><br><span class="line">    latch_.wait();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> NO_THREAD_SAFETY_ANALYSIS </span>&#123;</span><br><span class="line">    running_ = <span class="literal">false</span>;</span><br><span class="line">    cond_.notify();</span><br><span class="line">    thread_.join();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">threadFunc</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="keyword">typedef</span> muduo::detail::FixedBuffer&lt;muduo::detail::kLargeBuffer&gt; Buffer;</span><br><span class="line">  <span class="keyword">typedef</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Buffer&gt;&gt; BufferVector;</span><br><span class="line">  <span class="keyword">typedef</span> BufferVector::value_type BufferPtr;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> flushInterval_;</span><br><span class="line">  <span class="built_in">std</span>::atomic&lt;<span class="keyword">bool</span>&gt; running_;</span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">string</span> basename_;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">off_t</span> rollSize_;</span><br><span class="line">  muduo::Thread thread_;</span><br><span class="line">  muduo::CountDownLatch latch_;</span><br><span class="line">  muduo::MutexLock mutex_;</span><br><span class="line">  <span class="function">muduo::Condition cond_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="function">BufferPtr currentBuffer_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="function">BufferPtr nextBuffer_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="function">BufferVector buffers_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AsyncLogging.cc</span></span><br><span class="line">AsyncLogging::AsyncLogging(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename, <span class="keyword">off_t</span> rollSize, <span class="keyword">int</span> flushInterval)</span><br><span class="line">  : flushInterval_(flushInterval),</span><br><span class="line">    running_(<span class="literal">false</span>),</span><br><span class="line">    basename_(basename),</span><br><span class="line">    rollSize_(rollSize),</span><br><span class="line">    thread_(<span class="built_in">std</span>::bind(&amp;AsyncLogging::threadFunc, <span class="keyword">this</span>), <span class="string">&quot;Logging&quot;</span>),</span><br><span class="line">    latch_(<span class="number">1</span>),</span><br><span class="line">    mutex_(),</span><br><span class="line">    cond_(mutex_),</span><br><span class="line">    currentBuffer_(<span class="keyword">new</span> Buffer),</span><br><span class="line">    nextBuffer_(<span class="keyword">new</span> Buffer),</span><br><span class="line">    buffers_()</span><br><span class="line">&#123;</span><br><span class="line">  currentBuffer_-&gt;bzero();</span><br><span class="line">  nextBuffer_-&gt;bzero();</span><br><span class="line">  buffers_.reserve(<span class="number">16</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AsyncLogging::append</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">  <span class="function">muduo::MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="keyword">if</span> (currentBuffer_-&gt;avail() &gt; len) &#123;</span><br><span class="line">    currentBuffer_-&gt;append(logline, len);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    buffers_.push_back(<span class="built_in">std</span>::move(currentBuffer_));</span><br><span class="line">    <span class="keyword">if</span> (nextBuffer_) &#123;</span><br><span class="line">      currentBuffer_ = <span class="built_in">std</span>::move(nextBuffer_);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      currentBuffer_.reset(<span class="keyword">new</span> Buffer); <span class="comment">// Rarely happens</span></span><br><span class="line">    &#125;</span><br><span class="line">    currentBuffer_-&gt;append(logline, len);</span><br><span class="line">    cond_.notify();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AsyncLogging::threadFunc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  assert(running_ == <span class="literal">true</span>);</span><br><span class="line">  latch_.countDown();</span><br><span class="line">  <span class="function">LogFile <span class="title">output</span><span class="params">(basename_, rollSize_, <span class="literal">false</span>)</span></span>;</span><br><span class="line">  <span class="function">BufferPtr <span class="title">newBuffer1</span><span class="params">(<span class="keyword">new</span> Buffer)</span></span>;</span><br><span class="line">  <span class="function">BufferPtr <span class="title">newBuffer2</span><span class="params">(<span class="keyword">new</span> Buffer)</span></span>;</span><br><span class="line">  newBuffer1-&gt;bzero();</span><br><span class="line">  newBuffer2-&gt;bzero();</span><br><span class="line">  BufferVector buffersToWrite;</span><br><span class="line">  buffersToWrite.reserve(<span class="number">16</span>);</span><br><span class="line">  <span class="keyword">while</span> (running_) &#123;</span><br><span class="line">    assert(newBuffer1 &amp;&amp; newBuffer1-&gt;length() == <span class="number">0</span>);</span><br><span class="line">    assert(newBuffer2 &amp;&amp; newBuffer2-&gt;length() == <span class="number">0</span>);</span><br><span class="line">    assert(buffersToWrite.empty());</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="function">muduo::MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">      <span class="keyword">if</span> (buffers_.empty()) &#123; <span class="comment">// unusual usage!</span></span><br><span class="line">        cond_.waitForSeconds(flushInterval_);</span><br><span class="line">      &#125;</span><br><span class="line">      buffers_.push_back(<span class="built_in">std</span>::move(currentBuffer_));</span><br><span class="line">      currentBuffer_ = <span class="built_in">std</span>::move(newBuffer1);</span><br><span class="line">      <span class="comment">//采用 swap 的方式，将数据移至局部对象 buffersToWrite 中，这样在处理的时候不会产生竞态问题，而且缩短了临界区。这同样也是为了避免日志前端的等待</span></span><br><span class="line">      buffersToWrite.swap(buffers_);</span><br><span class="line">      <span class="keyword">if</span> (!nextBuffer_) &#123;</span><br><span class="line">        nextBuffer_ = <span class="built_in">std</span>::move(newBuffer2);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    assert(!buffersToWrite.empty());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (buffersToWrite.size() &gt; <span class="number">25</span>) &#123;</span><br><span class="line">      <span class="keyword">char</span> buf[<span class="number">256</span>];</span><br><span class="line">      <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;Dropped log messages at %s, %zd larger buffers\n&quot;</span>,</span><br><span class="line">               Timestamp::now().toFormattedString().c_str(),</span><br><span class="line">               buffersToWrite.size()<span class="number">-2</span>);</span><br><span class="line">      <span class="built_in">fputs</span>(buf, <span class="built_in">stderr</span>);</span><br><span class="line">      output.append(buf, <span class="keyword">static_cast</span>&lt;<span class="keyword">int</span>&gt;(<span class="built_in">strlen</span>(buf)));</span><br><span class="line">      buffersToWrite.erase(buffersToWrite.begin()+<span class="number">2</span>, buffersToWrite.end());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; buffer : buffersToWrite) &#123;</span><br><span class="line">      <span class="comment">// <span class="doctag">FIXME:</span> use unbuffered stdio FILE ? or use ::writev ?</span></span><br><span class="line">      output.append(buffer-&gt;data(), buffer-&gt;length());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (buffersToWrite.size() &gt; <span class="number">2</span>) &#123;</span><br><span class="line">      <span class="comment">// drop non-bzero-ed buffers, avoid trashing</span></span><br><span class="line">      buffersToWrite.resize(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!newBuffer1) &#123;</span><br><span class="line">      assert(!buffersToWrite.empty());</span><br><span class="line">      newBuffer1 = <span class="built_in">std</span>::move(buffersToWrite.back());</span><br><span class="line">      buffersToWrite.pop_back();</span><br><span class="line">      newBuffer1-&gt;reset();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!newBuffer2) &#123;</span><br><span class="line">      assert(!buffersToWrite.empty());</span><br><span class="line">      newBuffer2 = <span class="built_in">std</span>::move(buffersToWrite.back());</span><br><span class="line">      buffersToWrite.pop_back();</span><br><span class="line">      newBuffer2-&gt;reset();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buffersToWrite.clear();</span><br><span class="line">    output.flush();</span><br><span class="line">  &#125;</span><br><span class="line">  output.flush();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整个 AsyncLogging 类的设计采用了双缓冲的方式实现，主要的思路是</p>
+<blockquote>
+<p>采用两个缓冲：A 和 B。前端负责往缓冲 A 中写数据，而后端负责将缓冲 B 的数据写入文件。当 A 写完后，则交换 A 和 B，然后让后端将缓冲 A 写入文件，而前端则继续往 B 中填充数据，并不断重复这个过程。</p>
+</blockquote>
+<p>这样的做法，好处是在新建日志的时候不必等待磁盘文件操作，另外批处理的方式也能避免后端线程被频繁唤醒。实际实现中，为了进一步减少日志前端的等待，使用了两个工作缓冲区 + 两个备用缓冲区，共四个缓冲区。</p>
+<p>另外，日志系统的后端实现中仅使用了缓冲区，而没有使用消息队列，主要还是出于功能和性能的考虑。从功能上讲，后端线程需要负责间隔刷新，当时间间隔 (默认是 3 秒) 抵达时，不论是否有数据抵达，后端线程都需要刷新缓冲区以避免程序崩溃而导致日志丢失。其次，从性能上讲，只有单个消费者，因此不使用阻塞队列，就可以避免每次有日志信息抵达就要去 notify 后端线程一次。</p>
+<p>对于 AsyncLogging 的实现而言并不复杂，真正有难度的点在于对日志刷新情况的把握，主要可以分为：</p>
+<blockquote>
+<p>正常情况：</p>
+<ul>
+<li>前端未写满缓冲区就发生了超时，此时程序应当有何种行为？</li>
+<li>前端在发生超时以前就写满了缓冲区，此时程序应当有何种行为？</li>
+<li>前端产生了过多的日志导致写超出的情况，此时程序应当有何种行为？</li>
+<li>后端因写入速度太慢，导致写超出的情况，，此时程序应当有何种行为？</li>
+</ul>
+<p>异常情况：出现了死锁或者死循环，导致后端日志消息堆积，此时程序应当有何种行为？</p>
+</blockquote>
+<p>对于上述的情况，陈硕在他的书 《Linux 多线程服务端编程  —— 使用 muduo C++ 网络库》中有详细的描述，并配有时序图，在此不赘述。</p>
+<h4 id="LogFile-h-cc-的源码及实现"><a href="#LogFile-h-cc-的源码及实现" class="headerlink" title="LogFile.{h, cc} 的源码及实现"></a>LogFile.{h, cc} 的源码及实现</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//LogFile.h</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LogFile</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  LogFile(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename,</span><br><span class="line">          <span class="keyword">off_t</span> rollSize,</span><br><span class="line">          <span class="keyword">bool</span> threadSafe = <span class="literal">true</span>,</span><br><span class="line">          <span class="keyword">int</span> flushInterval = <span class="number">3</span>,</span><br><span class="line">          <span class="keyword">int</span> checkEveryN = <span class="number">1024</span>);</span><br><span class="line">  ~LogFile();</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">append</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">flush</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">rollFile</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">append_unlocked</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="built_in">string</span> <span class="title">getLogFileName</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename, <span class="keyword">time_t</span>* now)</span></span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">string</span> basename_;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">off_t</span> rollSize_;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> flushInterval_;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> checkEveryN_;</span><br><span class="line">  <span class="keyword">int</span> count_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;MutexLock&gt; mutex_;</span><br><span class="line">  <span class="keyword">time_t</span> startOfPeriod_;</span><br><span class="line">  <span class="keyword">time_t</span> lastRoll_;</span><br><span class="line">  <span class="keyword">time_t</span> lastFlush_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;FileUtil::AppendFile&gt; file_;</span><br><span class="line">  <span class="comment">//代表一天的秒数</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">static</span> <span class="keyword">int</span> kRollPerSeconds_ = <span class="number">60</span>*<span class="number">60</span>*<span class="number">24</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LogFile.cc</span></span><br><span class="line">LogFile::LogFile(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename, <span class="keyword">off_t</span> rollSize, <span class="keyword">bool</span> threadSafe, <span class="keyword">int</span> flushInterval, <span class="keyword">int</span> checkEveryN)</span><br><span class="line">  : basename_(basename),</span><br><span class="line">    rollSize_(rollSize),</span><br><span class="line">    flushInterval_(flushInterval),</span><br><span class="line">    checkEveryN_(checkEveryN),</span><br><span class="line">    count_(<span class="number">0</span>),</span><br><span class="line">    mutex_(threadSafe ? <span class="keyword">new</span> MutexLock : <span class="literal">NULL</span>),</span><br><span class="line">    startOfPeriod_(<span class="number">0</span>),</span><br><span class="line">    lastRoll_(<span class="number">0</span>),</span><br><span class="line">    lastFlush_(<span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">  assert(basename.find(<span class="string">&#x27;/&#x27;</span>) == <span class="built_in">string</span>::npos);</span><br><span class="line">  rollFile();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">LogFile::~LogFile() = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">LogFile::append</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (mutex_) &#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(*mutex_)</span></span>;</span><br><span class="line">    append_unlocked(logline, len);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    append_unlocked(logline, len);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">LogFile::flush</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (mutex_) &#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(*mutex_)</span></span>;</span><br><span class="line">    file_-&gt;flush();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    file_-&gt;flush();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">LogFile::append_unlocked</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* logline, <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">  file_-&gt;append(logline, len);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (file_-&gt;writtenBytes() &gt; rollSize_) &#123;</span><br><span class="line">    rollFile();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ++count_;</span><br><span class="line">    <span class="keyword">if</span> (count_ &gt;= checkEveryN_) &#123;</span><br><span class="line">      count_ = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">time_t</span> now = ::time(<span class="literal">NULL</span>);</span><br><span class="line">      <span class="keyword">time_t</span> thisPeriod_ = now / kRollPerSeconds_ * kRollPerSeconds_;</span><br><span class="line">      <span class="keyword">if</span> (thisPeriod_ != startOfPeriod_) &#123;</span><br><span class="line">        rollFile();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (now - lastFlush_ &gt; flushInterval_) &#123;</span><br><span class="line">        lastFlush_ = now;</span><br><span class="line">        file_-&gt;flush();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">LogFile::rollFile</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">time_t</span> now = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">string</span> filename = getLogFileName(basename_, &amp;now);</span><br><span class="line">  <span class="keyword">time_t</span> start = now / kRollPerSeconds_ * kRollPerSeconds_;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (now &gt; lastRoll_) &#123;</span><br><span class="line">    lastRoll_ = now;</span><br><span class="line">    lastFlush_ = now;</span><br><span class="line">    startOfPeriod_ = start;</span><br><span class="line">    file_.reset(<span class="keyword">new</span> FileUtil::AppendFile(filename));</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">string</span> <span class="title">LogFile::getLogFileName</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; basename, <span class="keyword">time_t</span>* now)</span></span>&#123;</span><br><span class="line">  <span class="built_in">string</span> filename;</span><br><span class="line">  filename.reserve(basename.size() + <span class="number">64</span>);</span><br><span class="line">  filename = basename;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">char</span> timebuf[<span class="number">32</span>];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tm</span> <span class="title">tm</span>;</span></span><br><span class="line">  *now = time(<span class="literal">NULL</span>);</span><br><span class="line">  gmtime_r(now, &amp;tm); <span class="comment">// <span class="doctag">FIXME:</span> localtime_r ?</span></span><br><span class="line">  strftime(timebuf, <span class="keyword">sizeof</span> timebuf, <span class="string">&quot;.%Y%m%d-%H%M%S.&quot;</span>, &amp;tm);</span><br><span class="line">  filename += timebuf;</span><br><span class="line"></span><br><span class="line">  filename += ProcessInfo::hostname();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">char</span> pidbuf[<span class="number">32</span>];</span><br><span class="line">  <span class="built_in">snprintf</span>(pidbuf, <span class="keyword">sizeof</span> pidbuf, <span class="string">&quot;.%d&quot;</span>, ProcessInfo::pid());</span><br><span class="line">  filename += pidbuf;</span><br><span class="line"></span><br><span class="line">  filename += <span class="string">&quot;.log&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> filename;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于 LogFile 而言，其主要的作用是实现文件滚动。文件滚动的触发条件有两个：</p>
+<ul>
+<li>当文件的大小超过一定值后</li>
+<li>每隔一天滚动一次</li>
+</ul>
+<p>当满足滚动条件时，新建的日志文件名应满足：程序名.时间.主机名.进程id.log(例如：logtest.20200713-171322.hostname.1234.log)。</p>
+<p>其中主要的函数有两个 <code>rollFile</code> 和 <code>append_unlocked</code>。主要说说 <code>append_unlocked()</code>函数。</p>
+<p>对于滚动的第一个条件而言，每次写入日志信息时都会用 记录写入信息的大小。通过 <code>writtenBytes() </code>就可以知道当前往文件中写入了多少字节的数据。</p>
+<p>对于第二个条件，<code>append_unlock()</code> 会记录所插入的日志条数，每当插入日志的记录数超过 checkEveryN 时就检测当前时间，并从中取出天数和 startOfPeriod_ 进行比较，如果不在同一天，则执行 <code>rollFile()</code></p>
+<h4 id="一些其他的问题"><a href="#一些其他的问题" class="headerlink" title="一些其他的问题"></a>一些其他的问题</h4><p>为什么 AsyncLogging 中的部分函数需要使用到锁，而 LogFile 当中要提供无锁版本？</p>
+<p>这主要还是因为 AsyncLogging 和许多日志前端打交道，是一对多的问题，因此必须考虑线程安全性。而 LogFile 只和 AsyncLogging 打交道，是一对一的情况，主要以无锁版本为主。实际上在 muduo 网络库中的 example 以及测试代码中，AsyncLogging  使用的都是 LogFile 的 <code>append_unlocked()</code>函数</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢老板加鸡腿~~<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/rewards/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/rewards/wechatpay.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -212,7 +291,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -225,80 +304,127 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-  	<time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">muduo 网络库日志前端</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
 
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/">muduo 网络库日志前端</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#AsyncLogging-h%EF%BC%8Ccc-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">AsyncLogging.{h，cc} 的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LogFile-h-cc-%E7%9A%84%E6%BA%90%E7%A0%81%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">LogFile.{h, cc} 的源码及实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">一些其他的问题</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+  <div id="SOHUCS" sid="muduo-网络库日志后端" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+  
+
+  
+
+  
 
 
           </div>
@@ -332,9 +458,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

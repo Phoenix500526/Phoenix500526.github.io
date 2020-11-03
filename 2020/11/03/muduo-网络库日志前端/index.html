@@ -16,11 +16,12 @@
 <meta property="og:description" content="muduo 网络库日志模块简介muduo 网络库中提供了一个高效的异步日志模块，其本质是一个多生产者单消费者的模型，可以分为前端(frontend) 和后端(backend)。  前端：前端采用流的输出格式，并提供了相关级别的宏（LOG_DEBUG, LOG_INFO, etc）供用户使用，代码位于 Logging.{h, cc} 中。出于安全性以及性能的考虑，封装了一个简单的日志流 LogStr">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-11-03T12:52:36.000Z">
-<meta property="article:modified_time" content="2020-11-03T14:42:55.240Z">
+<meta property="article:modified_time" content="2020-11-03T15:21:52.624Z">
 <meta property="article:author" content="Phoenix">
 <meta property="article:tag" content="muduo网络库">
 <meta property="article:tag" content="源码剖析">
 <meta property="article:tag" content="日志系统">
+<meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -172,6 +173,13 @@
         <a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
   	<time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
 </a>
+
+
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
         
       </header>
     
@@ -188,6 +196,8 @@
 <li>调用 Logger 类的静态成员函数 <code>setOutput()</code>，将 AsyncLogging 对象的 <code>append()</code> 函数注册到 Logger 类当中</li>
 <li>用户使用对应的日志宏进行日志的输出</li>
 </ol>
+<a id="more"></a>
+
 <h4 id="前端源码及亮点"><a href="#前端源码及亮点" class="headerlink" title="前端源码及亮点"></a>前端源码及亮点</h4><p>前端 Logger 类的设计与实现【出于版面节省需要，对代码格式进行了改动。原版代码采用了对 grep/diff 友好的代码格式】：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Logging.h</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Logger</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">//日志级别的数量</span></span><br><span class="line">  <span class="class"><span class="keyword">enum</span> <span class="title">LogLevel</span>&#123;</span>TRACE, DEBUG, INFO, WARN, ERROR, FATAL, NUM_LOG_LEVELS,	&#125;;</span><br><span class="line">  <span class="comment">// 将文件名和长度封装成为内部类 SourceFile，清晰了语义同时，简化了构造函数的实现。</span></span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">SourceFile</span> &#123;</span></span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">int</span> N&gt;</span><br><span class="line">    SourceFile(<span class="keyword">const</span> <span class="keyword">char</span> (&amp;arr)[N]): data_(arr), size_(N<span class="number">-1</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> <span class="keyword">char</span>* slash = <span class="built_in">strrchr</span>(data_, <span class="string">&#x27;/&#x27;</span>); <span class="comment">// builtin function</span></span><br><span class="line">      <span class="keyword">if</span> (slash) &#123;</span><br><span class="line">        data_ = slash + <span class="number">1</span>;</span><br><span class="line">        size_ -= <span class="keyword">static_cast</span>&lt;<span class="keyword">int</span>&gt;(data_ - arr);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">SourceFile</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* filename)</span>: <span class="title">data_</span><span class="params">(filename)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">const</span> <span class="keyword">char</span>* slash = <span class="built_in">strrchr</span>(filename, <span class="string">&#x27;/&#x27;</span>);</span><br><span class="line">      <span class="keyword">if</span> (slash) &#123;</span><br><span class="line">        data_ = slash + <span class="number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      size_ = <span class="keyword">static_cast</span>&lt;<span class="keyword">int</span>&gt;(<span class="built_in">strlen</span>(data_));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* data_;</span><br><span class="line">    <span class="keyword">int</span> size_;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  Logger(SourceFile file, <span class="keyword">int</span> line);</span><br><span class="line">  Logger(SourceFile file, <span class="keyword">int</span> line, LogLevel level);</span><br><span class="line">  Logger(SourceFile file, <span class="keyword">int</span> line, LogLevel level, <span class="keyword">const</span> <span class="keyword">char</span>* func);</span><br><span class="line">  Logger(SourceFile file, <span class="keyword">int</span> line, <span class="keyword">bool</span> toAbort);</span><br><span class="line">  ~Logger();</span><br><span class="line">  <span class="function">LogStream&amp; <span class="title">stream</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> impl_.stream_; &#125;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> LogLevel <span class="title">logLevel</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setLogLevel</span><span class="params">(LogLevel level)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*OutputFunc)</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* msg, <span class="keyword">int</span> len)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*FlushFunc)</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setOutput</span><span class="params">(OutputFunc)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setFlush</span><span class="params">(FlushFunc)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setTimeZone</span><span class="params">(<span class="keyword">const</span> TimeZone&amp; tz)</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">    </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Impl</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> Logger::LogLevel LogLevel;</span><br><span class="line">  Impl(LogLevel level, <span class="keyword">int</span> old_errno, <span class="keyword">const</span> SourceFile&amp; file, <span class="keyword">int</span> line);</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">formatTime</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">finish</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  Timestamp time_;</span><br><span class="line">  LogStream stream_;</span><br><span class="line">  LogLevel level_;</span><br><span class="line">  <span class="keyword">int</span> line_;</span><br><span class="line">  SourceFile basename_;</span><br><span class="line">&#125;;</span><br><span class="line">  Impl impl_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> Logger::LogLevel g_logLevel;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">inline</span> Logger::LogLevel <span class="title">Logger::logLevel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> g_logLevel;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_TRACE <span class="meta-keyword">if</span> (muduo::Logger::logLevel() &lt;= muduo::Logger::TRACE) \</span></span><br><span class="line">  muduo::Logger(__FILE__, __LINE__, muduo::Logger::TRACE, __func__).stream()</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_DEBUG <span class="meta-keyword">if</span> (muduo::Logger::logLevel() &lt;= muduo::Logger::DEBUG) \</span></span><br><span class="line">  muduo::Logger(__FILE__, __LINE__, muduo::Logger::DEBUG, __func__).stream()</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_INFO <span class="meta-keyword">if</span> (muduo::Logger::logLevel() &lt;= muduo::Logger::INFO) \</span></span><br><span class="line">  muduo::Logger(__FILE__, __LINE__).stream()</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_WARN muduo::Logger(__FILE__, __LINE__, muduo::Logger::WARN).stream()</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_ERROR muduo::Logger(__FILE__, __LINE__, muduo::Logger::ERROR).stream()</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_FATAL muduo::Logger(__FILE__, __LINE__, muduo::Logger::FATAL).stream()</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_SYSERR muduo::Logger(__FILE__, __LINE__, false).stream()</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOG_SYSFATAL muduo::Logger(__FILE__, __LINE__, true).stream()</span></span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
 
@@ -318,6 +328,10 @@
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
         		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        		</li>
       		
 		</ul>
 	</div>
@@ -395,6 +409,20 @@
 </article>
 
   
+<nav id="article-nav">
+  
+    <a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          muduo 网络库日志后端
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -462,6 +490,17 @@
       	</div>
     </div>
   </div>
+
+    <!-- 不蒜子统计 -->
+      <span id="busuanzi_container_site_pv">
+            本站总访问量<span id="busuanzi_value_site_pv"></span>次
+      </span>
+      <span class="post-meta-divider">|</span>
+      <span id="busuanzi_container_site_uv" style='display:none'>
+            本站访客数<span id="busuanzi_value_site_uv"></span>人
+      </span>
+      <script async src="/busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
 </footer>
     </div>
     <script>
@@ -547,6 +586,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">多线程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++</a>
               </li>
             
             <div class="clearfix"></div>
