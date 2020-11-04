@@ -6,19 +6,25 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2020/11 | Hacker Cube</title>
+  <title>skynet 源码阅读笔记 —— 配置文件的加载 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/archives/2020/11/index.html">
+  <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第三篇文章，主要探讨 skynet 的配置文件加载机制，包含了以下内容：   main 函数是如何启动配置文件加载的？ 让代码描述自身：使用 lua 作为配置语言，并利用 lua 的解释器来解析配置文件 main 函数是如何解析配置文件的？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet 源码阅读笔记 —— 配置文件的加载">
+<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第三篇文章，主要探讨 skynet 的配置文件加载机制，包含了以下内容：   main 函数是如何启动配置文件加载的？ 让代码描述自身：使用 lua 作为配置语言，并利用 lua 的解释器来解析配置文件 main 函数是如何解析配置文件的？">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-04T09:15:48.000Z">
+<meta property="article:modified_time" content="2020-11-04T09:20:42.065Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="skynet框架">
+<meta property="article:tag" content="C语言">
+<meta property="article:tag" content="lua语言">
+<meta property="article:tag" content="配置文件">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -204,177 +210,158 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-skynet-源码阅读笔记-——-配置文件的加载" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" class="archive-article-date">
-        <time datetime="2020-11-04T09:33:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" target="_blank">skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动</a>
   
+    <h1 class="article-title" itemprop="name">
+      skynet 源码阅读笔记 —— 配置文件的加载
     </h1>
   
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">lua</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">bootstrap服务</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
-  
-    </h1>
-  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" class="archive-article-date">
         <time datetime="2020-11-04T09:15:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
 </a>
 
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">2.4k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">10分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第三篇文章，主要探讨 skynet 的配置文件加载机制，包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>main 函数是如何启动配置文件加载的？</li>
+<li>让代码描述自身：使用 lua 作为配置语言，并利用 lua 的解释器来解析配置文件</li>
+<li>main 函数是如何解析配置文件的？</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="skynet-中-main-函数的流程"><a href="#skynet-中-main-函数的流程" class="headerlink" title="skynet 中 main 函数的流程"></a>skynet 中 main 函数的流程</h4><p>skynet 的 main 函数位于 skynet_main.c 文件当中，其定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * config_file = <span class="literal">NULL</span> ;</span><br><span class="line">    <span class="keyword">if</span> (argc &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        config_file = argv[<span class="number">1</span>];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Need a config file. Please read skynet wiki : https://github.com/cloudwu/skynet/wiki/Config\n&quot;</span></span><br><span class="line">            <span class="string">&quot;usage: skynet configfilename\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    skynet_globalinit();</span><br><span class="line">    skynet_env_init();</span><br><span class="line">    sigign();</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_config</span> <span class="title">config</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> LUA_CACHELIB</span></span><br><span class="line">    <span class="comment">// init the lock of code cache</span></span><br><span class="line">    luaL_initcodecache();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="comment">//创建一个新的 lua 环境，并将 lua 库加载进去, 该函数使用默认分配函数来进行创建</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">lua_State</span> *<span class="title">L</span> =</span> luaL_newstate();</span><br><span class="line">    luaL_openlibs(L);   <span class="comment">// link lua lib</span></span><br><span class="line">    <span class="comment">//将 load_config 加载为 lua 代码块，&quot;t&quot; 表示代码块的类型是文本类型，代码块的名称为 “=[skynet config]”</span></span><br><span class="line">    <span class="keyword">int</span> err =  luaL_loadbufferx(L, load_config, <span class="built_in">strlen</span>(load_config), <span class="string">&quot;=[skynet config]&quot;</span>, <span class="string">&quot;t&quot;</span>);</span><br><span class="line">    assert(err == LUA_OK);</span><br><span class="line">    <span class="comment">//向 lua 的虚拟栈中压入 config_file,作为 load_config 的参数</span></span><br><span class="line">    lua_pushstring(L, config_file);</span><br><span class="line">    <span class="comment">//lua_pcall 的第二个参数表示传递的参数个数，第三个参数表示期望的结果数量，第四个参数表示错误处理函数</span></span><br><span class="line">    err = lua_pcall(L, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="comment">//如果出错，则返回存放在虚拟栈栈顶的错误信息</span></span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>,<span class="string">&quot;%s\n&quot;</span>,lua_tostring(L,<span class="number">-1</span>));</span><br><span class="line">        lua_close(L);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    _init_env(L);</span><br><span class="line">    config.thread =  optint(<span class="string">&quot;thread&quot;</span>,<span class="number">8</span>);</span><br><span class="line">    config.module_path = optstring(<span class="string">&quot;cpath&quot;</span>,<span class="string">&quot;./cservice/?.so&quot;</span>);</span><br><span class="line">    config.harbor = optint(<span class="string">&quot;harbor&quot;</span>, <span class="number">1</span>);</span><br><span class="line">    config.bootstrap = optstring(<span class="string">&quot;bootstrap&quot;</span>,<span class="string">&quot;snlua bootstrap&quot;</span>);</span><br><span class="line">    config.daemon = optstring(<span class="string">&quot;daemon&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    config.logger = optstring(<span class="string">&quot;logger&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    config.logservice = optstring(<span class="string">&quot;logservice&quot;</span>, <span class="string">&quot;logger&quot;</span>);</span><br><span class="line">    config.profile = optboolean(<span class="string">&quot;profile&quot;</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    lua_close(L);</span><br><span class="line">    skynet_start(&amp;config);</span><br><span class="line">    skynet_globalexit();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用过 skynet 的人都知道，skynet 在启动时相应的配置文件作为参数传递给 skynet 进程，例如 <code>skynet example/config</code>。从代码上可以看出，skynet 的 <code>main</code> 函数主要流程可以分为 3 个部分：</p>
+<blockquote>
+<ol>
+<li>初始化运行环境，并通过 C API 调用相应的 lua 脚本解析配置文件，然后结果保存在 config 结构体中</li>
+<li>以 config 为参数启动 skynet 进入事件循环</li>
+<li>执行 skynet_globalexit() 完成 skynet 的退出准备</li>
+</ol>
+</blockquote>
+<h4 id="使用-lua-语言描述配置文件"><a href="#使用-lua-语言描述配置文件" class="headerlink" title="使用 lua 语言描述配置文件"></a>使用 lua 语言描述配置文件</h4><p>在了解 skynet 是如何加载配置文件前，我们先来看看配置文件究竟长什么样？skynet 在 example 目录下提供了示范的 <code>config.path</code> 文件以及 <code>config</code> 文件</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--config.path 文件</span></span><br><span class="line">root = <span class="string">&quot;./&quot;</span></span><br><span class="line">luaservice = root..<span class="string">&quot;service/?.lua;&quot;</span>..root..<span class="string">&quot;test/?.lua;&quot;</span>..root..<span class="string">&quot;examples/?.lua;&quot;</span>..root..<span class="string">&quot;test/?/init.lua&quot;</span></span><br><span class="line">lualoader = root .. <span class="string">&quot;lualib/loader.lua&quot;</span></span><br><span class="line">lua_path = root..<span class="string">&quot;lualib/?.lua;&quot;</span>..root..<span class="string">&quot;lualib/?/init.lua&quot;</span></span><br><span class="line">lua_cpath = root .. <span class="string">&quot;luaclib/?.so&quot;</span></span><br><span class="line">snax = root..<span class="string">&quot;examples/?.lua;&quot;</span>..root..<span class="string">&quot;test/?.lua&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--config 文件</span></span><br><span class="line"><span class="comment">--include 为 load_config 中定义的脚本调用接口</span></span><br><span class="line">include <span class="string">&quot;config.path&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- preload = &quot;./examples/preload.lua&quot;   -- run preload.lua before every lua service run</span></span><br><span class="line">thread = <span class="number">8</span></span><br><span class="line">logger = <span class="literal">nil</span></span><br><span class="line">logpath = <span class="string">&quot;.&quot;</span></span><br><span class="line">harbor = <span class="number">1</span></span><br><span class="line">address = <span class="string">&quot;127.0.0.1:2526&quot;</span></span><br><span class="line">master = <span class="string">&quot;127.0.0.1:2013&quot;</span></span><br><span class="line">start = <span class="string">&quot;main&quot;</span>  <span class="comment">-- main script</span></span><br><span class="line">bootstrap = <span class="string">&quot;snlua bootstrap&quot;</span>   <span class="comment">-- The service for bootstrap</span></span><br><span class="line">standalone = <span class="string">&quot;0.0.0.0:2013&quot;</span></span><br><span class="line"><span class="comment">-- snax_interface_g = &quot;snax_g&quot;</span></span><br><span class="line"><span class="built_in">cpath</span> = root..<span class="string">&quot;cservice/?.so&quot;</span></span><br><span class="line"><span class="comment">-- daemon = &quot;./skynet.pid&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>skynet 的配置文件本身使用了 lua 语言来描述对应的选项，而 skynet 也是通过 C API 来调用对应的 lua 脚本对配置文件进行解析。使用 lua 语言来描述配置选项，相较于以普通的文本来描述配置文件有以下几个好处：</p>
+<blockquote>
+<ol>
+<li>lua 作为一门脚本语言，本身提供了解析器及灵活丰富的语法，不仅表达能力强于文本语言，而且 C/C++ 都为其提供了良好的支持，简单易用</li>
+<li>使用 lua 语言描述配置文件，则配置文件本身也可以运行。你可以在配置文件中定义并调用函数，要求用户输入数据或者访问系统的环境变量等，这些都是文本语言所难以实现的。</li>
+<li>lua 实现的配置文件可以扩展性强，当需要向配置文件中添加新的配置机制会更加方便。</li>
+</ol>
+</blockquote>
+<h4 id="配置文件解析脚本"><a href="#配置文件解析脚本" class="headerlink" title="配置文件解析脚本"></a>配置文件解析脚本</h4><p>这个解析配置文件的脚本的内容则是以 C 字符串的形式保存在 <code>load_config</code> 变量当中。我们将其以 lua 代码的形式展示在下方：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- load_config 的内容：</span></span><br><span class="line"><span class="keyword">local</span> result = &#123;&#125;</span><br><span class="line"><span class="comment">--获取相应的环境变量</span></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">getenv</span><span class="params">(name)</span></span> <span class="keyword">return</span> <span class="built_in">assert</span>(<span class="built_in">os</span>.<span class="built_in">getenv</span>(name), <span class="string">[[os.getenv() failed: ]]</span> .. name) <span class="keyword">end</span></span><br><span class="line"><span class="comment">--获取路径的分隔符，在 linux 下 sep = /</span></span><br><span class="line"><span class="keyword">local</span> sep = <span class="built_in">package</span>.<span class="built_in">config</span>:<span class="built_in">sub</span>(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line"><span class="comment">--将 . 和 / 合并得到了当前目录的相对路径 ./</span></span><br><span class="line"><span class="keyword">local</span> current_path = <span class="string">[[.]]</span>..sep</span><br><span class="line"></span><br><span class="line"><span class="comment">--定义脚本调用接口 include</span></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">include</span><span class="params">(filename)</span></span></span><br><span class="line">    <span class="keyword">local</span> last_path = current_path</span><br><span class="line">    <span class="comment">--以最后一个/为分界将 filename 分割为路径 path 和文件名 name</span></span><br><span class="line">    <span class="keyword">local</span> <span class="built_in">path</span>, name = filename:<span class="built_in">match</span>(<span class="string">[[(.*]]</span>..sep..<span class="string">[[)(.*)$]]</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">path</span> <span class="keyword">then</span></span><br><span class="line">        <span class="comment">--若 path 为绝对路径，则起始字符为 /</span></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">path</span>:<span class="built_in">sub</span>(<span class="number">1</span>,<span class="number">1</span>) == sep <span class="keyword">then</span>    <span class="comment">-- root</span></span><br><span class="line">            current_path = <span class="built_in">path</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">--path 为相对路径的情况</span></span><br><span class="line">            current_path = current_path .. <span class="built_in">path</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="comment">--若 path 为 nil，则说明 filename 不包含路径</span></span><br><span class="line">        name = filename</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="comment">--打开配置文件</span></span><br><span class="line">    <span class="keyword">local</span> f = <span class="built_in">assert</span>(<span class="built_in">io</span>.<span class="built_in">open</span>(current_path .. name))</span><br><span class="line">    <span class="comment">--读取配置文件中的所有内容</span></span><br><span class="line">    <span class="keyword">local</span> code = <span class="built_in">assert</span>(f:<span class="built_in">read</span> <span class="string">[[*a]]</span>)</span><br><span class="line">    <span class="comment">--如果配置文件中存在形如 $(环境变量) 的字符串，则调用 getenv 将其替换成环境变量的值</span></span><br><span class="line">    code = <span class="built_in">string</span>.<span class="built_in">gsub</span>(code, <span class="string">[[%$([%w_%d]+)]]</span>, <span class="built_in">getenv</span>)</span><br><span class="line">    f:<span class="built_in">close</span>()</span><br><span class="line">    <span class="comment">--将 code 中的内容以文本的形式加载到 result,其中 t 代表文本模式。</span></span><br><span class="line">    <span class="built_in">assert</span>(<span class="built_in">load</span>(code,<span class="string">[[@]]</span>..filename,<span class="string">[[t]]</span>,result))()</span><br><span class="line">    current_path = last_path</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">--设置 result 的元表，这样在调用 include 的过程中，如果 result 中没有对应的键则会自动调用 include 函数</span></span><br><span class="line"><span class="built_in">setmetatable</span>(result, &#123; <span class="built_in">__index</span> = &#123; include = include &#125; &#125;)</span><br><span class="line"><span class="comment">--config_name 是变长参数</span></span><br><span class="line"><span class="keyword">local</span> config_name = ...</span><br><span class="line"><span class="comment">--使用 include 调用 config_name 脚本</span></span><br><span class="line">include(config_name)</span><br><span class="line"><span class="comment">--调用完 include 后将 result 的元表清除，避免遍历 result 时收到元表的影响</span></span><br><span class="line"><span class="built_in">setmetatable</span>(result, <span class="literal">nil</span>)</span><br><span class="line"><span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+<h4 id="main-函数中解析脚本的流程"><a href="#main-函数中解析脚本的流程" class="headerlink" title="main 函数中解析脚本的流程"></a>main 函数中解析脚本的流程</h4><p>在了解了配置文件的内容及 load_config 的解析流程后，我们就可以来分析一下 <code>main</code> 函数加载配置文件的详细过程了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_env.c</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_env</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">    lua_State *L;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">skynet_env</span> *<span class="title">E</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_env_init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    E = skynet_malloc(<span class="keyword">sizeof</span>(*E));</span><br><span class="line">    SPIN_INIT(E)</span><br><span class="line">    E-&gt;L = luaL_newstate();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//skynet_main.c</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _init_env(lua_State *L) &#123;</span><br><span class="line">    lua_pushnil(L);  <span class="comment">/* first key */</span></span><br><span class="line">    <span class="keyword">while</span> (lua_next(L, <span class="number">-2</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> keyt = lua_type(L, <span class="number">-2</span>);</span><br><span class="line">        <span class="keyword">if</span> (keyt != LUA_TSTRING) &#123;</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Invalid config table\n&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">char</span> * key = lua_tostring(L,<span class="number">-2</span>);</span><br><span class="line">        <span class="keyword">if</span> (lua_type(L,<span class="number">-1</span>) == LUA_TBOOLEAN) &#123;</span><br><span class="line">            <span class="keyword">int</span> b = lua_toboolean(L,<span class="number">-1</span>);</span><br><span class="line">            skynet_setenv(key,b ? <span class="string">&quot;true&quot;</span> : <span class="string">&quot;false&quot;</span> );</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">const</span> <span class="keyword">char</span> * value = lua_tostring(L,<span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">if</span> (value == <span class="literal">NULL</span>) &#123;</span><br><span class="line">                <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Invalid config table key = %s\n&quot;</span>, key);</span><br><span class="line">                <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            skynet_setenv(key,value);</span><br><span class="line">        &#125;</span><br><span class="line">        lua_pop(L,<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    lua_pop(L,<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    skynet_env_init();</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">//创建一个新的 lua 环境，并将 lua 库加载进去, 该函数使用默认分配函数来进行创建</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">lua_State</span> *<span class="title">L</span> =</span> luaL_newstate();</span><br><span class="line">    luaL_openlibs(L);   <span class="comment">// link lua lib</span></span><br><span class="line">    <span class="comment">//将 load_config 加载为 lua 代码块，&quot;t&quot; 表示代码块的类型是文本类型，代码块的名称为 “=[skynet config]”</span></span><br><span class="line">    <span class="keyword">int</span> err =  luaL_loadbufferx(L, load_config, <span class="built_in">strlen</span>(load_config), <span class="string">&quot;=[skynet config]&quot;</span>, <span class="string">&quot;t&quot;</span>);</span><br><span class="line">    assert(err == LUA_OK);</span><br><span class="line">    <span class="comment">//向 lua 的虚拟栈中压入 config_file,作为 load_config 的参数</span></span><br><span class="line">    lua_pushstring(L, config_file);</span><br><span class="line">    <span class="comment">//lua_pcall 的第二个参数表示传递的参数个数，第三个参数表示期望的结果数量，第四个参数表示错误处理函数</span></span><br><span class="line">    err = lua_pcall(L, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="comment">//如果出错，则返回存放在虚拟栈栈顶的错误信息</span></span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>,<span class="string">&quot;%s\n&quot;</span>,lua_tostring(L,<span class="number">-1</span>));</span><br><span class="line">        lua_close(L);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//将配置文件的内容添加到环境变量当中</span></span><br><span class="line">    _init_env(L);</span><br><span class="line">    <span class="comment">//opt*(key, value) 函数会以 key 为键值访问环境变量，如果设置了该环境变量则返回对应的值，若没有设置该环境变量则将其设为 value</span></span><br><span class="line">    config.thread =  optint(<span class="string">&quot;thread&quot;</span>,<span class="number">8</span>);</span><br><span class="line">    config.module_path = optstring(<span class="string">&quot;cpath&quot;</span>,<span class="string">&quot;./cservice/?.so&quot;</span>);</span><br><span class="line">    config.harbor = optint(<span class="string">&quot;harbor&quot;</span>, <span class="number">1</span>);</span><br><span class="line">    config.bootstrap = optstring(<span class="string">&quot;bootstrap&quot;</span>,<span class="string">&quot;snlua bootstrap&quot;</span>);</span><br><span class="line">    config.daemon = optstring(<span class="string">&quot;daemon&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    config.logger = optstring(<span class="string">&quot;logger&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    config.logservice = optstring(<span class="string">&quot;logservice&quot;</span>, <span class="string">&quot;logger&quot;</span>);</span><br><span class="line">    config.profile = optboolean(<span class="string">&quot;profile&quot;</span>, <span class="number">1</span>);</span><br><span class="line">    lua_close(L);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中可以看出，skynet 读取配置文件的大致流程为：先调用 <code>skynet_env_init</code> 函数初始化一个全局的 lua 环境，接着创建一个新的 lua 环境，并在该环境中使用 <code>luaL_loadbufferx</code>将 load_config 加载进来，然后使用 <code>lua_pushstring</code>将配置文件 config_file 压入 lua 的虚拟栈中。最后使用 <code>lua_pcall</code> 调用 load_config 脚本完成配置文件的解析。解析完毕后，调用 <code>_init_env</code> 将解析结果保存为环境变量。在需要时调用相关类型的 <code>opt</code> 函数读取相应的配置项。<br>最后我们来看看 <code>skynet_env</code> 的定义及相应函数的实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_env.c</span></span><br><span class="line"><span class="comment">// skynet_env 维护了一个全局的 lua 环境</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_env</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">    lua_State *L;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">skynet_env</span> *<span class="title">E</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line"><span class="comment">//从全局的 lua 环境中查找全局变量 key</span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span>*  <span class="title">skynet_getenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *key)</span> </span>&#123;</span><br><span class="line">    SPIN_LOCK(E)</span><br><span class="line">    lua_State *L = E-&gt;L;</span><br><span class="line">    lua_getglobal(L, key);</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * result = lua_tostring(L, <span class="number">-1</span>);</span><br><span class="line">    lua_pop(L, <span class="number">1</span>);</span><br><span class="line">    SPIN_UNLOCK(E)</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//将 &#123;key, value&#125; 保存为全局的 lua 环境的全局变量</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_setenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *key, <span class="keyword">const</span> <span class="keyword">char</span> *value)</span> </span>&#123;</span><br><span class="line">    SPIN_LOCK(E)</span><br><span class="line">    lua_State *L = E-&gt;L;</span><br><span class="line">    lua_getglobal(L, key);</span><br><span class="line">    assert(lua_isnil(L, <span class="number">-1</span>));</span><br><span class="line">    lua_pop(L,<span class="number">1</span>);</span><br><span class="line">    lua_pushstring(L,value);</span><br><span class="line">    lua_setglobal(L,key);</span><br><span class="line">    SPIN_UNLOCK(E)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//skynet_main.c</span></span><br><span class="line"><span class="comment">//optboolean 和 optstring 函数的实现逻辑与 optint 相似。</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">optint</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *key, <span class="keyword">int</span> opt)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * str = skynet_getenv(key);</span><br><span class="line">    <span class="keyword">if</span> (str == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">char</span> tmp[<span class="number">20</span>];</span><br><span class="line">        <span class="built_in">sprintf</span>(tmp,<span class="string">&quot;%d&quot;</span>,opt);</span><br><span class="line">        skynet_setenv(key, tmp);</span><br><span class="line">        <span class="keyword">return</span> opt;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> strtol(str, <span class="literal">NULL</span>, <span class="number">10</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" target="_blank">skynet 源码阅读笔记 —— 配置文件的加载</a>
-  
-    </h1>
-  
+      </a>
+    </div>
+    
 
-
-        <div class="article-info info-on-right">
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-配置文件的加载/" title="skynet 源码阅读笔记 —— 配置文件的加载" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-配置文件的加载/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -402,7 +389,7 @@
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -415,479 +402,137 @@
 	</div>
 
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" class="archive-article-date">
-        <time datetime="2020-11-04T09:09:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          skynet 源码阅读笔记 —— skynet中的定时器机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">skynet 源码阅读笔记 —— skynet 的模块与服务</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" target="_blank">skynet 源码阅读笔记 —— skynet 的模块与服务</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">动态库</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#skynet-%E4%B8%AD-main-%E5%87%BD%E6%95%B0%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">skynet 中 main 函数的流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-lua-%E8%AF%AD%E8%A8%80%E6%8F%8F%E8%BF%B0%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">使用 lua 语言描述配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90%E8%84%9A%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">配置文件解析脚本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#main-%E5%87%BD%E6%95%B0%E4%B8%AD%E8%A7%A3%E6%9E%90%E8%84%9A%E6%9C%AC%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">main 函数中解析脚本的流程</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T08:35:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— 消息调度机制</a>
-  
-    </h1>
-  
+        
+    </div>
+</aside>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">消息队列</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" class="archive-article-date">
-        <time datetime="2020-11-04T08:16:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" target="_blank">学习的奥义：刻意练习与相关方法</a>
-  
-    </h1>
-  
+<div id="SOHUCS" sid="skynet-源码阅读笔记-——-配置文件的加载" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">方法论</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" class="archive-article-date">
-        <time datetime="2020-11-04T07:47:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" target="_blank">意志力的科学与科学的意志力</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">意志力科学</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" class="archive-article-date">
-        <time datetime="2020-11-04T06:50:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" target="_blank">睡眠的奥秘 —— 关于睡眠，你可能不知道的事</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">睡眠</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" target="_blank">muduo 网络库日志后端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" target="_blank">muduo 网络库日志前端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -928,8 +573,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,

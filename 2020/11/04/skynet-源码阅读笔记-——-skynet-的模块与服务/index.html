@@ -6,19 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2020/11 | Hacker Cube</title>
+  <title>skynet 源码阅读笔记 —— skynet 的模块与服务 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/archives/2020/11/index.html">
+  <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第二篇文章，探讨了 skynet 的模块加载与服务的启动功能，主要包含了以下内容：   基本概念：模块与服务是什么？ 模块的加载 服务的启动 流程的回顾">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet 源码阅读笔记 —— skynet 的模块与服务">
+<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第二篇文章，探讨了 skynet 的模块加载与服务的启动功能，主要包含了以下内容：   基本概念：模块与服务是什么？ 模块的加载 服务的启动 流程的回顾">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-04T09:09:27.000Z">
+<meta property="article:modified_time" content="2020-11-04T09:13:00.887Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="skynet框架">
+<meta property="article:tag" content="动态库">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -204,247 +208,156 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-skynet-源码阅读笔记-——-skynet-的模块与服务" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" class="archive-article-date">
-        <time datetime="2020-11-04T09:33:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" target="_blank">skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动</a>
   
+    <h1 class="article-title" itemprop="name">
+      skynet 源码阅读笔记 —— skynet 的模块与服务
     </h1>
   
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">lua</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">bootstrap服务</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
-  
-    </h1>
-  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" class="archive-article-date">
-        <time datetime="2020-11-04T09:15:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" target="_blank">skynet 源码阅读笔记 —— 配置文件的加载</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">lua语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">配置文件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" class="archive-article-date">
         <time datetime="2020-11-04T09:09:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
 </a>
 
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">2.2k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">9分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第二篇文章，探讨了 skynet 的模块加载与服务的启动功能，主要包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>基本概念：模块与服务是什么？</li>
+<li>模块的加载</li>
+<li>服务的启动</li>
+<li>流程的回顾</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="1-基本概念：模块与服务"><a href="#1-基本概念：模块与服务" class="headerlink" title="1.基本概念：模块与服务"></a>1.基本概念：模块与服务</h4><p>*<em>模块(module)**：在skynet中，模块是指符合规范的 C 共享库文件。一个符合规范的 C 共享库应当具备 <code>*_create</code>、<code>*_signal</code>、<code>*_release</code> 以及 <code>*_init</code> 四个接口。其中 \</em> 代表模块名称。其中模块的接口及定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_module.h</span></span><br><span class="line"><span class="comment">//每一个模块都应当提供 create、init、release 以及 signal 等四个接口</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">void</span> * (*skynet_dl_create)(<span class="keyword">void</span>);</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">int</span> <span class="params">(*skynet_dl_init)</span><span class="params">(<span class="keyword">void</span> * inst, struct skynet_context *, <span class="keyword">const</span> <span class="keyword">char</span> * parm)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*skynet_dl_release)</span><span class="params">(<span class="keyword">void</span> * inst)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*skynet_dl_signal)</span><span class="params">(<span class="keyword">void</span> * inst, <span class="keyword">int</span> signal)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_module</span> &#123;</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name; <span class="comment">//模块名称</span></span><br><span class="line">    <span class="keyword">void</span> * <span class="keyword">module</span>;     <span class="comment">//用于访问对应so库的句柄，由dlopen函数获得</span></span><br><span class="line">    skynet_dl_create create;</span><br><span class="line">    skynet_dl_init init;</span><br><span class="line">    skynet_dl_release release;</span><br><span class="line">    skynet_dl_signal signal;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//skynet_module.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_MODULE_TYPE 32</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//modules 列表，用于存放全部用到的 module </span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">modules</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> count;  <span class="comment">//存放的 module 的数量</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * path;  <span class="comment">//path由配置文件中的module_path提供</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_module</span> <span class="title">m</span>[<span class="title">MAX_MODULE_TYPE</span>];</span>    <span class="comment">//存储module的数组</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">modules</span> * <span class="title">M</span> =</span> <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+<p>**服务(service)**：相对于模块是静态的概念，服务则是动态的概念，指的是运行在独立上下文中的模块。<br>skynet 提供了这样的一种机制：用户可以将自定义的模块放置到 skynet 指定的目录下。当 skynet 使用到对应的服务时，会将该模块加载到 modules 当中，并为其创建一个独立的上下文环境(context)。这样不同的服务的运行环境相互透明，交互则通过消息队列来进行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_server.c:</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_context</span> &#123;</span></span><br><span class="line">    <span class="keyword">void</span> * instance;    <span class="comment">//调用模块的 *_create 函数创建对应的服务实例</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_module</span> * <span class="title">mod</span>;</span> <span class="comment">//指向对应的模块</span></span><br><span class="line">    <span class="keyword">void</span> * cb_ud;   <span class="comment">//回调函数所需参数</span></span><br><span class="line">    skynet_cb cb;   <span class="comment">//回调函数</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">queue</span>;</span>    <span class="comment">//服务所属的消息队列</span></span><br><span class="line">    FILE * logfile;     <span class="comment">//日志文件句柄</span></span><br><span class="line">    <span class="keyword">uint64_t</span> cpu_cost;  <span class="comment">// in microsec</span></span><br><span class="line">    <span class="keyword">uint64_t</span> cpu_start; <span class="comment">// in microsec</span></span><br><span class="line">    <span class="keyword">char</span> result[<span class="number">32</span>];    <span class="comment">//存放回调函数的执行结果</span></span><br><span class="line">    <span class="keyword">uint32_t</span> handle;    <span class="comment">//位于该上下文环境中的一个服务的句柄</span></span><br><span class="line">    <span class="keyword">int</span> session_id;     <span class="comment">//session_id 用来将请求和响应匹配起来</span></span><br><span class="line">    <span class="keyword">int</span> ref;            <span class="comment">//引用计数，当 ref == 0 时回收内存</span></span><br><span class="line">    <span class="keyword">int</span> message_count;  <span class="comment">//消息队列中消息的数量？</span></span><br><span class="line">    <span class="keyword">bool</span> init;          <span class="comment">//是否完成了初始化</span></span><br><span class="line">    <span class="keyword">bool</span> endless;       <span class="comment">//该服务是否是一个无限循环</span></span><br><span class="line">    <span class="keyword">bool</span> profile;       </span><br><span class="line"></span><br><span class="line">    CHECKCALLING_DECL</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-模块的加载"><a href="#2-模块的加载" class="headerlink" title="2.模块的加载"></a>2.模块的加载</h4><p>在 skynet 中，模块的加载主要通过 <code>skynet_module_query</code> 函数来完成。当 skynet 启动时会先执行 <code>skynet_module_init</code> 函数对全局模块列表 modules 进行初始化。当需要使用到某个服务时，skynet 会调用 <code>skynet_context_new</code> 函数为其创建上下文，这个过程当中会调用 <code>skynet_module_query(name)</code> 函数，该函数会根据 name 查找相应的模块。如果该模块尚未被加载，则将其加载到 modules 当中。具体代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_module.c</span></span><br><span class="line"><span class="comment">//根据模块名查找对应的模块，如果找不到且 modules 中尚有空间则将模块加载进来</span></span><br><span class="line"><span class="function">struct skynet_module * <span class="title">skynet_module_query</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> * name)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_module</span> * <span class="title">result</span> =</span> _query(name);</span><br><span class="line">    <span class="keyword">if</span> (result)</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line"></span><br><span class="line">    SPIN_LOCK(M)</span><br><span class="line">    <span class="comment">//双重检测可以避免以下情形：两个不同的服务 A 和 B 同时调用了一个服务 C，在 A 查找 C 中的模块时，B 进入自旋等待状态。</span></span><br><span class="line">    <span class="comment">//当 A 调用结束后会将 C 模块插入 modules 中，此时如果 B 再执行插入则会导致重复插入</span></span><br><span class="line">    result = _query(name); <span class="comment">// double check</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (result == <span class="literal">NULL</span> &amp;&amp; M-&gt;count &lt; MAX_MODULE_TYPE) &#123;</span><br><span class="line">        <span class="keyword">int</span> index = M-&gt;count;</span><br><span class="line">        <span class="comment">//返回相应动态库的句柄</span></span><br><span class="line">        <span class="keyword">void</span> * dl = _try_open(M,name);</span><br><span class="line">        <span class="keyword">if</span> (dl) &#123;</span><br><span class="line">            M-&gt;m[index].name = name;</span><br><span class="line">            M-&gt;m[index].<span class="keyword">module</span> = dl;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (open_sym(&amp;M-&gt;m[index]) == <span class="number">0</span>) &#123;</span><br><span class="line">                M-&gt;m[index].name = skynet_strdup(name);</span><br><span class="line">                M-&gt;count ++;</span><br><span class="line">                result = &amp;M-&gt;m[index];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    SPIN_UNLOCK(M)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">open_sym</span><span class="params">(struct skynet_module *mod)</span> </span>&#123;</span><br><span class="line">    mod-&gt;create = get_api(mod, <span class="string">&quot;_create&quot;</span>);</span><br><span class="line">    mod-&gt;init = get_api(mod, <span class="string">&quot;_init&quot;</span>);</span><br><span class="line">    mod-&gt;release = get_api(mod, <span class="string">&quot;_release&quot;</span>);</span><br><span class="line">    mod-&gt;signal = get_api(mod, <span class="string">&quot;_signal&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> mod-&gt;init == <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//从动态库中找到对应的 api 并将其函数地址返回</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">get_api</span><span class="params">(struct skynet_module *mod, <span class="keyword">const</span> <span class="keyword">char</span> *api_name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">size_t</span> name_size = <span class="built_in">strlen</span>(mod-&gt;name);</span><br><span class="line">    <span class="keyword">size_t</span> api_size = <span class="built_in">strlen</span>(api_name);</span><br><span class="line">    <span class="keyword">char</span> tmp[name_size + api_size + <span class="number">1</span>];</span><br><span class="line">    <span class="built_in">memcpy</span>(tmp, mod-&gt;name, name_size);</span><br><span class="line">    <span class="built_in">memcpy</span>(tmp+name_size, api_name, api_size+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">char</span> *ptr = <span class="built_in">strrchr</span>(tmp, <span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (ptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        ptr = tmp;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ptr = ptr + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dlsym(mod-&gt;<span class="keyword">module</span>, ptr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中可以看出，加载模块需要先调用 <code>_try_open()</code> 函数去打开对应的 .so 文件, 并通过 <code>open_sym</code> 函数来将对应的 api 存放到 <code>module</code> 结构体中相应的函数指针处。.so 文件中的 api 命名统一按照 “module_function” 的格式命名。</p>
+<h4 id="3-服务的启动"><a href="#3-服务的启动" class="headerlink" title="3.服务的启动"></a>3.服务的启动</h4><p>skynet 中服务的创建主要通过 <code>skynet_context_new</code> 来完成，其代码定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_server.c</span></span><br><span class="line"><span class="function">struct skynet_context* <span class="title">skynet_context_new</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> * name, <span class="keyword">const</span> <span class="keyword">char</span> *param)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_module</span> * <span class="title">mod</span> =</span> skynet_module_query(name);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mod == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> *inst = skynet_module_instance_create(mod);</span><br><span class="line">    <span class="keyword">if</span> (inst == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_context</span> * <span class="title">ctx</span> =</span> skynet_malloc(<span class="keyword">sizeof</span>(*ctx));</span><br><span class="line">    CHECKCALLING_INIT(ctx)</span><br><span class="line"></span><br><span class="line">    ctx-&gt;mod = mod;</span><br><span class="line">    ctx-&gt;instance = inst;</span><br><span class="line">    <span class="comment">//此处将引用置为 2 的原因是因为在 skynet_handle_register 中会将 ctx 保存起来，增加一次引用。</span></span><br><span class="line">    <span class="comment">//之后再将 ctx 返回给对应的变量，增加了一次引用，因此 ref = 2</span></span><br><span class="line">    ctx-&gt;ref = <span class="number">2</span>;</span><br><span class="line">    ctx-&gt;cb = <span class="literal">NULL</span>;</span><br><span class="line">    ctx-&gt;cb_ud = <span class="literal">NULL</span>;</span><br><span class="line">    ctx-&gt;session_id = <span class="number">0</span>;</span><br><span class="line">    ctx-&gt;logfile = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ctx-&gt;init = <span class="literal">false</span>;</span><br><span class="line">    ctx-&gt;endless = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    ctx-&gt;cpu_cost = <span class="number">0</span>;</span><br><span class="line">    ctx-&gt;cpu_start = <span class="number">0</span>;</span><br><span class="line">    ctx-&gt;message_count = <span class="number">0</span>;</span><br><span class="line">    ctx-&gt;profile = G_NODE.profile;</span><br><span class="line">    <span class="comment">// Should set to 0 first to avoid skynet_handle_retireall get an uninitialized handle</span></span><br><span class="line">    ctx-&gt;handle = <span class="number">0</span>;    </span><br><span class="line">    ctx-&gt;handle = skynet_handle_register(ctx);</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> * <span class="title">queue</span> =</span> ctx-&gt;<span class="built_in">queue</span> = skynet_mq_create(ctx-&gt;handle);</span><br><span class="line">    <span class="comment">// init function maybe use ctx-&gt;handle, so it must init at last</span></span><br><span class="line">    context_inc();</span><br><span class="line"></span><br><span class="line">    CHECKCALLING_BEGIN(ctx)</span><br><span class="line">    <span class="keyword">int</span> r = skynet_module_instance_init(mod, inst, ctx, param);</span><br><span class="line">    CHECKCALLING_END(ctx)</span><br><span class="line">    <span class="keyword">if</span> (r == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//skynet_context_release 会在 ctx-&gt;ref == 0 时回收这个 context</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">skynet_context</span> * <span class="title">ret</span> =</span> skynet_context_release(ctx);</span><br><span class="line">        <span class="keyword">if</span> (ret) &#123;</span><br><span class="line">            ctx-&gt;init = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        skynet_globalmq_push(<span class="built_in">queue</span>);</span><br><span class="line">        <span class="keyword">if</span> (ret) &#123;</span><br><span class="line">            skynet_error(ret, <span class="string">&quot;LAUNCH %s %s&quot;</span>, name, param ? param : <span class="string">&quot;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        skynet_error(ctx, <span class="string">&quot;FAILED launch %s&quot;</span>, name);</span><br><span class="line">        <span class="keyword">uint32_t</span> handle = ctx-&gt;handle;</span><br><span class="line">        skynet_context_release(ctx);</span><br><span class="line">        skynet_handle_retire(handle);</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">drop_t</span> <span class="title">d</span> =</span> &#123; handle &#125;;</span><br><span class="line">        skynet_mq_release(<span class="built_in">queue</span>, drop_message, &amp;d);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中我们可以看出 <code>skynet_context_new</code> 的主要工作为如下：</p>
+<blockquote>
+<ol>
+<li>在 modules 中查找对应的模块名称，如果存在则直接返回模块的句柄，不存在则将模块加载进内存，并保存在 modules 当中</li>
+<li>调用 module 的 create api 创建 module 的实例 inst</li>
+<li>分配 skynet_context 结构体并为其赋上相应的值</li>
+<li>调用 module 的 init api 为 inst 进行初始化<br>   如果初始化成功，则将该 context 中的次级消息队列 queue 放入到全局消息队列当中，然后返回创建好的服务(context)<br>   如果失败则释放分配的 skynet_context, 为服务分配的 handle 以及专属的次级消息队列, 然后返回 NULL。</li>
+</ol>
+</blockquote>
+<p>上述代码中需要注意的，<code>ctx-&gt;ref</code>的初始值为 2。这是因为当 <code>skynet_context_new</code> 执行完毕后，会有两个地方引用了新创建好的 context。一个是 <code>skynet_context_new</code> 的调用者，它会保存返回的 context 指针; 另一个则是 <code>skynet_handle_register</code> 函数，该函数会将新创建的 context 保存在 <code>handle_storage</code> 的 <code>slot</code> 字段中<br>接下来，我们来看看 <code>skynet_context_new</code> 中的几个模块相关的函数：<code>skynet_module_instance_create</code>、 <code>skynet_module_instance_init</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_module.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">skynet_module_instance_create</span><span class="params">(struct skynet_module *m)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (m-&gt;create) &#123;</span><br><span class="line">        <span class="keyword">return</span> m-&gt;create();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">void</span> *)(<span class="keyword">intptr_t</span>)(~<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">skynet_module_instance_init</span><span class="params">(struct skynet_module *m, <span class="keyword">void</span> * inst, struct skynet_context *ctx, <span class="keyword">const</span> <span class="keyword">char</span> * parm)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> m-&gt;init(inst, ctx, parm);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_module_instance_release</span><span class="params">(struct skynet_module *m, <span class="keyword">void</span> *inst)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (m-&gt;release) &#123;</span><br><span class="line">        m-&gt;release(inst);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_module_instance_signal</span><span class="params">(struct skynet_module *m, <span class="keyword">void</span> *inst, <span class="keyword">int</span> signal)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (m-&gt;signal) &#123;</span><br><span class="line">        m-&gt;signal(inst, signal);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，<code>skynet_module_instance_create</code> 的返回值 <code>(void *)(intptr_t)(~0)</code> 引起了我的好奇。这个地址的值为 <code>0xffffffff</code>, 代表的是内存地址的最底端的地址。它主要的作用就是为了和 <code>NULL</code> 作区分。当 skynet 调用对应模块的 <code>_create</code> 函数时, 如果此时内存耗尽，无法创建模块对象，则会返回 <code>NULL</code>。如果用户在没有定义 <code>_create</code> 函数情况下也使用 <code>NULL</code> 做返回值，则无法区分这两种情况。</p>
+<h4 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a>4.总结</h4><p>简单地来讲，skynet 的模块加载与服务创建的整体过程为：<br>当 skynet 启动时会先执行 <code>skynet_module_init</code> 进行 modules 的创建，随后调用 <code>skynet_context_new</code> 创建新的服务。在这个过程当中， skynet 先会自动根据配置文件中指定的模块路径进行 module 的加载。完成加载后的 module 将被保存在全局的 modules 当中。随后，分配 <code>skynet_context</code> 结构体并进行相应赋值。在赋值的过程中会调用到 module 的 <code>_create</code>, <code>_init</code> 等 api。如果分配成功则将 <code>context</code> 返回给调用者，失败返回 <code>NULL</code>。创建好的服务彼此透明，运行在不同的 <code>skynet_context</code> 下，不同的服务之间的交互必须通过消息队列进行转发</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" target="_blank">skynet 源码阅读笔记 —— skynet 的模块与服务</a>
-  
-    </h1>
-  
+      </a>
+    </div>
+    
 
-
-        <div class="article-info info-on-right">
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-skynet-的模块与服务/" title="skynet 源码阅读笔记 —— skynet 的模块与服务" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-skynet-的模块与服务/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -464,7 +377,7 @@
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -477,417 +390,137 @@
 	</div>
 
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T08:35:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          skynet 源码阅读笔记 —— 配置文件的加载
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">skynet 源码阅读笔记 —— 消息调度机制</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— 消息调度机制</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">消息队列</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%EF%BC%9A%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1"><span class="toc-number">2.</span> <span class="toc-text">1.基本概念：模块与服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%A8%A1%E5%9D%97%E7%9A%84%E5%8A%A0%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">2.模块的加载</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="toc-number">4.</span> <span class="toc-text">3.服务的启动</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">4.总结</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" class="archive-article-date">
-        <time datetime="2020-11-04T08:16:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" target="_blank">学习的奥义：刻意练习与相关方法</a>
-  
-    </h1>
-  
+        
+    </div>
+</aside>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">方法论</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" class="archive-article-date">
-        <time datetime="2020-11-04T07:47:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" target="_blank">意志力的科学与科学的意志力</a>
-  
-    </h1>
-  
+<div id="SOHUCS" sid="skynet-源码阅读笔记-——-skynet-的模块与服务" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">意志力科学</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" class="archive-article-date">
-        <time datetime="2020-11-04T06:50:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" target="_blank">睡眠的奥秘 —— 关于睡眠，你可能不知道的事</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">睡眠</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" target="_blank">muduo 网络库日志后端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" target="_blank">muduo 网络库日志前端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -928,8 +561,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,

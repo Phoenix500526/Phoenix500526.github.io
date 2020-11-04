@@ -6,20 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives: 2020/11 | Hacker Cube</title>
+  <title>skynet 源码阅读笔记 —— 消息调度机制 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/archives/2020/11/index.html">
+  <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第一篇文章，主要探讨 skynet 的消息调度机制，包含了以下内容：   基本数据结构：包括消息队列以及消息本身的数据结构 消息调度的过程：主要包括了消息是如何生产，又如何消费的 多线程模型：skynet 的线程池设计，如何为进程设置合理的优先级使其拥有较高的 CPU 利用率，如何做线程监控设">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet 源码阅读笔记 —— 消息调度机制">
+<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第一篇文章，主要探讨 skynet 的消息调度机制，包含了以下内容：   基本数据结构：包括消息队列以及消息本身的数据结构 消息调度的过程：主要包括了消息是如何生产，又如何消费的 多线程模型：skynet 的线程池设计，如何为进程设置合理的优先级使其拥有较高的 CPU 利用率，如何做线程监控设">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png">
+<meta property="og:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E7%AE%A1%E7%90%86%E8%80%85%E6%A8%A1%E5%9E%8B.png">
+<meta property="article:published_time" content="2020-11-04T08:35:38.000Z">
+<meta property="article:modified_time" content="2020-11-04T09:06:52.137Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="skynet框架">
+<meta property="article:tag" content="C语言">
+<meta property="article:tag" content="消息队列">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
   
@@ -204,309 +213,185 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-skynet-源码阅读笔记-——-消息调度机制" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" class="archive-article-date">
-        <time datetime="2020-11-04T09:33:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" target="_blank">skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动</a>
   
+    <h1 class="article-title" itemprop="name">
+      skynet 源码阅读笔记 —— 消息调度机制
     </h1>
   
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">lua</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">bootstrap服务</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
-  
-    </h1>
-  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" class="archive-article-date">
-        <time datetime="2020-11-04T09:15:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" target="_blank">skynet 源码阅读笔记 —— 配置文件的加载</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">lua语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">配置文件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" class="archive-article-date">
-        <time datetime="2020-11-04T09:09:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" target="_blank">skynet 源码阅读笔记 —— skynet 的模块与服务</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">动态库</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
         <time datetime="2020-11-04T08:35:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
 </a>
 
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">3.8k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">17分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第一篇文章，主要探讨 skynet 的消息调度机制，包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>基本数据结构：包括消息队列以及消息本身的数据结构</li>
+<li>消息调度的过程：主要包括了消息是如何生产，又如何消费的</li>
+<li>多线程模型：skynet 的线程池设计，如何为进程设置合理的优先级使其拥有较高的 CPU 利用率，如何做线程监控设计(monitor) 以及如何高效地实现线程安全。</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="基本数据结构之消息队列"><a href="#基本数据结构之消息队列" class="headerlink" title="基本数据结构之消息队列"></a>基本数据结构之消息队列</h4><p>skynet 采用了<strong>二级消息队列</strong>模式，其中顶层消息队列为 <code>global_queue</code>，而底层的消息队列为 <code>message_queue</code>，它们的具体定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_mq.c</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span>   <span class="comment">//自旋锁，避免多个线程同时向一个队列中 push 消息时导致的竞态问题</span></span><br><span class="line">    <span class="keyword">uint32_t</span> handle;    <span class="comment">//服务句柄。表明该消息队列具体属于哪个服务</span></span><br><span class="line">    <span class="keyword">int</span> cap;            <span class="comment">//消息队列的容量</span></span><br><span class="line">    <span class="keyword">int</span> head;</span><br><span class="line">    <span class="keyword">int</span> tail;</span><br><span class="line">    <span class="keyword">int</span> release;        <span class="comment">//是否可以释放信息</span></span><br><span class="line">    <span class="keyword">int</span> in_global;      <span class="comment">//是否位于全局队列当中</span></span><br><span class="line">    <span class="keyword">int</span> overload;       <span class="comment">//是否过载</span></span><br><span class="line">    <span class="keyword">int</span> overload_threshold; <span class="comment">//过载上限</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_message</span> *<span class="title">queue</span>;</span>   <span class="comment">//指向消息队列中存放消息的一片内存区域</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">next</span>;</span>     <span class="comment">//指向下个次级消息队列的指针</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">global_queue</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">head</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">tail</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>skynet 的消息队列形式如下：</p>
+<div style="text-align:center">
+ <img src="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png" width=800 height=505/>
+</div>
+<div class="image-caption" align="center">二级消息队列</div>
+
+<h4 id="基本数据结构之消息"><a href="#基本数据结构之消息" class="headerlink" title="基本数据结构之消息"></a>基本数据结构之消息</h4><p>skynet 中一共支持两种不同的消息，一种为本地消息<code>skynet_message</code> ，另一种则为远程消息 <code>remote_message</code>。其中，<code>skynet_message</code>和 <code>remote_message</code> 如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_mq.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_message</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> source;	<span class="comment">//发送的源地址</span></span><br><span class="line">    <span class="comment">//session 用于将请求包和响应包匹配起来。当一个服务向另一个服务发起请求时，会产生一个 session</span></span><br><span class="line">    <span class="comment">//当响应端处理完毕后，会将 session 原样返回，这样请求端就可以根据 session 找到对应的结果</span></span><br><span class="line">    <span class="keyword">int</span> session;		</span><br><span class="line">    <span class="keyword">void</span> * data;</span><br><span class="line">    <span class="keyword">size_t</span> sz;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//skynet_harbor.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> GLOBALNAME_LENGTH 16</span></span><br><span class="line"><span class="comment">//remote_name 代表一个远程 skynet 节点。</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">remote_name</span> &#123;</span></span><br><span class="line">	<span class="keyword">char</span> name[GLOBALNAME_LENGTH];</span><br><span class="line">	<span class="keyword">uint32_t</span> handle;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">remote_message</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">remote_name</span> <span class="title">destination</span>;</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">void</span> * message;</span><br><span class="line">	<span class="keyword">size_t</span> sz;</span><br><span class="line">	<span class="keyword">int</span> type;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这里解释一下上述消息定义中的 <code>session</code> 和 <code>type</code> 字段。**<code>session</code> 主要用来匹配一对请求和响应<strong>。当一个服务向另一个服务提起请求时，会生成一个 session，并跟随请求包一并发送出去。接收端接收到包并处理完毕后，再将同样的 session 返回。这样，编写服务的人只需要在服务的 callback 函数中记录下所有发送出去的 session 就可以在收到每个消息后调用正确的处理函数。而 **<code>type</code> 主要是用来区分不同的消息包类型</strong>。type 的定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TEXT 0		<span class="comment">//文本类型</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_RESPONSE 1	<span class="comment">//响应包</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_MULTICAST 2	<span class="comment">//组播包</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_CLIENT 3		<span class="comment">//客户端消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_SYSTEM 4		<span class="comment">//系统消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_HARBOR 5		<span class="comment">//集群内其他的 skynet 节点发来的消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TAG_DONTCOPY 0x10000		<span class="comment">//禁止拷贝</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TAG_ALLOCSESSION 0x20000	<span class="comment">//分配新的 session</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="谁生产，谁消费？"><a href="#谁生产，谁消费？" class="headerlink" title="谁生产，谁消费？"></a>谁生产，谁消费？</h4><p>在 skynet 中，每个服务都拥有自己的一个次级消息队列。一个服务给另一个服务发送消息的过程，本质上就是将一个 skynet_message 压入到目标服务的次级消息队列当中。当一个服务的次级消息队列非空时，skynet 会将其push 到全局消息队列当中。而消息的消费，则是由线程池中的 worker 线程来完成，其大致的框图如下：</p>
+<div style="text-align:center">
+ <img src="http://qj9elheb0.hn-bkt.clouddn.com/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E7%AE%A1%E7%90%86%E8%80%85%E6%A8%A1%E5%9E%8B.png" width=800 height=366/>
+</div>
+<div class="image-caption" align="center">生产者消费者管理者模型</div>
+
+<h6 id="消息消费的过程"><a href="#消息消费的过程" class="headerlink" title="消息消费的过程"></a>消息消费的过程</h6><p>在 skynet 启动的时候，会根据配置文件的 <code>thread</code> 字段初始化线程池。其中线程池中的前三个线程是 <code>monitor</code>, <code>timer</code> 和 <code>socket</code> 线程。其中，monitor 线程主要负责检查每个服务是否陷入了死循环，socket 线程负责网络相关操作，timer 线程则负责定时器。对应代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_start.c</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">thread_worker</span><span class="params">(<span class="keyword">void</span> *p)</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">worker_parm</span> *<span class="title">wp</span> =</span> p;</span><br><span class="line">	<span class="keyword">int</span> id = wp-&gt;id;</span><br><span class="line">	<span class="keyword">int</span> weight = wp-&gt;weight;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">monitor</span> *<span class="title">m</span> =</span> wp-&gt;m;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">skynet_monitor</span> *<span class="title">sm</span> =</span> m-&gt;m[id];</span><br><span class="line">	skynet_initthread(THREAD_WORKER);</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> * <span class="title">q</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">while</span> (!m-&gt;quit) &#123;</span><br><span class="line">		q = skynet_context_message_dispatch(sm, q, weight);</span><br><span class="line">		<span class="keyword">if</span> (q == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (pthread_mutex_lock(&amp;m-&gt;mutex) == <span class="number">0</span>) &#123;</span><br><span class="line">				++ m-&gt;sleep;</span><br><span class="line">				<span class="comment">// &quot;spurious wakeup&quot; is harmless,</span></span><br><span class="line">				<span class="comment">// because skynet_context_message_dispatch() can be call at any time.</span></span><br><span class="line">				<span class="keyword">if</span> (!m-&gt;quit)</span><br><span class="line">					pthread_cond_wait(&amp;m-&gt;cond, &amp;m-&gt;mutex);</span><br><span class="line">				-- m-&gt;sleep;</span><br><span class="line">				<span class="keyword">if</span> (pthread_mutex_unlock(&amp;m-&gt;mutex)) &#123;</span><br><span class="line">					<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;unlock mutex error&quot;</span>);</span><br><span class="line">					<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(<span class="keyword">int</span> thread)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">pthread_t</span> pid[thread+<span class="number">3</span>];</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">monitor</span> *<span class="title">m</span> =</span> skynet_malloc(<span class="keyword">sizeof</span>(*m));</span><br><span class="line">	<span class="built_in">memset</span>(m, <span class="number">0</span>, <span class="keyword">sizeof</span>(*m));</span><br><span class="line">	m-&gt;count = thread;</span><br><span class="line">	m-&gt;sleep = <span class="number">0</span>;</span><br><span class="line">	m-&gt;m = skynet_malloc(thread * <span class="keyword">sizeof</span>(struct skynet_monitor *));</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;thread;i++) &#123;</span><br><span class="line">		m-&gt;m[i] = skynet_monitor_new();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (pthread_mutex_init(&amp;m-&gt;mutex, <span class="literal">NULL</span>)) &#123;</span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Init mutex error&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (pthread_cond_init(&amp;m-&gt;cond, <span class="literal">NULL</span>)) &#123;</span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Init cond error&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//创建 monitor 线程负责监视所有的 worker 线程</span></span><br><span class="line">	create_thread(&amp;pid[<span class="number">0</span>], thread_monitor, m);</span><br><span class="line">	create_thread(&amp;pid[<span class="number">1</span>], thread_timer, m);</span><br><span class="line">	create_thread(&amp;pid[<span class="number">2</span>], thread_socket, m);</span><br><span class="line">	<span class="comment">//worker 线程的权重值</span></span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> weight[] = &#123; </span><br><span class="line">		<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">		<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, </span><br><span class="line">		<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, </span><br><span class="line">		<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, &#125;;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">worker_parm</span> <span class="title">wp</span>[<span class="title">thread</span>];</span></span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;thread;i++) &#123;</span><br><span class="line">		wp[i].m = m;</span><br><span class="line">		wp[i].id = i;</span><br><span class="line">		<span class="keyword">if</span> (i &lt; <span class="keyword">sizeof</span>(weight)/<span class="keyword">sizeof</span>(weight[<span class="number">0</span>])) &#123;</span><br><span class="line">			wp[i].weight= weight[i];</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			wp[i].weight = <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		create_thread(&amp;pid[i+<span class="number">3</span>], thread_worker, &amp;wp[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;thread+<span class="number">3</span>;i++) &#123;</span><br><span class="line">		pthread_join(pid[i], <span class="literal">NULL</span>); </span><br><span class="line">	&#125;</span><br><span class="line">	free_monitor(m);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上述代码中，我们可以看出 skynet 创建线程池的流程，先创建好 monitor、socket 和 timer 这三个线程，然后创建相应数量的 worker 线程，而每个 worker 线程最终会调用 <code>skynet_context_message_dispatch</code>函数从全局消息队列中获取消息。<code>skynet_context_message_dispatch</code> 的定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// skynet_start.c</span></span><br><span class="line"><span class="function">struct message_queue* <span class="title">skynet_context_message_dispatch</span><span class="params">(struct skynet_monitor *sm, struct message_queue *q, <span class="keyword">int</span> weight)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//从全局消息队列中取出一个次级消息队列</span></span><br><span class="line">	<span class="keyword">if</span> (q == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		q = skynet_globalmq_pop();</span><br><span class="line">		<span class="keyword">if</span> (q==<span class="literal">NULL</span>)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//获得该次级消息队列所对应的服务的句柄</span></span><br><span class="line">	<span class="keyword">uint32_t</span> handle = skynet_mq_handle(q);</span><br><span class="line">	<span class="comment">//获取服务上下文</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">skynet_context</span> * <span class="title">ctx</span> =</span> skynet_handle_grab(handle);</span><br><span class="line">    <span class="comment">//若取出的服务没有上下文，则重取一个新的次级消息队列</span></span><br><span class="line">	<span class="keyword">if</span> (ctx == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">drop_t</span> <span class="title">d</span> =</span> &#123; handle &#125;;</span><br><span class="line">		skynet_mq_release(q, drop_message, &amp;d);</span><br><span class="line">		<span class="keyword">return</span> skynet_globalmq_pop();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">int</span> i,n=<span class="number">1</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">skynet_message</span> <span class="title">msg</span>;</span></span><br><span class="line">    <span class="comment">//根据不同的权重从消息队列中获得不同数量的消息</span></span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;n;i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (skynet_mq_pop(q,&amp;msg)) &#123;</span><br><span class="line">			skynet_context_release(ctx);</span><br><span class="line">			<span class="keyword">return</span> skynet_globalmq_pop();</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (i==<span class="number">0</span> &amp;&amp; weight &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">			n = skynet_mq_length(q);</span><br><span class="line">			n &gt;&gt;= weight;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">int</span> overload = skynet_mq_overload(q);</span><br><span class="line">		<span class="keyword">if</span> (overload) &#123;</span><br><span class="line">			skynet_error(ctx, <span class="string">&quot;May overload, message queue length = %d&quot;</span>, overload);</span><br><span class="line">		&#125;</span><br><span class="line">		skynet_monitor_trigger(sm, msg.source , handle);</span><br><span class="line">		<span class="keyword">if</span> (ctx-&gt;cb == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			skynet_free(msg.data);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			dispatch_message(ctx, &amp;msg);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		skynet_monitor_trigger(sm, <span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	assert(q == ctx-&gt;<span class="built_in">queue</span>);</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">nq</span> =</span> skynet_globalmq_pop();</span><br><span class="line">	<span class="keyword">if</span> (nq) &#123;</span><br><span class="line">		<span class="comment">// If global mq is not empty , push q back, and return next queue (nq)</span></span><br><span class="line">		<span class="comment">// Else (global mq is empty or block, don&#x27;t push q back, and return q again (for next dispatch)</span></span><br><span class="line">		skynet_globalmq_push(q);</span><br><span class="line">		q = nq;</span><br><span class="line">	&#125; </span><br><span class="line">	skynet_context_release(ctx);</span><br><span class="line">	<span class="keyword">return</span> q;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结合 <code>strat</code> 和 <code>skynet_context_message_dispatch</code>，我们可以知道 skynet 的消息调度机制的全貌：当 skynet 启动时会初始化线程池，其中线程池内总共包含 4 种线程：<code>monitor</code>、<code>timer</code>、<code>socket</code> 和 <code>worker</code>，其中<code>worker</code> 具有不同的权重值。<strong>每个 <code>worker</code> 会不断从全局消息队列中取出某个服务的次级消息队列，并根据权重值的不同从消息队列中取出若干个消息，然后调用服务所属的 callback 函数消费消息。</strong>权重与取出的消息个数的关系如下：</p>
+<blockquote>
+<p>-1 ：从次级消息队列取出一个消息进行处理<br>0  ：从次级消息队列中取出所有消息进行处理<br>1  ：从次级消息队列中取出一半的消息进行处理<br>2  ：从次级消息队列中取出四分之一的消息进行处理<br>3  ：从次级消息队列中取出八分之一的消息进行处理</p>
+</blockquote>
+<p><strong>这种分配优先级的做法，使得 CPU 的运转效率尽可能的高</strong>。当线程足够多时，如果每次都只处理一个消息，虽然可以避免一些服务饿死，但却可能会使得消息队列中出现大量消息堆积。如果每次都处理一整个消息队列中的消息，则可能会使一些服务中的消息长时间得不到相应，从而导致服务饿死。为线程配置权重的做法是一个非常好的折中方案</p>
+<h6 id="消息生产的过程"><a href="#消息生产的过程" class="headerlink" title="消息生产的过程"></a>消息生产的过程</h6><p>skynet 中不同的服务运行在不同的上下文当中，彼此之间的交互只能通过消息队列进行转发。不同服务之间转发消息的接口为 <code>skynet_send</code> ，其定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_server.c</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">skynet_send</span><span class="params">(struct skynet_context * context, <span class="keyword">uint32_t</span> source, <span class="keyword">uint32_t</span> destination , <span class="keyword">int</span> type, <span class="keyword">int</span> session, <span class="keyword">void</span> * data, <span class="keyword">size_t</span> sz)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> ((sz &amp; MESSAGE_TYPE_MASK) != sz) &#123;</span><br><span class="line">		skynet_error(context, <span class="string">&quot;The message to %x is too large&quot;</span>, destination);</span><br><span class="line">		<span class="keyword">if</span> (type &amp; PTYPE_TAG_DONTCOPY) &#123;</span><br><span class="line">			skynet_free(data);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//_filter_args:根据 type 中的 PTYPE_TAG_DONTCOPY 和 PTYPE_TAG_ALLOCSESSION 位域对参数进行一些相应的处理</span></span><br><span class="line">    <span class="comment">// PTYPE_TAG_DONTCOPY：表示不要拷贝 data 的副本，直接在 data 上进行处理</span></span><br><span class="line">    <span class="comment">// PTYPE_TAG_ALLOCSESSION: 表示为消息分配一个新的 session</span></span><br><span class="line">	_filter_args(context, type, &amp;session, (<span class="keyword">void</span> **)&amp;data, &amp;sz);</span><br><span class="line">	<span class="keyword">if</span> (source == <span class="number">0</span>) &#123;</span><br><span class="line">		source = context-&gt;handle;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (destination == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (data) &#123;</span><br><span class="line">			skynet_error(context, <span class="string">&quot;Destination address can&#x27;t be 0&quot;</span>);</span><br><span class="line">			skynet_free(data);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> session;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (skynet_harbor_message_isremote(destination)) &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">remote_message</span> * <span class="title">rmsg</span> =</span> skynet_malloc(<span class="keyword">sizeof</span>(*rmsg));</span><br><span class="line">		rmsg-&gt;destination.handle = destination;</span><br><span class="line">		rmsg-&gt;message = data;</span><br><span class="line">		rmsg-&gt;sz = sz &amp; MESSAGE_TYPE_MASK;</span><br><span class="line">		rmsg-&gt;type = sz &gt;&gt; MESSAGE_TYPE_SHIFT;</span><br><span class="line">		skynet_harbor_send(rmsg, source, session);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		struct skynet_message smsg;</span><br><span class="line">		smsg.source = source;</span><br><span class="line">		smsg.session = session;</span><br><span class="line">		smsg.data = data;</span><br><span class="line">		smsg.sz = sz;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (skynet_context_push(destination, &amp;smsg)) &#123;</span><br><span class="line">			skynet_free(data);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> session;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中，<code>skynet_send</code> 使用了 <code>source</code> 和 <code>destination</code> 来标记消息的发送端和接收端，这两个参数的本质就是能够在全网范围内唯一标识一个服务的 handle。handle 为一个 32 位无符号整数，其中高 8 位为 harbor id，用来表示服务所属的 skynet 节点，而剩余的 24 位则用于表示该 skynet 内的唯一一个服务。不管最终调用的函数是 <code>skynet_harbor_send</code> 还是 <code>skynet_context_push</code>，最后都会回归到 <code>skynet_mq_push</code> 这个函数中。<strong>因此，skynet 中发送消息的本质就是往目标服务的次级消息队列中压入消息。</strong></p>
+<h4 id="监工机制-——-monitor-线程的工作"><a href="#监工机制-——-monitor-线程的工作" class="headerlink" title="监工机制 —— monitor 线程的工作"></a>监工机制 —— monitor 线程的工作</h4><p>说完了 skynet 消息调度中消息的生产与消费，我们来稍微看一看 monitor 线程(监工) 是如何监管 worker 线程的工作的。在这之前我们先看看 monitor 的定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_start.c</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">monitor</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> count;		<span class="comment">//monitor 所监视的 worker 线程的数量</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_monitor</span> ** <span class="title">m</span>;</span>	<span class="comment">//存放所有的 skynet_monitor 的数组，worker 和 skynet_monitor 一一对应</span></span><br><span class="line">    <span class="keyword">pthread_cond_t</span> cond;</span><br><span class="line">    <span class="keyword">pthread_mutex_t</span> mutex;</span><br><span class="line">    <span class="keyword">int</span> sleep;	<span class="comment">//休眠时间</span></span><br><span class="line">    <span class="keyword">int</span> quit;	<span class="comment">//退出标志</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//skynet_monitor.c</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">skynet_monitor</span> &#123;</span></span><br><span class="line">	<span class="keyword">int</span> version;			<span class="comment">//版本号</span></span><br><span class="line">	<span class="keyword">int</span> check_version;		<span class="comment">//前一个版本号</span></span><br><span class="line">	<span class="keyword">uint32_t</span> source;		<span class="comment">//源地址</span></span><br><span class="line">	<span class="keyword">uint32_t</span> destination;	<span class="comment">//目标地址</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>如前面所提到的，当 skynet 启动线程池时，第一个创建的线程便是 monitor 线程，它的运行函数如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_start.c</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> *<span class="title">thread_monitor</span><span class="params">(<span class="keyword">void</span> *p)</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">monitor</span> * <span class="title">m</span> =</span> p;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	<span class="keyword">int</span> n = m-&gt;count;</span><br><span class="line">	skynet_initthread(THREAD_MONITOR);</span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		<span class="comment">//CHECK_ABORT : if (G_NODE.total == 0) break;</span></span><br><span class="line">		CHECK_ABORT</span><br><span class="line">		<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;n;i++) &#123;</span><br><span class="line">			skynet_monitor_check(m-&gt;m[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++) &#123;</span><br><span class="line">			CHECK_ABORT</span><br><span class="line">			sleep(<span class="number">1</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//skynet_monitor.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_monitor_check</span><span class="params">(struct skynet_monitor *sm)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//版本号相同时</span></span><br><span class="line">	<span class="keyword">if</span> (sm-&gt;version == sm-&gt;check_version) &#123;</span><br><span class="line">        <span class="comment">//若目标地址不为 0，则 sm 所对应那个 worker 可能陷入了死循环</span></span><br><span class="line">		<span class="keyword">if</span> (sm-&gt;destination) &#123;</span><br><span class="line">			skynet_context_endless(sm-&gt;destination);</span><br><span class="line">			skynet_error(<span class="literal">NULL</span>, <span class="string">&quot;A message from [ :%08x ] to [ :%08x ] maybe in an endless loop (version = %d)&quot;</span>, sm-&gt;source , sm-&gt;destination, sm-&gt;version);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//版本号不同</span></span><br><span class="line">		sm-&gt;check_version = sm-&gt;version;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>monitor 的监管逻辑非常简单，每隔 5 s 便为每个 worker 线程执行一次 <code>skynet_monitor_check</code> 函数。<br>我们再来看看 <code>skynet_monitor_trigger</code> 函数的实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// skynet_start.c</span></span><br><span class="line"><span class="function">struct message_queue* <span class="title">skynet_context_message_dispatch</span><span class="params">(struct skynet_monitor *sm, struct message_queue *q, <span class="keyword">int</span> weight)</span> </span>&#123;</span><br><span class="line">...</span><br><span class="line">		<span class="keyword">int</span> overload = skynet_mq_overload(q);</span><br><span class="line">		<span class="keyword">if</span> (overload) &#123;</span><br><span class="line">			skynet_error(ctx, <span class="string">&quot;May overload, message queue length = %d&quot;</span>, overload);</span><br><span class="line">		&#125;</span><br><span class="line">		skynet_monitor_trigger(sm, msg.source , handle);</span><br><span class="line">		<span class="keyword">if</span> (ctx-&gt;cb == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			skynet_free(msg.data);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			dispatch_message(ctx, &amp;msg);</span><br><span class="line">		&#125;</span><br><span class="line">    	skynet_monitor_trigger(sm, <span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//skynet_monitor.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_monitor_trigger</span><span class="params">(struct skynet_monitor *sm, <span class="keyword">uint32_t</span> source, <span class="keyword">uint32_t</span> destination)</span> </span>&#123;</span><br><span class="line">	sm-&gt;source = source;</span><br><span class="line">	sm-&gt;destination = destination;</span><br><span class="line">    <span class="comment">//递增 version</span></span><br><span class="line">	ATOM_INC(&amp;sm-&gt;version);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中，我们可以看出 monitor 线程的工作原理。我们来还原一下 monitor 的工作场景：</p>
+<blockquote>
+<ol>
+<li>当一个 worker 线程(记为w)从消息队列中取出一个次级消费队列进行消费。在执行 <code>dispatch_message(ctx, &amp;msg);</code>之前会先调用 <code>skynet_monitor_trigger</code>函数，此时对应的 skynet_monitor(记为w_sm) 有 <code>w_sm-&gt;version = 1</code>， <code>w_sm-&gt;check_version = 0</code> 成立。随后 w 进入了消息消费过程。</li>
+<li>此时 monitor 刚好对 w_sm 执行了 <code>skynet_monitor_check</code>函数，使得有 <code>w_sm-&gt;version == w_sm-&gt;check_version == 1</code> 成立。</li>
+<li>当 w 在消费过程中陷入了死循环并超过第二步 5 s 的时间后，monitor 再一次对 w_sm 执行 <code>skynet_monitor_check</code>函数。这一次 monitor 发现条件  <code>w_sm-&gt;version == w_sm-&gt;check_version</code> 成立，于是向用户返回一条错误日志。</li>
+<li>若 w 在第二步 5 s 的时间内完成了消息消费的过程，则会将 <code>w_sm-&gt;source</code> 和 <code>w_sm-&gt;destination</code> 都设置为 0。 这样即使 monitor 即使检测到 <code>w_sm-&gt;version == w_sm-&gt;check_version</code> 也不会产生错误日志。</li>
+</ol>
+</blockquote>
+<h4 id="如何实现线程安全"><a href="#如何实现线程安全" class="headerlink" title="如何实现线程安全"></a>如何实现线程安全</h4><p>在 skynet 的消息调度机制中，可能涉及到竞态问题的地方主要有往全局消息队列中执行<code>push</code>和<code>pop</code>操作、往次级消息队列中执行 <code>push</code> 和 <code>pop</code> 操作以及消息的消费过程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">struct message_queue * <span class="title">skynet_globalmq_pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">global_queue</span> *<span class="title">q</span> =</span> Q;</span><br><span class="line">	SPIN_LOCK(q)</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">message_queue</span> *<span class="title">mq</span> =</span> q-&gt;head;</span><br><span class="line">	<span class="keyword">if</span>(mq) &#123;</span><br><span class="line">		q-&gt;head = mq-&gt;next;</span><br><span class="line">		<span class="keyword">if</span>(q-&gt;head == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			assert(mq == q-&gt;tail);</span><br><span class="line">			q-&gt;tail = <span class="literal">NULL</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		mq-&gt;next = <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SPIN_UNLOCK(q)</span><br><span class="line">	<span class="keyword">return</span> mq;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_globalmq_push</span><span class="params">(struct message_queue * <span class="built_in">queue</span>)</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">global_queue</span> *<span class="title">q</span>=</span> Q;</span><br><span class="line"></span><br><span class="line">	SPIN_LOCK(q)</span><br><span class="line">	assert(<span class="built_in">queue</span>-&gt;next == <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span>(q-&gt;tail) &#123;</span><br><span class="line">		q-&gt;tail-&gt;next = <span class="built_in">queue</span>;</span><br><span class="line">		q-&gt;tail = <span class="built_in">queue</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		q-&gt;head = q-&gt;tail = <span class="built_in">queue</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SPIN_UNLOCK(q)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_mq_push</span><span class="params">(struct message_queue *q, struct skynet_message *message)</span> </span>&#123;</span><br><span class="line">	assert(message);</span><br><span class="line">	SPIN_LOCK(q)</span><br><span class="line">	q-&gt;<span class="built_in">queue</span>[q-&gt;tail] = *message;</span><br><span class="line">	<span class="keyword">if</span> (++ q-&gt;tail &gt;= q-&gt;cap) &#123;</span><br><span class="line">		q-&gt;tail = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (q-&gt;head == q-&gt;tail) &#123;</span><br><span class="line">		expand_queue(q);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (q-&gt;in_global == <span class="number">0</span>) &#123;</span><br><span class="line">		q-&gt;in_global = MQ_IN_GLOBAL;</span><br><span class="line">		skynet_globalmq_push(q);</span><br><span class="line">	&#125;</span><br><span class="line">	SPIN_UNLOCK(q)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">skynet_mq_pop</span><span class="params">(struct message_queue *q, struct skynet_message *message)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> ret = <span class="number">1</span>;</span><br><span class="line">	SPIN_LOCK(q)</span><br><span class="line">	<span class="keyword">if</span> (q-&gt;head != q-&gt;tail) &#123;</span><br><span class="line">		*message = q-&gt;<span class="built_in">queue</span>[q-&gt;head++];</span><br><span class="line">		ret = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">int</span> head = q-&gt;head;</span><br><span class="line">		<span class="keyword">int</span> tail = q-&gt;tail;</span><br><span class="line">		<span class="keyword">int</span> cap = q-&gt;cap;</span><br><span class="line">		<span class="keyword">if</span> (head &gt;= cap) &#123;</span><br><span class="line">			q-&gt;head = head = <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">int</span> length = tail - head;</span><br><span class="line">		<span class="keyword">if</span> (length &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			length += cap;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">while</span> (length &gt; q-&gt;overload_threshold) &#123;</span><br><span class="line">			q-&gt;overload = length;</span><br><span class="line">			q-&gt;overload_threshold *= <span class="number">2</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// reset overload_threshold when queue is empty</span></span><br><span class="line">		q-&gt;overload_threshold = MQ_OVERLOAD;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (ret) &#123;</span><br><span class="line">		q-&gt;in_global = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SPIN_UNLOCK(q)</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>skynet 的全局消息队列会被很多的线程访问，而且同一个服务可以同时接收多个不同服务所发送来的信息，因此这两个队列的访问频率都较高，而且对这两个队列的压入和弹出操作都非常快，使用自旋锁回避互斥锁更加经济。服务的 callback 不必是线程安全的，因为每次 worker 都会从全局消息队列中将整个次级消息队列取出，因此其他线程无法同时访问到同一个次级消息队列，自然也就不会面临竞态问题。</p>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p>[1]. <a target="_blank" rel="noopener" href="https://blog.codingnow.com/2012/09/the_design_of_skynet.html">Skynet 设计综述 —— 云风</a><br>[2].<a target="_blank" rel="noopener" href="https://manistein.github.io/blog/post/server/skynet/skynet%E6%BA%90%E7%A0%81%E8%B5%8F%E6%9E%90/">skynet源码赏析</a></p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— 消息调度机制</a>
-  
-    </h1>
-  
+      </a>
+    </div>
+    
 
-
-        <div class="article-info info-on-right">
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-消息调度机制/" title="skynet 源码阅读笔记 —— 消息调度机制" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-消息调度机制/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -534,7 +419,7 @@
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -547,347 +432,137 @@
 	</div>
 
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" class="archive-article-date">
-        <time datetime="2020-11-04T08:16:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          skynet 源码阅读笔记 —— skynet 的模块与服务
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">学习的奥义：刻意练习与相关方法</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" target="_blank">学习的奥义：刻意练习与相关方法</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">方法论</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8B%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="toc-number">2.</span> <span class="toc-text">基本数据结构之消息队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8B%E6%B6%88%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">基本数据结构之消息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%81%E7%94%9F%E4%BA%A7%EF%BC%8C%E8%B0%81%E6%B6%88%E8%B4%B9%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">谁生产，谁消费？</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">4.0.1.</span> <span class="toc-text">消息消费的过程</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">4.0.2.</span> <span class="toc-text">消息生产的过程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%91%E5%B7%A5%E6%9C%BA%E5%88%B6-%E2%80%94%E2%80%94-monitor-%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%B7%A5%E4%BD%9C"><span class="toc-number">5.</span> <span class="toc-text">监工机制 —— monitor 线程的工作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="toc-number">6.</span> <span class="toc-text">如何实现线程安全</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">7.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" class="archive-article-date">
-        <time datetime="2020-11-04T07:47:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" target="_blank">意志力的科学与科学的意志力</a>
-  
-    </h1>
-  
+        
+    </div>
+</aside>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">意志力科学</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" class="archive-article-date">
-        <time datetime="2020-11-04T06:50:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
 
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" target="_blank">睡眠的奥秘 —— 关于睡眠，你可能不知道的事</a>
-  
-    </h1>
-  
+<div id="SOHUCS" sid="skynet-源码阅读笔记-——-消息调度机制" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">睡眠</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" target="_blank">muduo 网络库日志后端</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" target="_blank">muduo 网络库日志前端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -928,8 +603,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,

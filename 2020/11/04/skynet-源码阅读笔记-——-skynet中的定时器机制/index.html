@@ -6,20 +6,27 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: 主题阅读. 读书笔记 | Hacker Cube</title>
+  <title>skynet 源码阅读笔记 —— skynet中的定时器机制 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/tags/%E4%B8%BB%E9%A2%98%E9%98%85%E8%AF%BB-%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/index.html">
+  <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第四篇文章，探讨了 skynet 的定时器机制，主要包含了以下内容：   定时器的基本数据结构 starttime、current 以及 current_point 的意义，包括了 CLOCK_REALTIME 以及 CLOCK_MONOTONIC 等内容 time、near 数组以及 t 数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet 源码阅读笔记 —— skynet中的定时器机制">
+<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第四篇文章，探讨了 skynet 的定时器机制，主要包含了以下内容：   定时器的基本数据结构 starttime、current 以及 current_point 的意义，包括了 CLOCK_REALTIME 以及 CLOCK_MONOTONIC 等内容 time、near 数组以及 t 数">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://qj9elheb0.hn-bkt.clouddn.com/time%20%E4%B8%8E%20near%20%E4%BB%A5%E5%8F%8A%20t%20%E7%9A%84%E5%85%B3%E7%B3%BB.png">
+<meta property="article:published_time" content="2020-11-04T09:22:37.000Z">
+<meta property="article:modified_time" content="2020-11-04T09:32:01.748Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="skynet框架">
+<meta property="article:tag" content="Timer">
+<meta property="article:tag" content="C语言">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://qj9elheb0.hn-bkt.clouddn.com/time%20%E4%B8%8E%20near%20%E4%BB%A5%E5%8F%8A%20t%20%E7%9A%84%E5%85%B3%E7%B3%BB.png">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
   
@@ -204,80 +211,329 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-skynet-源码阅读笔记-——-skynet中的定时器机制" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" class="archive-article-date">
-        <time datetime="2020-11-04T06:50:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" target="_blank">睡眠的奥秘 —— 关于睡眠，你可能不知道的事</a>
   
+    <h1 class="article-title" itemprop="name">
+      skynet 源码阅读笔记 —— skynet中的定时器机制
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
+        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">2.4k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">10分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第四篇文章，探讨了 skynet 的定时器机制，主要包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>定时器的基本数据结构</li>
+<li>starttime、current 以及 current_point 的意义，包括了 CLOCK_REALTIME 以及 CLOCK_MONOTONIC 等内容</li>
+<li>time、near 数组以及 t 数组的意义</li>
+<li>time、near 数组以及 t 数组三者之间的联系</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h4><p>要了解 skynet 的定时器机制，需要先了解 skynet 中的 <code>timer</code> 的数据结构及初始化代码(skynet 中所有 timer 相关的代码都存放于 skynet_timer.c 文件中)：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_NEAR_SHIFT 8</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_NEAR (1 &lt;&lt; TIME_NEAR_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_LEVEL_SHIFT 6</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_LEVEL (1 &lt;&lt; TIME_LEVEL_SHIFT)</span></span><br><span class="line"><span class="comment">// TIME_NEAR_MASK = 0x11111111</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_NEAR_MASK (TIME_NEAR-1)</span></span><br><span class="line"><span class="comment">// TIME_LEVEL_MASK = 0x111111</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TIME_LEVEL_MASK (TIME_LEVEL-1)</span></span><br><span class="line"><span class="comment">//超时事件</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">timer_event</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> handle;    <span class="comment">//标记该超时时间所对应的服务</span></span><br><span class="line">    <span class="keyword">int</span> session;        <span class="comment">//超时事件发送消息所属的 handle</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//定时器节点</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> *<span class="title">next</span>;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> expire;    <span class="comment">//超时事件</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//定时器链表</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">link_list</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> <span class="title">head</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> *<span class="title">tail</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">timer</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">link_list</span> <span class="title">near</span>[<span class="title">TIME_NEAR</span>];</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">link_list</span> <span class="title">t</span>[4][<span class="title">TIME_LEVEL</span>];</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> time;</span><br><span class="line">    <span class="keyword">uint32_t</span> starttime;     </span><br><span class="line">    <span class="keyword">uint64_t</span> current;       </span><br><span class="line">    <span class="keyword">uint64_t</span> current_point; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">timer</span> * <span class="title">TI</span> =</span> <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+<p>从上述数据结构的定义中可以知道，skynet 采用 <code>timer_event</code> 来表示超时事件，其中 <code>handle</code> 代表了该超时事件属于哪个服务，而 <code>session</code> 则代表向对应服务所发送的超时消息的 session。skynet 采用了带头节点的单链表来存储多个定时器。</p>
+<h4 id="starttime、current-以及-current-point-的意义"><a href="#starttime、current-以及-current-point-的意义" class="headerlink" title="starttime、current 以及 current_point 的意义"></a>starttime、current 以及 current_point 的意义</h4><p>要想了解 上述三个字段的具体意义，我们需要先了解 timer 是如何被初始化，以及节点是如何添加到 timer 当中的。在说明 <code>skynet_timer_init</code> 之前，需要花点时间说明 <code>clock_gettime</code> 中不同的时间类别，也就是所谓的 clock_id. <code>clock_gettime</code> 支持多种不同的 <code>clk_id</code>, 其中包括但不限于:<code>CLOCK_REALTIME</code>、<code>CLOCK_MONOTONIC</code>、<code>CLOCK_PROCESS_CPUTIMEID</code> 和 <code>CLOCK_THREAD_CPUTIME_ID</code></p>
+<blockquote>
+<ul>
+<li>CLOCK_REALTIME：墙上时间(wall time)，也就是我们现实生活中所用的时间，由变量xtime来记录。系统每次启动时将CMOS上的RTC时间读入xtime，这个值是”自1970-01-01起经历的秒数、本秒中经历的纳秒数”，每来一个timer interrupt，也需要去更新xtime。其值为从 1970-01-01:00:00:00 至今所流逝的时间。</li>
+<li>CLOCK_MONOTONIC：单调时间(monotonic time)，代表的从系统启动至今所流逝的时间，由变量jiffies来记录。系统每次启动时jiffies初始化为0，每来一个timer interrupt，jiffies加1，也就是说它代表系统启动后流逝的tick数。jiffies一定是单调递增的</li>
+<li>CLOCK_PROCESS_CPUTIMEID：进程专属的 CPU 时钟，代表从进程启动后至今所流逝的时间</li>
+<li>CLOCK_THREAD_CPUTIME_ID：线程专属单 CPU 时钟，代表从线程启动后至今所流逝的时间</li>
+</ul>
+</blockquote>
+<p>其中，<code>CLOCK_REALTIME</code> 和 <code>CLOCK_MONOTONIC</code> 的区别在于 <code>CLOCK_REALTIME</code> 的值可以受到系统时间跳变或 NTP 的影响， 而<code>CLOCK_MONOTONIC</code> 不会受到影响，因此常用 <code>CLOCK_MONOTONIC</code> 来计算系统启动后两个先后发生的事件之间的时间差</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建一个 timer 结构，并将其中 near 以及 t 链表数组清空</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> struct timer* <span class="title">timer_create_timer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timer</span> *<span class="title">r</span>=</span>(struct timer *)skynet_malloc(<span class="keyword">sizeof</span>(struct timer));</span><br><span class="line">    <span class="built_in">memset</span>(r,<span class="number">0</span>,<span class="keyword">sizeof</span>(*r));</span><br><span class="line">    <span class="keyword">int</span> i,j;</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;TIME_NEAR;i++) &#123;</span><br><span class="line">        link_clear(&amp;r-&gt;near[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;<span class="number">4</span>;i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (j=<span class="number">0</span>;j&lt;TIME_LEVEL;j++) &#123;</span><br><span class="line">            link_clear(&amp;r-&gt;t[i][j]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    SPIN_INIT(r)</span><br><span class="line">    r-&gt;current = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span>  <span class="title">skynet_timer_init</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    TI = timer_create_timer();</span><br><span class="line">    <span class="keyword">uint32_t</span> current = <span class="number">0</span>;</span><br><span class="line">    systime(&amp;TI-&gt;starttime, &amp;current);</span><br><span class="line">    <span class="comment">//TI-&gt;starttime 保存了当前墙上时间，精确到秒</span></span><br><span class="line">    <span class="comment">//TI-&gt;current 从 starttime 启动后到当前的时间，精确到 10 ms</span></span><br><span class="line">    TI-&gt;current = current;</span><br><span class="line">    <span class="comment">//TI-&gt;current_point 代表是精确到 10 ms的单调时间，表示从系统启动到当前所流失的时间</span></span><br><span class="line">    TI-&gt;current_point = gettime();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//获得当前系统的墙上时间，并将其中的整秒部分存入 sec 中，将纳秒部分转化为以 10 ms 为精度的 centisecond,并存入 cs 中</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">systime</span><span class="params">(<span class="keyword">uint32_t</span> *sec, <span class="keyword">uint32_t</span> *cs)</span> </span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timespec</span> <span class="title">ti</span>;</span></span><br><span class="line">    clock_gettime(CLOCK_REALTIME, &amp;ti);</span><br><span class="line">    *sec = (<span class="keyword">uint32_t</span>)ti.tv_sec;</span><br><span class="line">    *cs = (<span class="keyword">uint32_t</span>)(ti.tv_nsec / <span class="number">10000000</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">tv</span>;</span></span><br><span class="line">    gettimeofday(&amp;tv, <span class="literal">NULL</span>);</span><br><span class="line">    *sec = tv.tv_sec;</span><br><span class="line">    *cs = tv.tv_usec / <span class="number">10000</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//获得当前系统的单调时间，并将其转换成为以 10ms 为精度的时间格式</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">uint64_t</span> <span class="title">gettime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">uint64_t</span> t;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timespec</span> <span class="title">ti</span>;</span></span><br><span class="line">    clock_gettime(CLOCK_MONOTONIC, &amp;ti);</span><br><span class="line">    t = (<span class="keyword">uint64_t</span>)ti.tv_sec * <span class="number">100</span>;</span><br><span class="line">    t += ti.tv_nsec / <span class="number">10000000</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">tv</span>;</span></span><br><span class="line">    gettimeofday(&amp;tv, <span class="literal">NULL</span>);</span><br><span class="line">    t = (<span class="keyword">uint64_t</span>)tv.tv_sec * <span class="number">100</span>;</span><br><span class="line">    t += tv.tv_usec / <span class="number">10000</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中，我们可以知道 <code>starttime</code> 代表的是 timer 初始化的墙上时间，精确到秒，而 <code>current</code> 则相当于 timer 启动后至今的时间差(也就是 timer 的运行时间)，精度为 10 ms，而 <code>current_point</code> 则相当于从系统开机至今经过的时间，精度同样为 10ms</p>
+<h4 id="time、near-数组以及-t-数组的意义"><a href="#time、near-数组以及-t-数组的意义" class="headerlink" title="time、near 数组以及 t 数组的意义"></a>time、near 数组以及 t 数组的意义</h4><p>timer 一旦完成初始化后，就会交给 timer 线程去使用，为了了解上述三个字段的含义以及定时器背后的流程，我们需要先阅读 timer 线程的线程函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//skynet_timer.c</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">thread_timer</span><span class="params">(<span class="keyword">void</span> *p)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">monitor</span> * <span class="title">m</span> =</span> p;</span><br><span class="line">    skynet_initthread(THREAD_TIMER);</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        skynet_updatetime();</span><br><span class="line">        skynet_socket_updatetime();</span><br><span class="line">        CHECK_ABORT</span><br><span class="line">        wakeup(m,m-&gt;count<span class="number">-1</span>);</span><br><span class="line">        usleep(<span class="number">2500</span>);</span><br><span class="line">        <span class="keyword">if</span> (SIG) &#123;</span><br><span class="line">            signal_hup();</span><br><span class="line">            SIG = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// wakeup socket thread</span></span><br><span class="line">    skynet_socket_exit();</span><br><span class="line">    <span class="comment">// wakeup all worker thread</span></span><br><span class="line">    pthread_mutex_lock(&amp;m-&gt;mutex);</span><br><span class="line">    m-&gt;quit = <span class="number">1</span>;</span><br><span class="line">    pthread_cond_broadcast(&amp;m-&gt;cond);</span><br><span class="line">    pthread_mutex_unlock(&amp;m-&gt;mutex);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码可以看出，timer 的调用主要通过 <code>skynet_updatetime</code> 函数来实现(<code>skynet_socket_updatetime</code> 函数的部分会放到网络当中讲)。继续追踪相应的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add_node</span><span class="params">(struct timer *T,struct timer_node *node)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> time=node-&gt;expire;     <span class="comment">//节点的超时时间</span></span><br><span class="line">    <span class="keyword">uint32_t</span> current_time=T-&gt;time;  </span><br><span class="line">    <span class="comment">//判断 time 和 current_time 之间的间隔是否小于 256 个 tick(2560ms)</span></span><br><span class="line">    <span class="keyword">if</span> ((time|TIME_NEAR_MASK)==(current_time|TIME_NEAR_MASK)) &#123;</span><br><span class="line">        link(&amp;T-&gt;near[time&amp;TIME_NEAR_MASK],node);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> i;</span><br><span class="line">        <span class="keyword">uint32_t</span> mask=TIME_NEAR &lt;&lt; TIME_LEVEL_SHIFT;</span><br><span class="line">        <span class="comment">//找到合适的 level 添加节点</span></span><br><span class="line">        <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> ((time|(mask<span class="number">-1</span>))==(current_time|(mask<span class="number">-1</span>))) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            mask &lt;&lt;= TIME_LEVEL_SHIFT;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        link(&amp;T-&gt;t[i][((time&gt;&gt;(TIME_NEAR_SHIFT + i*TIME_LEVEL_SHIFT)) &amp; TIME_LEVEL_MASK)],node);    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//将 t[level][idx] 中的链表取出，并将其中的节点插入 near 当中 </span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">move_list</span><span class="params">(struct timer *T, <span class="keyword">int</span> level, <span class="keyword">int</span> idx)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> *<span class="title">current</span> =</span> link_clear(&amp;T-&gt;t[level][idx]);</span><br><span class="line">    <span class="keyword">while</span> (current) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> *<span class="title">temp</span>=</span>current-&gt;next;</span><br><span class="line">        add_node(T,current);</span><br><span class="line">        current=temp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">skynet_updatetime</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获得以 10 ms 为精度的单调时间</span></span><br><span class="line">    <span class="keyword">uint64_t</span> cp = gettime();</span><br><span class="line">    <span class="keyword">if</span>(cp &lt; TI-&gt;current_point) &#123;</span><br><span class="line">        skynet_error(<span class="literal">NULL</span>, <span class="string">&quot;time diff error: change from %lld to %lld&quot;</span>, cp, TI-&gt;current_point);</span><br><span class="line">        TI-&gt;current_point = cp;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cp != TI-&gt;current_point) &#123;</span><br><span class="line">        <span class="comment">//获得时间差</span></span><br><span class="line">        <span class="keyword">uint32_t</span> diff = (<span class="keyword">uint32_t</span>)(cp - TI-&gt;current_point);</span><br><span class="line">        TI-&gt;current_point = cp;</span><br><span class="line">        <span class="comment">//更新 timer 的运行时间</span></span><br><span class="line">        TI-&gt;current += diff;</span><br><span class="line">        <span class="keyword">int</span> i;</span><br><span class="line">        <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;diff;i++) &#123;</span><br><span class="line">            timer_update(TI);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">timer_update</span><span class="params">(struct timer *T)</span> </span>&#123;</span><br><span class="line">    SPIN_LOCK(T);</span><br><span class="line">    <span class="comment">// try to dispatch timeout 0 (rare condition)</span></span><br><span class="line">    timer_execute(T);   <span class="comment">//看看 near[T-&gt;time &amp; TIME_NEAR_MASK] 中的链表是否为空</span></span><br><span class="line">    <span class="comment">// shift time first, and then dispatch timer message</span></span><br><span class="line">    timer_shift(T); <span class="comment">//移动链表，将 t 中链表移动值</span></span><br><span class="line">    timer_execute(T);</span><br><span class="line">    SPIN_UNLOCK(T);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">timer_execute</span><span class="params">(struct timer *T)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//取出 time 的低 8 位，idx 代表了当前超时</span></span><br><span class="line">    <span class="keyword">int</span> idx = T-&gt;time &amp; TIME_NEAR_MASK;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (T-&gt;near[idx].head.next) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">timer_node</span> *<span class="title">current</span> =</span> link_clear(&amp;T-&gt;near[idx]);</span><br><span class="line">        SPIN_UNLOCK(T);</span><br><span class="line">        <span class="comment">// dispatch_list don&#x27;t need lock T</span></span><br><span class="line">        dispatch_list(current);</span><br><span class="line">        SPIN_LOCK(T);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">timer_shift</span><span class="params">(struct timer *T)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> mask = TIME_NEAR;</span><br><span class="line">    <span class="keyword">uint32_t</span> ct = ++T-&gt;time;</span><br><span class="line">    <span class="comment">//ct == 0 代表发生了溢出</span></span><br><span class="line">    <span class="keyword">if</span> (ct == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//将 t[3][0] 中链表取出并依次添加</span></span><br><span class="line">        move_list(T, <span class="number">3</span>, <span class="number">0</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">uint32_t</span> time = ct &gt;&gt; TIME_NEAR_SHIFT;</span><br><span class="line">        <span class="keyword">int</span> i=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> ((ct &amp; (mask<span class="number">-1</span>))==<span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> idx=time &amp; TIME_LEVEL_MASK;</span><br><span class="line">            <span class="keyword">if</span> (idx!=<span class="number">0</span>) &#123;</span><br><span class="line">                move_list(T, i, idx);</span><br><span class="line">                <span class="keyword">break</span>;              </span><br><span class="line">            &#125;</span><br><span class="line">            mask &lt;&lt;= TIME_LEVEL_SHIFT;</span><br><span class="line">            time &gt;&gt;= TIME_LEVEL_SHIFT;</span><br><span class="line">            ++i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，可以看到每调用一次 <code>timer_shift</code>， <code>time</code>就会自增 1，而 <code>skynet_updatetime</code> 中一共执行了 diff 次 <code>timer_shift</code>。因此 <code>time</code> 代表了**从 timer 启动后至今一共经历了多少次 tick(一次 tick 的长度为 10ms)**。而且从 <code>timer_shift</code> 函数我们可以看出<code>time</code>和<code>near</code>数组以及<code>t</code>数组关系：</p>
+<div style="text-align:center">
+ <img src="http://qj9elheb0.hn-bkt.clouddn.com/time%20%E4%B8%8E%20near%20%E4%BB%A5%E5%8F%8A%20t%20%E7%9A%84%E5%85%B3%E7%B3%BB.png"/>
+</div>
+<div class="image-caption" align="center">time 与 near 以及 t 的关系</div>
+
+
+<p>如上图所示，skynet 按照超时时间的紧迫程度为 timer 划分出 5 个槽，其中紧急程度为 near &gt; level0 &gt; level1 &gt; level2 &gt; level3。其中，<code>near</code> 中的定时器节点超时时间相差最大不超过 2^8 = 256 次 tick，而对于同一个 level 而言，t[level] 中的定时器超时时间间隔不超过 2^6 = 64 次 tick。 <code>time</code> 中不同的位域代表了不同的紧急程度。<code>timer_execute</code> 每次只对 <code>near</code> 中的定时器执行超时操作。</p>
+<p>了解了上述内容，我们就能够明白 skynet 是怎么样运转定时器的：<strong>skynet 的 timer 线程会不断触发 <code>skynet_update</code> 函数，在该函数中会不断执行 <code>timer_execute</code>对 <code>near</code> 中的定时器执行超时操作。执行完毕后，调用<code>timer_shift</code> 从 <code>t[0]</code>~<code>t[3]</code> 中选择合适的定时器节点加入到 <code>near</code> 中，这一过程就相当于提高了定时器节点的紧急程度(因为随着时间的流逝，定时器节点的紧急程度会越来越向 near 逼近)。</strong></p>
+<p>讲完了 skynet 定时器的运转流程，最后来看看为什么在函数 <code>move_list</code> 中，当 <code>time</code> 发生回绕时，为什么直接将 <code>t[3]</code> 放到 <code>near</code> 当中？这主要是因为添加节点采用的是位运算的方式，因此当发生 time 发生回绕时，低位会全部变为0，因此 <code>t[0]</code> ～ <code>t[3]</code> 都会被接连移动到 <code>near</code> 当中, 所以出于效率的考虑，直接将 <code>t[3]</code> 移入 <code>near</code> 即可</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-skynet中的定时器机制/" title="skynet 源码阅读笔记 —— skynet中的定时器机制" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-skynet中的定时器机制/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">睡眠</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">主题阅读. 读书笔记</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
+        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+    
 
     
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">skynet 源码阅读笔记 —— 配置文件的加载</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">基本数据结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#starttime%E3%80%81current-%E4%BB%A5%E5%8F%8A-current-point-%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-number">3.</span> <span class="toc-text">starttime、current 以及 current_point 的意义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#time%E3%80%81near-%E6%95%B0%E7%BB%84%E4%BB%A5%E5%8F%8A-t-%E6%95%B0%E7%BB%84%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-number">4.</span> <span class="toc-text">time、near 数组以及 t 数组的意义</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+
+
+<div id="SOHUCS" sid="skynet-源码阅读笔记-——-skynet中的定时器机制" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -318,9 +574,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,
@@ -426,11 +682,63 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
+                <a href="javascript:void(0)" class="js-tag color4">skynet框架</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">主题阅读. 读书笔记</a>
+                <a href="javascript:void(0)" class="js-tag color4">动态库</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C语言</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">lua</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">bootstrap服务</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">lua语言</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">配置文件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">思维与认知</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">方法论</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">主题阅读</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">读书笔记</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
               </li>
             
             <div class="clearfix"></div>
