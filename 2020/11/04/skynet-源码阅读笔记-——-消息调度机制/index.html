@@ -17,10 +17,10 @@
 <meta property="og:site_name" content="Hacker Cube">
 <meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第一篇文章，主要探讨 skynet 的消息调度机制，包含了以下内容：   基本数据结构：包括消息队列以及消息本身的数据结构 消息调度的过程：主要包括了消息是如何生产，又如何消费的 多线程模型：skynet 的线程池设计，如何为进程设置合理的优先级使其拥有较高的 CPU 利用率，如何做线程监控设">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png">
-<meta property="og:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E7%AE%A1%E7%90%86%E8%80%85%E6%A8%A1%E5%9E%8B.png">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/ab37e981-0cf0-41fe-b6a3-f1224e647254.png">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/6f4da700-c368-4281-aeef-e77435bff871.png">
 <meta property="article:published_time" content="2020-11-04T08:35:38.000Z">
-<meta property="article:modified_time" content="2020-11-04T12:16:59.618Z">
+<meta property="article:modified_time" content="2020-11-04T14:05:56.481Z">
 <meta property="article:author" content="Phoenix">
 <meta property="article:tag" content="源码剖析">
 <meta property="article:tag" content="多线程">
@@ -28,7 +28,7 @@
 <meta property="article:tag" content="C语言">
 <meta property="article:tag" content="消息队列">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png">
+<meta name="twitter:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/ab37e981-0cf0-41fe-b6a3-f1224e647254.png">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
   
@@ -281,7 +281,7 @@
 
 <p>skynet 的消息队列形式如下：</p>
 <div style="text-align:center">
- <img src="http://qj9elheb0.hn-bkt.clouddn.com/%E4%BA%8C%E7%BA%A7%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.png" width=800 height=505/>
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/ab37e981-0cf0-41fe-b6a3-f1224e647254.png" width=800 height=505/>
 </div>
 <div class="image-caption" align="center">二级消息队列</div>
 
@@ -291,7 +291,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TEXT 0		<span class="comment">//文本类型</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_RESPONSE 1	<span class="comment">//响应包</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_MULTICAST 2	<span class="comment">//组播包</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_CLIENT 3		<span class="comment">//客户端消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_SYSTEM 4		<span class="comment">//系统消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_HARBOR 5		<span class="comment">//集群内其他的 skynet 节点发来的消息</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TAG_DONTCOPY 0x10000		<span class="comment">//禁止拷贝</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PTYPE_TAG_ALLOCSESSION 0x20000	<span class="comment">//分配新的 session</span></span></span><br></pre></td></tr></table></figure>
 <h4 id="谁生产，谁消费？"><a href="#谁生产，谁消费？" class="headerlink" title="谁生产，谁消费？"></a>谁生产，谁消费？</h4><p>在 skynet 中，每个服务都拥有自己的一个次级消息队列。一个服务给另一个服务发送消息的过程，本质上就是将一个 skynet_message 压入到目标服务的次级消息队列当中。当一个服务的次级消息队列非空时，skynet 会将其push 到全局消息队列当中。而消息的消费，则是由线程池中的 worker 线程来完成，其大致的框图如下：</p>
 <div style="text-align:center">
- <img src="http://qj9elheb0.hn-bkt.clouddn.com/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E7%AE%A1%E7%90%86%E8%80%85%E6%A8%A1%E5%9E%8B.png" width=800 height=366/>
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/6f4da700-c368-4281-aeef-e77435bff871.png" width=800 height=366/>
 </div>
 <div class="image-caption" align="center">生产者消费者管理者模型</div>
 
@@ -820,9 +820,9 @@
           
             <li class="search-li">
               <a href="https://www.jianshu.com/u/d2aa8a7f1468" target="_blank" 
-                class="search-title" title="记录工作和学习过程中的笔记：Java、前端开发、Hexo博客、聚合支付、Linux笔记、ElasticSearch、ELK日志分析">
+                class="search-title" title="早期自己的一个博客，用于记录所学的点滴">
                 
-                  <img src="https://zhousiwei.gitee.io/ibooks/favicon.ico">
+                  <i class="icon-link icon"></i>
                 
                 简书
               </a>
