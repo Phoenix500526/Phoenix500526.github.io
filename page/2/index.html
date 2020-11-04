@@ -78,7 +78,9 @@
 			
 				<li><a href="/" target="_blank">主页</a></li>
 			
-				<li><a href="/tags/%E9%9A%8F%E7%AC%94/" target="_blank">随笔</a></li>
+				<li><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90" target="_blank">源码剖析</a></li>
+			
+				<li><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/" target="_blank">学而时嬉之</a></li>
 			
 			</ul>
 		</nav>
@@ -158,6 +160,8 @@
 			
 				
 			
+				
+			
 			
 			
 			<nav class="header-nav">
@@ -187,12 +191,14 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 50%">
+				<ul style="width: 70%">
 				
 				
-					<li style="width: 50%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
 		        
-					<li style="width: 50%"><a href="/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90">源码剖析</a></li>
+		        
+					<li style="width: 33.333333333333336%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
 		        
 				</ul>
 			</nav>
@@ -240,7 +246,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#99;&#111;&#x6d;">&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#x67;&#105;&#116;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#x6f;&#109;">&#x67;&#105;&#116;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
     
     <a class="article-more-a" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/#more">more >></a>
     
@@ -260,10 +266,6 @@
 			 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -287,7 +289,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
         		</li>
       		
 		</ul>
@@ -355,7 +357,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#116;&#x68;&#x75;&#98;&#x2e;&#x63;&#111;&#109;">&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#116;&#x68;&#x75;&#98;&#x2e;&#x63;&#111;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#x67;&#105;&#x74;&#64;&#103;&#105;&#116;&#104;&#117;&#98;&#46;&#99;&#x6f;&#109;">&#x67;&#105;&#x74;&#64;&#103;&#105;&#116;&#104;&#117;&#98;&#46;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
     
     <a class="article-more-a" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/#more">more >></a>
     
@@ -378,10 +380,6 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
         		</li>
       		 
@@ -398,7 +396,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
         		</li>
       		
 		</ul>
@@ -574,10 +572,6 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">源码剖析</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
               </li>
              
@@ -716,7 +710,7 @@
     	<section class="tools-section tools-section-me" q-show="aboutme">
         
           
-  	  		<div class="aboutme-wrap" id="aboutme">主要涉及技术：<br>C++ 后端开发 lua语言<br>开源爱好者、Linux<br><br>联系QQ:519788069<br><br>很惭愧<br><br>只做了一点微小的工作<br>谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="aboutme">主要涉及技术：<br>C++, 后端开发, lua语言<br>开源爱好者、Linux<br><br>热爱阅读，健身，旅游及美食<br><br>联系QQ:519788069<br></div>
   	  	
     	</section>
     
