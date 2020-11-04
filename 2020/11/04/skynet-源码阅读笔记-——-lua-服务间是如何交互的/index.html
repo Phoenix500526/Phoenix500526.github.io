@@ -6,19 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: C++ | Hacker Cube</title>
+  <title>skynet 源码阅读笔记 —— lua 服务间是如何交互的 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/tags/C/index.html">
+  <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：   lua 服务的消息协议 lua 服务如何注册自己的消息及对应的回调函数 lua 服务是如何接受消息的？ lua 服务是如何发送消息的？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet 源码阅读笔记 —— lua 服务间是如何交互的">
+<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：   lua 服务的消息协议 lua 服务如何注册自己的消息及对应的回调函数 lua 服务是如何接受消息的？ lua 服务是如何发送消息的？">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-04T12:21:24.000Z">
+<meta property="article:modified_time" content="2020-11-04T12:29:49.465Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="源码剖析">
+<meta property="article:tag" content="skynet框架">
+<meta property="article:tag" content="Timer">
+<meta property="article:tag" content="C语言">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -204,158 +209,322 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-skynet-源码阅读笔记-——-lua-服务间是如何交互的" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" target="_blank">muduo 网络库日志后端</a>
   
+    <h1 class="article-title" itemprop="name">
+      skynet 源码阅读笔记 —— lua 服务间是如何交互的
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" class="archive-article-date">
+        <time datetime="2020-11-04T12:21:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">2.6k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">11分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>lua 服务的消息协议</li>
+<li>lua 服务如何注册自己的消息及对应的回调函数</li>
+<li>lua 服务是如何接受消息的？</li>
+<li>lua 服务是如何发送消息的？</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="lua-服务的消息协议"><a href="#lua-服务的消息协议" class="headerlink" title="lua 服务的消息协议"></a>lua 服务的消息协议</h4><p>skynet 使用 proto 来描述不同的消息协议。在最开始的时候，proto 是一个空表，需要由 <code>skynet.register_protocol</code> 进行消息协议的注册。skynet 在启动 lua 服务的初期会默认注册 lua，response 以及 error 类型的消息协议，这个过程通常在 <code>require &quot;skynet&quot;</code>语句中执行。<code>skynet.register_protocol</code>函数如下：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">skynet.register_protocol</span><span class="params">(class)</span></span></span><br><span class="line">    <span class="keyword">local</span> name = class.name</span><br><span class="line">    <span class="keyword">local</span> id = class.id</span><br><span class="line">    <span class="built_in">assert</span>(proto[name] == <span class="literal">nil</span> <span class="keyword">and</span> proto[id] == <span class="literal">nil</span>)</span><br><span class="line">    <span class="built_in">assert</span>(<span class="built_in">type</span>(name) == <span class="string">&quot;string&quot;</span> <span class="keyword">and</span> <span class="built_in">type</span>(id) == <span class="string">&quot;number&quot;</span> <span class="keyword">and</span> id &gt;=<span class="number">0</span> <span class="keyword">and</span> id &lt;=<span class="number">255</span>)</span><br><span class="line">    proto[name] = class</span><br><span class="line">    proto[id] = class</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="keyword">local</span> REG = skynet.register_protocol</span><br><span class="line">    <span class="comment">--注册不同的消息类型，有普通的 lua 消息，响应消息以及错误消息</span></span><br><span class="line">    REG &#123;</span><br><span class="line">        name = <span class="string">&quot;lua&quot;</span>,</span><br><span class="line">        id = skynet.PTYPE_LUA,</span><br><span class="line">        pack = skynet.pack,</span><br><span class="line">        <span class="built_in">unpack</span> = skynet.<span class="built_in">unpack</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    REG &#123;</span><br><span class="line">        name = <span class="string">&quot;response&quot;</span>,</span><br><span class="line">        id = skynet.PTYPE_RESPONSE,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    REG &#123;</span><br><span class="line">        name = <span class="string">&quot;error&quot;</span>,</span><br><span class="line">        id = skynet.PTYPE_ERROR,</span><br><span class="line">        <span class="built_in">unpack</span> = <span class="function"><span class="keyword">function</span><span class="params">(...)</span></span> <span class="keyword">return</span> ... <span class="keyword">end</span>,</span><br><span class="line">        dispatch = _error_dispatch,</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>从 skynet 默认注册的消息类型来推断，我们知道一个消息协议应当包含有以下的一些字段：</p>
+<ul>
+<li>name:表明了该消息协议的类型名称</li>
+<li>id:表明该消息协议的类型编号，包括了以下几种不同的类型  <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> skynet = &#123;</span><br><span class="line">    <span class="comment">-- read skynet.h</span></span><br><span class="line">    PTYPE_TEXT = <span class="number">0</span>,     <span class="comment">--文本类型</span></span><br><span class="line">    PTYPE_RESPONSE = <span class="number">1</span>, <span class="comment">--响应消息</span></span><br><span class="line">    PTYPE_MULTICAST = <span class="number">2</span>,<span class="comment">--组播消息</span></span><br><span class="line">    PTYPE_CLIENT = <span class="number">3</span>,</span><br><span class="line">    PTYPE_SYSTEM = <span class="number">4</span>,</span><br><span class="line">    PTYPE_HARBOR = <span class="number">5</span>,</span><br><span class="line">    PTYPE_SOCKET = <span class="number">6</span>,</span><br><span class="line">    PTYPE_ERROR = <span class="number">7</span>,    <span class="comment">--错误消息</span></span><br><span class="line">    PTYPE_QUEUE = <span class="number">8</span>,    <span class="comment">-- used in deprecated mqueue, use skynet.queue instead</span></span><br><span class="line">    PTYPE_DEBUG = <span class="number">9</span>,</span><br><span class="line">    PTYPE_LUA = <span class="number">10</span>,     <span class="comment">--lua 服务类型的消息</span></span><br><span class="line">    PTYPE_SNAX = <span class="number">11</span>,</span><br><span class="line">    PTYPE_TRACE = <span class="number">12</span>,   <span class="comment">-- use for debug trace</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>pack:发送消息时所用到的打包函数</li>
+<li>unpack:接收消息时调用的解包函数</li>
+<li>dispatch:由消息提供方指定对应类型消息的处理函数，如果没有指定，则最终会调用 <code>skynet.dispatch(typename, func)</code><br>函数来处理</li>
+</ul>
+<p>说完基本的消息协议，我们来看看 skynet 定义的三种不同类型的消息都有什么作用：</p>
+<blockquote>
+<ol>
+<li>lua 型消息：采用 skynet.pack 和 skynet.unpack 进行消息的打包和解包, 默认调用<code>skynet.dispatch(typename, func)</code>进行消息的派发</li>
+<li>response 型消息：response 消息主要用于处理skynet.call调用和定时器的返回。当源服务向目的服务发送请求，会附带一个 session，目的服务在处理完请求后，会将 session 加入 response 消息中一起通过 <code>skynet.ret</code> 返回给源服务</li>
+<li>error 型消息：当调用 <code>skynet.call</code> 发送错误消息时，源服务可以接收到一个 error 类型的消息</li>
+</ol>
+</blockquote>
+<h4 id="lua-服务如何注册自己的消息及对应的回调函数"><a href="#lua-服务如何注册自己的消息及对应的回调函数" class="headerlink" title="lua 服务如何注册自己的消息及对应的回调函数"></a>lua 服务如何注册自己的消息及对应的回调函数</h4><p>讲完了 lua 服务的消息服务的定义，我们以 example/simplemonitor.lua 中的服务来说明一下，lua 服务之间是如何相互收发信息的。而在这之前，我们需要看看 simplemonitor.lua 定义：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> skynet = <span class="built_in">require</span> <span class="string">&quot;skynet&quot;</span></span><br><span class="line"><span class="comment">-- It&#x27;s a simple service exit monitor, you can do something more when a service exit.</span></span><br><span class="line"><span class="keyword">local</span> service_map = &#123;&#125;</span><br><span class="line"></span><br><span class="line">skynet.register_protocol &#123;</span><br><span class="line">    name = <span class="string">&quot;client&quot;</span>,</span><br><span class="line">    id = skynet.PTYPE_CLIENT,   <span class="comment">-- PTYPE_CLIENT = 3</span></span><br><span class="line">    <span class="built_in">unpack</span> = <span class="function"><span class="keyword">function</span><span class="params">()</span></span> <span class="keyword">end</span>,</span><br><span class="line">    dispatch = <span class="function"><span class="keyword">function</span><span class="params">(_, address)</span></span></span><br><span class="line">        <span class="keyword">local</span> w = service_map[address]</span><br><span class="line">        <span class="keyword">if</span> w <span class="keyword">then</span></span><br><span class="line">            <span class="keyword">for</span> watcher <span class="keyword">in</span> <span class="built_in">pairs</span>(w) <span class="keyword">do</span></span><br><span class="line">                skynet.redirect(watcher, address, <span class="string">&quot;error&quot;</span>, <span class="number">0</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            service_map[address] = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">monitor</span><span class="params">(session, watcher, command, service)</span></span></span><br><span class="line">    <span class="built_in">assert</span>(command, <span class="string">&quot;WATCH&quot;</span>)</span><br><span class="line">    <span class="keyword">local</span> w = service_map[service]</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> w <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">if</span> w == <span class="literal">false</span> <span class="keyword">then</span></span><br><span class="line">            skynet.ret(skynet.pack(<span class="literal">false</span>))</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        w = &#123;&#125;</span><br><span class="line">        service_map[service] = w</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    w[watcher] = <span class="literal">true</span></span><br><span class="line">    skynet.ret(skynet.pack(<span class="literal">true</span>))</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">skynet.start(<span class="function"><span class="keyword">function</span><span class="params">()</span></span></span><br><span class="line">    skynet.dispatch(<span class="string">&quot;lua&quot;</span>, monitor)</span><br><span class="line"><span class="keyword">end</span>)</span><br></pre></td></tr></table></figure>
+<p>如以往的文章所提到的那样，当使用 <code>skynet.newservice</code> 函数启动一个新的 lua 服务时，会执行相应的脚本来完成服务的初始化。在 simplemonitor.lua 脚本中，先执行了 <code>require &quot;skynet&quot;</code>，这不仅会将相应的函数导入到当前 lua 脚本当中，还会执行 <code>skynet.register_protocol</code>为 simplemonitor 注册三种默认消息协议。随后，simplemonitor.lua 又调用了 <code>skynet.register_protocol</code> 注册了一个 client 类型的 lua 消息协议，并指定了对应的 dispatch 函数。随后调用 <code>skynet.start</code> 来启动 simplemonitor 服务。在上一篇文章<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bc37152b6413">《skynet 源码阅读笔记 —— 如何在 lua 服务中启动另一个 lua 服务》</a> 中提到了 <code>skynet.start</code> 会将 simplemonitor 服务的消息回调函数设置为 <code>skynet.dispatch_message</code>,然后执行 <code>skynet.dipatch(&quot;lua&quot;, monitor)</code>进行服务的初始化。</p>
+<h4 id="lua-服务是如何接受消息的？"><a href="#lua-服务是如何接受消息的？" class="headerlink" title="lua 服务是如何接受消息的？"></a>lua 服务是如何接受消息的？</h4><p>讨论完 lua 服务是如何注册自己的消息类型及定义消息对应的回调函数后，我们来看看 lua 服务是如何接受消息的。我们先来看看 <code>skynet.dispatch</code> 函数的实现：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--skynet.lua</span></span><br><span class="line"><span class="comment">--simplemonitor 的调用形式为 skynet.dispatch(&quot;lua&quot;, monitor)</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">skynet.dispatch</span><span class="params">(typename, func)</span></span></span><br><span class="line">    <span class="comment">--取出 lua 型消息对应的协议</span></span><br><span class="line">    <span class="keyword">local</span> p = proto[typename]</span><br><span class="line">    <span class="keyword">if</span> func <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">local</span> ret = p.dispatch</span><br><span class="line">        <span class="comment">--将对应的 dispatch 函数设置为 monitor</span></span><br><span class="line">        p.dispatch = func</span><br><span class="line">        <span class="comment">--返回原来的 dispatch 函数</span></span><br><span class="line">        <span class="keyword">return</span> ret</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> p <span class="keyword">and</span> p.dispatch</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>从上述代码可以看出，当 simplemonitor 服务启动完毕后，对应的 lua 消息协议的 dispatch 函数实际上就是 <code>monitor</code> 函数。接着，我们再来看看 <code>skynet.dispatch_message</code></p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">skynet.dispatch_message</span><span class="params">(...)</span></span></span><br><span class="line">    <span class="comment">--调用 raw_dispatch_message 进行消息的转发</span></span><br><span class="line">    <span class="keyword">local</span> succ, err = <span class="built_in">pcall</span>(raw_dispatch_message,...)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">true</span> <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">local</span> co = tremove(fork_queue,<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> co == <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">local</span> fork_succ, fork_err = <span class="built_in">pcall</span>(suspend,co,coroutine_resume(co))</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> fork_succ <span class="keyword">then</span></span><br><span class="line">            <span class="keyword">if</span> succ <span class="keyword">then</span></span><br><span class="line">                succ = <span class="literal">false</span></span><br><span class="line">                err = <span class="built_in">tostring</span>(fork_err)</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                err = <span class="built_in">tostring</span>(err) .. <span class="string">&quot;\n&quot;</span> .. <span class="built_in">tostring</span>(fork_err)</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="built_in">assert</span>(succ, <span class="built_in">tostring</span>(err))</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">raw_dispatch_message</span><span class="params">(prototype, msg, sz, session, source)</span></span></span><br><span class="line">    <span class="keyword">if</span> prototype == <span class="number">1</span> <span class="keyword">then</span></span><br><span class="line">        ... <span class="comment">--prototype == 1代表响应消息类型</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="comment">--取出相应的消息协议</span></span><br><span class="line">        <span class="keyword">local</span> p = proto[prototype]</span><br><span class="line">        <span class="keyword">if</span> p == <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">            ...    <span class="comment">--若 p == nil 则调用 c.send 发送一个 ERROR 型消息</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">local</span> f = p.dispatch</span><br><span class="line">        <span class="keyword">if</span> f <span class="keyword">then</span></span><br><span class="line">            <span class="comment">-- co_create 会从协程池中获取一个空的协程，如果没有则创建一个新的协程，并将 dispatch 函数交给这个协程去执行。</span></span><br><span class="line">            <span class="keyword">local</span> co = co_create(f)</span><br><span class="line">            session_coroutine_id[co] = session</span><br><span class="line">            session_coroutine_address[co] = source</span><br><span class="line">            <span class="keyword">local</span> traceflag = p.trace</span><br><span class="line">            <span class="keyword">if</span> traceflag == <span class="literal">false</span> <span class="keyword">then</span></span><br><span class="line">                <span class="comment">-- force off</span></span><br><span class="line">                trace_source[source] = <span class="literal">nil</span></span><br><span class="line">                session_coroutine_tracetag[co] = <span class="literal">false</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">local</span> tag = trace_source[source]</span><br><span class="line">                <span class="keyword">if</span> tag <span class="keyword">then</span></span><br><span class="line">                    trace_source[source] = <span class="literal">nil</span></span><br><span class="line">                    c.trace(tag, <span class="string">&quot;request&quot;</span>)</span><br><span class="line">                    session_coroutine_tracetag[co] = tag</span><br><span class="line">                <span class="keyword">elseif</span> traceflag <span class="keyword">then</span></span><br><span class="line">                    <span class="comment">-- set running_thread for trace</span></span><br><span class="line">                    running_thread = co</span><br><span class="line">                    skynet.trace()</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="comment">--启动并执行协程，将协程执行的结果返回给suspend函数，suspend 会根据这个结果执行相应的操作</span></span><br><span class="line">            suspend(co, coroutine_resume(co, session,source, p.<span class="built_in">unpack</span>(msg,sz)))</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            trace_source[source] = <span class="literal">nil</span></span><br><span class="line">            <span class="keyword">if</span> session ~= <span class="number">0</span> <span class="keyword">then</span></span><br><span class="line">                c.send(source, skynet.PTYPE_ERROR, session, <span class="string">&quot;&quot;</span>)</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                unknown_request(session, source, msg, sz, proto[prototype].name)</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>结合上述带注释的代码，我们描述一下整体的过程：当服务 A 向 simplemonitor 发送一条消息时，会将这条消息放入到 simplemonitor 对应的 snlua 服务所属的次级消息队列当中(skynet当中有多个 snlua 类型的服务，分别对应不同的 lua 服务)。worker 线程会将其取出并消费，在消费的过程当中会调用该消息所指定的 callback 函数。而 <code>skynet.start</code> 已经通过 <code>c.callback(skynet.dispatch_message)</code> 将 simplemonitor 的消息的回调函数设置为 <code>skynet.dispatch_message</code>。此时，worker线程最终就会调用到 <code>raw_dispatch_message</code>函数。这个函数会获得一个新的空的协程来执行消息协议中指定的 dispatch 函数。对应协程一旦执行起来完毕，会调用 <code>coroutine_yield</code> 函数将自身挂起，并返回挂起的原因。<code>suspend</code>会根据这个原因做不同的处理</p>
+<h4 id="lua-服务是如何发送消息的？"><a href="#lua-服务是如何发送消息的？" class="headerlink" title="lua 服务是如何发送消息的？"></a>lua 服务是如何发送消息的？</h4><p>讲完了当 simplemonitor 收到消息的行为，我们再来看看发送消息的行为。假设现在有一个服务 A 需要向另一个服务 B 发送一条消息，那么他需要调用 <code>skynet.send</code> 函数。我们来看看 <code>skynet.send</code> 函数的定义：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">skynet.send</span><span class="params">(addr, typename, ...)</span></span></span><br><span class="line">    <span class="keyword">local</span> p = proto[typename]</span><br><span class="line">    <span class="keyword">return</span> c.send(addr, p.id, <span class="number">0</span> , p.pack(...))</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p><code>skynet.send</code>会调用 <code>c.send(addr, p.id, 0 , p.pack(...))</code> 函数来发送消息，其中 <code>c.send</code> 函数的参数从左至右分别是目标地址，消息协议类型，session ID，自定义参数列表。<br>我们再来看看 <code>c.send</code> 所对应的函数 <code>lsend</code> 是如何实现的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//lua-skynet.c</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">lsend</span><span class="params">(lua_State *L)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> send_message(L, <span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">send_message</span><span class="params">(lua_State *L, <span class="keyword">int</span> source, <span class="keyword">int</span> idx_type)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">skynet_context</span> * <span class="title">context</span> =</span> lua_touserdata(L, lua_upvalueindex(<span class="number">1</span>));</span><br><span class="line">    <span class="comment">//获得目的地址 addr</span></span><br><span class="line">    <span class="keyword">uint32_t</span> dest = (<span class="keyword">uint32_t</span>)lua_tointeger(L, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * dest_string = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span> (dest == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (lua_type(L,<span class="number">1</span>) == LUA_TNUMBER) &#123;</span><br><span class="line">            <span class="keyword">return</span> luaL_error(L, <span class="string">&quot;Invalid service address 0&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        dest_string = get_dest_string(L, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> type = luaL_checkinteger(L, idx_type+<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">int</span> session = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//如果没有设置 session，则最后分配一个 ssession</span></span><br><span class="line">    <span class="keyword">if</span> (lua_isnil(L,idx_type+<span class="number">1</span>)) &#123;</span><br><span class="line">        type |= PTYPE_TAG_ALLOCSESSION;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        session = luaL_checkinteger(L,idx_type+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> mtype = lua_type(L,idx_type+<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">switch</span> (mtype) &#123;</span><br><span class="line">    <span class="keyword">case</span> LUA_TSTRING: &#123;</span><br><span class="line">        <span class="keyword">size_t</span> len = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">void</span> * msg = (<span class="keyword">void</span> *)lua_tolstring(L,idx_type+<span class="number">2</span>,&amp;len);</span><br><span class="line">        <span class="keyword">if</span> (len == <span class="number">0</span>) &#123;</span><br><span class="line">            msg = <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//调用 skynet_send 将对应的消息发送到指定服务的次级消息队列当中。</span></span><br><span class="line">        <span class="keyword">if</span> (dest_string) &#123;</span><br><span class="line">            session = skynet_sendname(context, source, dest_string, type, session , msg, len);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            session = skynet_send(context, source, dest, type, session , msg, len);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">case</span> LUA_TLIGHTUSERDATA: &#123;</span><br><span class="line">        <span class="keyword">void</span> * msg = lua_touserdata(L,idx_type+<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">int</span> size = luaL_checkinteger(L,idx_type+<span class="number">3</span>);</span><br><span class="line">        <span class="keyword">if</span> (dest_string) &#123;</span><br><span class="line">            session = skynet_sendname(context, source, dest_string, type | PTYPE_TAG_DONTCOPY, session, msg, size);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            session = skynet_send(context, source, dest, type | PTYPE_TAG_DONTCOPY, session, msg, size);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        luaL_error(L, <span class="string">&quot;invalid param %s&quot;</span>, lua_typename(L, lua_type(L,idx_type+<span class="number">2</span>)));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (session &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (session == <span class="number">-2</span>) &#123;</span><br><span class="line">            <span class="comment">// package is too large</span></span><br><span class="line">            lua_pushboolean(L, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// send to invalid address</span></span><br><span class="line">        <span class="comment">// todo: maybe throw an error would be better</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    lua_pushinteger(L,session);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合上述代码及注释，当一个 lua 服务向另一个 lua 服务发送消息时，会调用<code>skynet.send</code> 函数，这个函数最终会调用 C 层的 <code>send_message</code>函数，通过对调用参数的解析，为消息添加上 type 和 session 字段，并最终调用 <code>skynet_send</code> 函数，这个函数在之前的<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6aa32e53856a">skynet 源码阅读笔记 —— 消息调度机制</a>说明了它的作用，这里就不多做说明。<code>skynet_send</code>函数将消息压入到指定服务的次级消息队列中，发送的过程就结束了。接下来只需要等待 worker 线程从全局消息队列中取出对应的次级消息队列，并消费相应的消息即可。</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/" title="skynet 源码阅读笔记 —— lua 服务间是如何交互的" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
 
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%A6%82%E4%BD%95%E5%9C%A8-lua-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%90%AF%E5%8A%A8%E5%8F%A6%E4%B8%80%E4%B8%AA-lua-%E6%9C%8D%E5%8A%A1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">skynet 源码阅读笔记 —— 如何在 lua 服务中启动另一个 lua 服务</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" target="_blank">muduo 网络库日志前端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lua-%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B6%88%E6%81%AF%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">lua 服务的消息协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lua-%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E6%B3%A8%E5%86%8C%E8%87%AA%E5%B7%B1%E7%9A%84%E6%B6%88%E6%81%AF%E5%8F%8A%E5%AF%B9%E5%BA%94%E7%9A%84%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">lua 服务如何注册自己的消息及对应的回调函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lua-%E6%9C%8D%E5%8A%A1%E6%98%AF%E5%A6%82%E4%BD%95%E6%8E%A5%E5%8F%97%E6%B6%88%E6%81%AF%E7%9A%84%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">lua 服务是如何接受消息的？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lua-%E6%9C%8D%E5%8A%A1%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF%E7%9A%84%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">lua 服务是如何发送消息的？</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+        
+    </div>
+</aside>
 
-    
+
+
+
+
+<div id="SOHUCS" sid="skynet-源码阅读笔记-——-lua-服务间是如何交互的" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -396,9 +565,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,
