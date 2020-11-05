@@ -10,19 +10,19 @@
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="前言muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#116;&amp;#64;&amp;#103;&amp;#x69;&amp;#116;&amp;#x68;&amp;#117;&amp;#x62;&amp;#46;&amp;#99;&amp;#11">
+  <meta name="description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#x74;&amp;#x40;&amp;#x67;&amp;#x69;&amp;#x74;&amp;#104;&amp;#117;&amp;#x62;&amp;#x2e;&amp;#99;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="muduo 网络库日志后端">
 <meta property="og:url" content="http://example.com/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="前言muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#116;&amp;#64;&amp;#103;&amp;#x69;&amp;#116;&amp;#x68;&amp;#117;&amp;#x62;&amp;#46;&amp;#99;&amp;#11">
+<meta property="og:description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#x74;&amp;#x40;&amp;#x67;&amp;#x69;&amp;#x74;&amp;#104;&amp;#117;&amp;#x62;&amp;#x2e;&amp;#99;">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-11-03T14:47:50.000Z">
-<meta property="article:modified_time" content="2020-11-04T15:10:18.884Z">
+<meta property="article:modified_time" content="2020-11-05T08:15:46.861Z">
 <meta property="article:author" content="Phoenix">
+<meta property="article:tag" content="多线程">
 <meta property="article:tag" content="muduo网络库">
 <meta property="article:tag" content="日志系统">
-<meta property="article:tag" content="多线程">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
   
@@ -78,8 +78,6 @@
 			<ul>
 			
 				<li><a href="/" target="_blank">主页</a></li>
-			
-				<li><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90" target="_blank">源码剖析</a></li>
 			
 				<li><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/" target="_blank">学而时嬉之</a></li>
 			
@@ -161,8 +159,6 @@
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -192,14 +188,12 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 70%">
+				<ul style="width: 50%">
 				
 				
-					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
+					<li style="width: 50%"><a href="/">主页</a></li>
 		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90">源码剖析</a></li>
-		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
+					<li style="width: 50%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
 		        
 				</ul>
 			</nav>
@@ -268,7 +262,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#x62;&#46;&#99;&#111;&#109;">&#103;&#x69;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#x62;&#46;&#99;&#111;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#x6f;&#109;">&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
 <a id="more"></a>
 <h4 id="AsyncLogging-h，cc-的实现"><a href="#AsyncLogging-h，cc-的实现" class="headerlink" title="AsyncLogging.{h，cc} 的实现"></a>AsyncLogging.{h，cc} 的实现</h4><p>AsyncLogging 是整个日志系统的后端线程，其中 <code>append()</code> 函数作为前端 Logger 类的输出回调函数。当用户使用如<code>LOG_DEBUG &lt;&lt; &quot;Hello world&quot;</code>语句时，会将日志信息封装为 Buffer</p>
 <!-- more -->
@@ -377,15 +371,15 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -401,7 +395,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
         		</li>
       		
 		</ul>
@@ -509,7 +503,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AsyncLogging-h%EF%BC%8Ccc-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">AsyncLogging.{h，cc} 的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LogFile-h-cc-%E7%9A%84%E6%BA%90%E7%A0%81%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">LogFile.{h, cc} 的源码及实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">一些其他的问题</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AsyncLogging-h%EF%BC%8Ccc-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">AsyncLogging.{h，cc} 的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LogFile-h-cc-%E7%9A%84%E6%BA%90%E7%A0%81%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">LogFile.{h, cc} 的源码及实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">一些其他的问题</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -667,19 +661,15 @@
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+                <a href="javascript:void(0)" class="js-tag color1">clang</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+                <a href="javascript:void(0)" class="js-tag color4">TSA</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">多线程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">C++</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -691,15 +681,27 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">动态库</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
+                <a href="javascript:void(0)" class="js-tag color4">lua</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">lua</a>
+                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -712,6 +714,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">配置文件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">mutex</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -735,11 +745,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
+                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
+                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
               </li>
             
             <div class="clearfix"></div>

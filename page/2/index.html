@@ -78,8 +78,6 @@
 			
 				<li><a href="/" target="_blank">主页</a></li>
 			
-				<li><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90" target="_blank">源码剖析</a></li>
-			
 				<li><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/" target="_blank">学而时嬉之</a></li>
 			
 			</ul>
@@ -160,8 +158,6 @@
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -191,14 +187,12 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 70%">
+				<ul style="width: 50%">
 				
 				
-					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
+					<li style="width: 50%"><a href="/">主页</a></li>
 		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90">源码剖析</a></li>
-		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
+					<li style="width: 50%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
 		        
 				</ul>
 			</nav>
@@ -215,6 +209,462 @@
           </div>
           <div id="js-content" class="content-ll">
             
+
+  
+    <article id="post-skynet-源码阅读笔记-——-消息调度机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— 消息调度机制</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
+        <time datetime="2020-11-04T08:35:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第一篇文章，主要探讨 skynet 的消息调度机制，包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>基本数据结构：包括消息队列以及消息本身的数据结构</li>
+<li>消息调度的过程：主要包括了消息是如何生产，又如何消费的</li>
+<li>多线程模型：skynet 的线程池设计，如何为进程设置合理的优先级使其拥有较高的 CPU 利用率，如何做线程监控设计(monitor) 以及如何高效地实现线程安全。</li>
+</ul>
+</blockquote>
+    
+    <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">消息队列</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-学习的奥义：刻意练习与相关方法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" target="_blank">学习的奥义：刻意练习与相关方法</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/" class="archive-article-date">
+        <time datetime="2020-11-04T08:16:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <blockquote>
+<p>人类社会只有发明了发明的方法之后才能发展，人们只有学习了学习的方法之后才能进步。   &#160; &#160; &#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160; &#160;&#160;——查理·芒格</p>
+</blockquote>
+<p>&#160; &#160; &#160; &#160;常言道：“一万小时出天才”，然而事实证明，常言未必正确。“一万个小时”这个理论最早是在格拉德威尔的《异类》一书中被提出，并随着这本书的畅销而红遍大江南北。这个理论告诉了人们一个道理：人人都能成为天才，只要你好好练习上一万个小时。可是，对于一个努力上进的年轻人来说，一个片面夸大训练时长而忽略训练方法的理论很可能一点帮助都没有。事实上，这一理论存在两个缺陷：首先，对于不同的行业，想要达到顶尖水平所需要花费的时间是不同，其次，一万个小时的训练指的是刻意练习，与一般练习存在着本质的不同。要想了解刻意练习，我们得先知道我们人类的大脑是怎么掌握一个技能的。</p>
+    
+    <a class="article-more-a" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">方法论</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/04/%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%A5%A5%E4%B9%89%EF%BC%9A%E5%88%BB%E6%84%8F%E7%BB%83%E4%B9%A0%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-意志力的科学与科学的意志力" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" target="_blank">意志力的科学与科学的意志力</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/" class="archive-article-date">
+        <time datetime="2020-11-04T07:47:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>   当我们谈论到成功的品质时，你最应该想到的是哪个？是中国励志成功学所提倡的好口才与好人脉，还是美国心灵鸡汤式的正面思维，比如特别强调自尊与自信？其实都不是，你最应当想到的是智力和意志力！心理学家通过研究发现，在众多人们所认为的与成功相关的品质当中，最能够预示一个人成功的品质是智力和意志力。虽然到目前为止，科学家们尚未找到能永久提高智力的方法，但幸运的是他们找到了提升意志力的方法，而佛罗里达州立大学的心理学家罗伊 · 鲍迈斯特(Roy Baumeister)和科学记者约翰 · 提尔内(John Tierney)所写的《意志力》正是对这一研究成果通俗有趣的一个介绍。该书借助于各种实验与统计，而非名人轶事，不仅告诉了我们关于意志力的科学，更告诉了我们什么是科学的意志力。</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/f6cb7b65-998f-4d80-8f68-b5ad5ecde4bf.png" width=200 height=250/>
+</div>
+<div class="image-caption" align="center">《意志力：关于自控、专注和效率的心理学》</div>
+    
+    <a class="article-more-a" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">思维与认知</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">意志力科学</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/04/%E6%84%8F%E5%BF%97%E5%8A%9B%E7%9A%84%E7%A7%91%E5%AD%A6%E4%B8%8E%E7%A7%91%E5%AD%A6%E7%9A%84%E6%84%8F%E5%BF%97%E5%8A%9B/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-睡眠的奥秘-——-关于睡眠，你可能不知道的事" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" target="_blank">睡眠的奥秘 —— 关于睡眠，你可能不知道的事</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/" class="archive-article-date">
+        <time datetime="2020-11-04T06:50:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <blockquote>
+<p>睡吧，合上双眼，世界就与我无关。<br>&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;&#160; &#160; &#160; &#160;——顾城，《生命幻想曲》</p>
+</blockquote>
+    
+    <a class="article-more-a" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">主题阅读</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">睡眠</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学而时嬉之//" class="article-tag-list-link color1">学而时嬉之</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/04/%E7%9D%A1%E7%9C%A0%E7%9A%84%E5%A5%A5%E7%A7%98-%E2%80%94%E2%80%94-%E5%85%B3%E4%BA%8E%E7%9D%A1%E7%9C%A0%EF%BC%8C%E4%BD%A0%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E4%BA%8B/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
 
   
     <article id="post-muduo-网络库日志后端" class="article article-type-post  article-index" itemscope itemprop="blogPost">
@@ -246,7 +696,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#x62;&#46;&#99;&#111;&#109;">&#103;&#x69;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#x62;&#46;&#99;&#111;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#x6f;&#109;">&#103;&#x69;&#x74;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
     
     <a class="article-more-a" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/#more">more >></a>
     
@@ -265,15 +715,15 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -289,7 +739,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
         		</li>
       		
 		</ul>
@@ -357,7 +807,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#x67;&#105;&#116;&#x40;&#103;&#x69;&#x74;&#x68;&#117;&#x62;&#46;&#99;&#111;&#x6d;">&#x67;&#105;&#116;&#x40;&#103;&#x69;&#x74;&#x68;&#117;&#x62;&#46;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#111;&#x6d;">&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
     
     <a class="article-more-a" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/#more">more >></a>
     
@@ -396,7 +846,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
         		</li>
       		
 		</ul>
@@ -568,19 +1018,15 @@
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+                <a href="javascript:void(0)" class="js-tag color1">clang</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+                <a href="javascript:void(0)" class="js-tag color4">TSA</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">多线程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">C++</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -592,15 +1038,27 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">动态库</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
+                <a href="javascript:void(0)" class="js-tag color4">lua</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">lua</a>
+                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -613,6 +1071,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">配置文件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">mutex</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -636,11 +1102,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
+                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
+                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
               </li>
             
             <div class="clearfix"></div>

@@ -6,19 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Category: 源码剖析 | Hacker Cube</title>
+  <title>对 muduo 网络库中互斥量与条件变量的思考与实践 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/index.html">
+  <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第三篇文章，主要探讨了 muduo 网络库对互斥量和条件变量的封装，以及我如何使用 C++11 的 mutex 以及 condition_variable 来对其进行重新实现，其中包含了以下内容：   基于 clang 的线程安全注解实现的 Mutex 类 基于 condition_variable 实现的 Condition 类 RAII 对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对 muduo 网络库中互斥量与条件变量的思考与实践">
+<meta property="og:url" content="http://example.com/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E4%BA%92%E6%96%A5%E9%87%8F%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第三篇文章，主要探讨了 muduo 网络库对互斥量和条件变量的封装，以及我如何使用 C++11 的 mutex 以及 condition_variable 来对其进行重新实现，其中包含了以下内容：   基于 clang 的线程安全注解实现的 Mutex 类 基于 condition_variable 实现的 Condition 类 RAII 对象">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-05T12:18:54.000Z">
+<meta property="article:modified_time" content="2020-11-05T15:08:21.350Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="mutex">
+<meta property="article:tag" content="condition_variable">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -73,8 +78,6 @@
 			<ul>
 			
 				<li><a href="/" target="_blank">主页</a></li>
-			
-				<li><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90" target="_blank">源码剖析</a></li>
 			
 				<li><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/" target="_blank">学而时嬉之</a></li>
 			
@@ -156,8 +159,6 @@
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -187,14 +188,12 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 70%">
+				<ul style="width: 50%">
 				
 				
-					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
+					<li style="width: 50%"><a href="/">主页</a></li>
 		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90">源码剖析</a></li>
-		        
-					<li style="width: 33.333333333333336%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
+					<li style="width: 50%"><a href="/categories/%E5%AD%A6%E8%80%8C%E6%97%B6%E5%AC%89%E4%B9%8B/">学而时嬉之</a></li>
 		        
 				</ul>
 			</nav>
@@ -210,417 +209,161 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-对-muduo-网络库中互斥量与条件变量的思考与实践" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" class="archive-article-date">
-        <time datetime="2020-11-04T12:21:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" target="_blank">skynet 源码阅读笔记 —— lua 服务间是如何交互的</a>
   
+    <h1 class="article-title" itemprop="name">
+      对 muduo 网络库中互斥量与条件变量的思考与实践
     </h1>
   
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		
-		</ul>
-	</div>
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<a href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E4%BA%92%E6%96%A5%E9%87%8F%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" class="archive-article-date">
+        <time datetime="2020-11-05T12:18:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-05</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">1.9k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">7分</span>
+    </span>
+  </span>
+</div>
 
 
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第三篇文章，主要探讨了 muduo 网络库对互斥量和条件变量的封装，以及我如何使用 C++11 的 mutex 以及 condition_variable 来对其进行重新实现，其中包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>基于 clang 的线程安全注解实现的 Mutex 类</li>
+<li>基于 condition_variable 实现的 Condition 类</li>
+<li>RAII 对象测试的一些 tips</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#105;&#x74;&#64;&#103;&#x69;&#116;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#109;">&#103;&#105;&#x74;&#64;&#103;&#x69;&#116;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<a id="more"></a>
+<h4 id="基于-clang-的线程安全注解实现的-Mutex-类"><a href="#基于-clang-的线程安全注解实现的-Mutex-类" class="headerlink" title="基于 clang 的线程安全注解实现的 Mutex 类"></a>基于 clang 的线程安全注解实现的 Mutex 类</h4><p>在并发编程当中，data race 往往是个非常令人头疼的问题。通常为了避免 data race，我们通常会使用静态的检查工具(如 clang 的 TSA)或者动态的检查工具(如 Valgrind) 等来检查代码。为了能够在 tmuduo 的实现中引入 TSA， 我对标准库的 mutex 进行了一层封装。具体的代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">class <span class="title">CAPABILITY</span><span class="params">(<span class="string">&quot;mutex&quot;</span>)</span> Mutex : noncopyable </span>&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Mutex() : mutex_(), holder_(<span class="number">0</span>) &#123;&#125;</span><br><span class="line">  ~Mutex() &#123; assert(holder_ == <span class="number">0</span>); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> <span class="title">ACQUIRE</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mutex_.lock();</span><br><span class="line">    assignHolder();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> <span class="title">RELEASE</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    unassignHolder();</span><br><span class="line">    mutex_.unlock();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">isLockedByThisThread</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> holder_ == CurrentThread::tid(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">assertLocked</span><span class="params">()</span> <span class="title">ASSERT_CAPABILITY</span><span class="params">(<span class="keyword">this</span>)</span> </span>&#123;</span><br><span class="line">    assert(isLockedByThisThread());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">friend</span> <span class="class"><span class="keyword">class</span> <span class="title">UniqueLock</span>;</span></span><br><span class="line">  <span class="comment">//仅供 UniqueLock 使用，严禁用户调用</span></span><br><span class="line">  <span class="function"><span class="built_in">std</span>::mutex&amp; <span class="title">getMutex</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> mutex_; &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">assignHolder</span><span class="params">()</span> </span>&#123; holder_ = CurrentThread::tid(); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">unassignHolder</span><span class="params">()</span> </span>&#123; holder_ = <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="built_in">std</span>::mutex mutex_;</span><br><span class="line">  <span class="keyword">pid_t</span> holder_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>对于上述代码，只要了解 TSA 的相关宏定义以及 <code>mutex</code> 的使用，应该不难理解。这里不过多地解释我自己写的代码。在我最初实现 Mutex 时，我并没有保留 <code>isLockedByThisThread()</code> 和 <code>assertLocked()</code>，而且我使用的是 <code>thread::id</code> 作为 <code>holder_</code> 的类型。后来，在实现 tmuduo 的过程当中，随着对项目理解的加深，我对 Mutex 做出了两点改变：</p>
+<ul>
+<li>使用 pid_t 而非 thread::id 来保存 holder_</li>
+<li>保留了<code>isLockedByThisThread()</code>和<code>assertLocked</code>这两个函数<br>其中关于第一个改变的原因，由于涉及到线程方面的一些内容，我会放到下一篇文章中来讨论，而这里主要谈谈<code>isLockedByThisThread()</code>和<code>assertLocked</code>这两个函数的意义。</li>
+</ul>
+<p>通常情况下，如果一个函数既有可能在已加锁的情况下访问，也可能在未加锁的情况下访问，那么出于执行效率的考虑，你应当将其拆分成为两个函数，例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MutexLock mutex;</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;Foo&gt; foos;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">post</span><span class="params">(<span class="keyword">const</span> Foo&amp; f)</span></span>&#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex)</span></span>;</span><br><span class="line">    postWithLockHold(f);    <span class="comment">//编译器会自动内联优化，因此不必担心开销</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//引入这个函数是为了体现代码作者的意图，尽管 push_back 通常可以手动内联</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">postWithLockHold</span><span class="params">(<span class="keyword">const</span> Foo&amp; f)</span></span>&#123;</span><br><span class="line">    foos.push_back(f);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于上述代码，可能会导致出现两个问题（此处的无锁和加锁是指函数调用外部，而非函数内部）：</p>
+<ul>
+<li>本该使用无锁版本 post， 结果误用了加锁版本 postWithLockHold，导致了死锁【之所以带上了 WithLockHold 这个显眼的后缀就是为了避免误用。但是如果误用了，可以用 gdb 利用函数调用栈来进行调试，如果两个函数先后占有了同一个 mutex 就会引发死锁】</li>
+<li>本该使用加锁版本 postWithLockHold，结果误用了无锁版本 post，导致了数据的损坏。【因此，MutexLock 提供了 <code>assertLocked( )</code>来进行检查】，例如：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">postWithLockHold</span><span class="params">(<span class="keyword">const</span> Foo&amp; f)</span></span>&#123;</span><br><span class="line">    assertLocked();</span><br><span class="line">    foos.push_back(f);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+回到问题本身，在 Mutex 的封装下，<code>assertLocked</code> 的实现可以看做是对 TSA 的一点点补充，TSA 是编译期的静态检查，对于运行时产生的错误无能为力。在实现 Mutex 时候，我们有一个基本原则：那就是<strong>尽可能让错误尽早出现</strong>。不管是利用 TSA 让编译器能够在编译期检测出错误，还是实现 <code>assertLocked</code> 让代码在运行时一旦产生错误就立即终止程序，都是为了尽量避免将错误留给用户去处理。</li>
+</ul>
+<p>当然，由于目前 Mutex 资源需要手动分配与释放， 用起来不太方便。我们可以采用 RAII 的方式对其进行包装，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SCOPED_CAPABILITY</span> <span class="title">UniqueLock</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">UniqueLock</span><span class="params">(Mutex&amp; mutex)</span> <span class="title">ACQUIRE</span><span class="params">(mutex)</span></span></span><br><span class="line">      : mutex_(mutex), lck_(mutex.getMutex()) &#123;</span><br><span class="line">    mutex_.assignHolder();</span><br><span class="line">  &#125;</span><br><span class="line">  ~UniqueLock() RELEASE() &#123; mutex_.unassignHolder(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="built_in">std</span>::unique_lock&lt;<span class="built_in">std</span>::mutex&gt;&amp; <span class="title">getUniqueLock</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> lck_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  Mutex&amp; mutex_;</span><br><span class="line">  <span class="built_in">std</span>::unique_lock&lt;<span class="built_in">std</span>::mutex&gt; lck_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> UniqueLock(x) <span class="meta-keyword">error</span> <span class="meta-string">&quot;Missing guard object name&quot;</span></span></span><br></pre></td></tr></table></figure>
+<p>上述代码也比较好理解，这里主要讲一下宏<code>UniqueLock(x)</code>的意义。对于 RAII 对象而言，通常有两种情况会导致诡异的bug：</p>
+<ul>
+<li>由于编译器优化，而使得 RAII 对象的生命周期大大延长</li>
+<li>不小心将 RAII 对象定义为匿名对象，从而导致提前析构<br>对于第一个问题，我们留到后面将 Mutex_test 的时候来讨论，而宏<code>UniqueLock(x)</code>正是为了避免解决第二个问题而存在的。我们来看一个例子：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">doit</span><span class="params">()</span></span>&#123;</span><br><span class="line">    MutexLockGuard(mutex);    <span class="comment">//因为遗漏了变量名，结果产生了一个临时对象然后又立马销毁了，结果没能锁住临界区</span></span><br><span class="line">    <span class="comment">//正确写法为 MutexLockGuard lock(mutex);</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+如果定义了宏<code>UniqueLock(x)</code>，则上述代码是无法通过编译的。</li>
+</ul>
+<h4 id="基于-condition-variable-实现的-Condition-类"><a href="#基于-condition-variable-实现的-Condition-类" class="headerlink" title="基于 condition_variable 实现的 Condition 类"></a>基于 condition_variable 实现的 Condition 类</h4><p>在实现了 Mutex 后，我也对 condition_variable 做了一层薄薄的封装。虽然 Condition 本身没有引入 TSA，但标准库中的 condition_variable 需要依赖于 mutex，因此我们也需要对 condition_variable 做了一层封装才能够兼容我们自己实现的 Mutex 类。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Condition</span> :</span> noncopyable &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="built_in">std</span>::condition_variable m_cond;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  Condition() : m_cond() &#123;&#125;</span><br><span class="line">  ~Condition() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">notify_all</span><span class="params">()</span> </span>&#123; m_cond.notify_all(); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">notify_one</span><span class="params">()</span> </span>&#123; m_cond.notify_one(); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">wait</span><span class="params">(UniqueLock&amp; lck)</span> </span>&#123; m_cond.wait(lck.getUniqueLock()); &#125;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> <span class="title">Predicate</span>&gt;</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">wait</span><span class="params">(UniqueLock&amp; lck, Predicate pred)</span> </span>&#123;</span><br><span class="line">    m_cond.wait(lck.getUniqueLock(), pred);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> <span class="title">Rep</span>, <span class="keyword">class</span> <span class="title">Period</span>&gt;</span></span><br><span class="line">  <span class="function"><span class="built_in">std</span>::cv_status <span class="title">wait_for</span><span class="params">(UniqueLock&amp; lck,</span></span></span><br><span class="line"><span class="function"><span class="params">                          <span class="keyword">const</span> <span class="built_in">std</span>::chrono::duration&lt;Rep, Period&gt;&amp; rel_time)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> m_cond.wait_for(lck.getUniqueLock(), rel_time);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> <span class="title">Rep</span>, <span class="keyword">class</span> <span class="title">Period</span>, <span class="keyword">class</span> <span class="title">Predicate</span>&gt;</span></span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">wait_for</span><span class="params">(UniqueLock&amp; lck,</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">const</span> <span class="built_in">std</span>::chrono::duration&lt;Rep, Period&gt;&amp; rel_time,</span></span></span><br><span class="line"><span class="function"><span class="params">                Predicate pred)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> m_cond.wait_for(lck.getUniqueLock(), rel_time, pred);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>代码整体来说比较简单，这里不过多赘述。</p>
+<h4 id="Mutex-test-的测试"><a href="#Mutex-test-的测试" class="headerlink" title="Mutex_test 的测试"></a>Mutex_test 的测试</h4><p>回到我们之前提到的关于 RAII 对象生命周期的一个问题，那就是要特别注意因为编译器的内联优化而导致 RAII 对象作用域溢出的问题。由于测试代码比较冗长，因此只贴了一小部分代码，如果有需要，可以在 tmuduo/test/Mutex_test.cc 文件中查看完整代码。下面主要说一下测试当中怎么样去注意这个问题：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">foo</span><span class="params">()</span> __<span class="title">attribute__</span><span class="params">((noinline))</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">UniqueLock <span class="title">lock</span><span class="params">(g_mutex)</span></span>;</span><br><span class="line">  <span class="keyword">if</span> (!g_mutex.isLockedByThisThread()) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;FAIL\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ++g_count;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">  ... <span class="comment">//do something</span></span><br><span class="line">  foo();</span><br><span class="line">  <span class="keyword">if</span> (g_count != <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;foo calls twice\n&quot;</span>);</span><br><span class="line">    <span class="built_in">abort</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  ... <span class="comment">//do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，利用到了 <code>__attribute__((noinline))</code> 来显式指明了 <code>foo</code> 是非内联函数，因此编译器不会对其进行内联优化。如果编译器对 <code>foo</code> 执行了内联优化，则 lock 的作用域将会从 <code>foo</code> 的局部作用域扩张到 <code>mian</code> 的作用域当中，这就很容易导致一些诡异的 bug 的产生</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/05/对-muduo-网络库中互斥量与条件变量的思考与实践/" title="对 muduo 网络库中互斥量与条件变量的思考与实践" target="_blank">http://example.com/2020/11/05/对-muduo-网络库中互斥量与条件变量的思考与实践/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
   </div>
-</article>
-  
+  <div class="article-info article-info-index">
     
     
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%A6%82%E4%BD%95%E5%9C%A8-lua-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%90%AF%E5%8A%A8%E5%8F%A6%E4%B8%80%E4%B8%AA-lua-%E6%9C%8D%E5%8A%A1/" class="archive-article-date">
-        <time datetime="2020-11-04T12:11:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%A6%82%E4%BD%95%E5%9C%A8-lua-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%90%AF%E5%8A%A8%E5%8F%A6%E4%B8%80%E4%B8%AA-lua-%E6%9C%8D%E5%8A%A1/" target="_blank">skynet 源码阅读笔记 —— 如何在 lua 服务中启动另一个 lua 服务</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">lua</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" class="archive-article-date">
-        <time datetime="2020-11-04T09:33:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/" target="_blank">skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">lua</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">bootstrap服务</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" class="archive-article-date">
-        <time datetime="2020-11-04T09:15:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" target="_blank">skynet 源码阅读笔记 —— 配置文件的加载</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">lua语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">配置文件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" class="archive-article-date">
-        <time datetime="2020-11-04T09:09:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet-%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E6%9C%8D%E5%8A%A1/" target="_blank">skynet 源码阅读笔记 —— skynet 的模块与服务</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">动态库</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T08:35:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E6%B6%88%E6%81%AF%E8%B0%83%E5%BA%A6%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— 消息调度机制</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -630,172 +373,164 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">消息队列</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T14:47:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/" target="_blank">muduo 网络库日志后端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">mutex</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">condition_variable</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E4%BA%92%E6%96%A5%E9%87%8F%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" class="archive-article-date">
-        <time datetime="2020-11-03T12:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-03</time>
-</a>
 
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          对 muduo 网络库中的线程模型的思考与实践
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/05/clang-%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%B3%A8%E8%A7%A3TSA/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">clang 的线程安全注解TSA</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/" target="_blank">muduo 网络库日志前端</a>
-  
-    </h1>
-  
-
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">日志系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/源码剖析//" class="article-tag-list-link color5">源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-clang-%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%B3%A8%E8%A7%A3%E5%AE%9E%E7%8E%B0%E7%9A%84-Mutex-%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">基于 clang 的线程安全注解实现的 Mutex 类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-condition-variable-%E5%AE%9E%E7%8E%B0%E7%9A%84-Condition-%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">基于 condition_variable 实现的 Condition 类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Mutex-test-%E7%9A%84%E6%B5%8B%E8%AF%95"><span class="toc-number">4.</span> <span class="toc-text">Mutex_test 的测试</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+        
+    </div>
+</aside>
 
-    
+
+
+
+
+<div id="SOHUCS" sid="对-muduo-网络库中互斥量与条件变量的思考与实践" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -836,10 +571,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,
 		root: "/",
@@ -924,19 +659,15 @@
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+                <a href="javascript:void(0)" class="js-tag color1">clang</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+                <a href="javascript:void(0)" class="js-tag color4">TSA</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">多线程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">C++</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -948,15 +679,27 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">日志系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">动态库</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
+                <a href="javascript:void(0)" class="js-tag color4">lua</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">lua</a>
+                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -969,6 +712,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">配置文件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">mutex</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -992,11 +743,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
+                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
+                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
               </li>
             
             <div class="clearfix"></div>
