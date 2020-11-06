@@ -10,18 +10,25 @@
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="文前导读">
+  <meta name="description" content="文前导读本文是 muduo 源码剖析系列文章的第六篇文章，主要探讨了如何设计异常类，使其携带尽可能多的有效信息。   异常到底要不要用 —— Google 到底怎么看异常 C++ 的 mangle 与 demangle 过程 如何让异常携带友好的线程函数栈调用信息   本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对 muduo 网络库异常对象的实践与思考">
 <meta property="og:url" content="http://example.com/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="文前导读">
+<meta property="og:description" content="文前导读本文是 muduo 源码剖析系列文章的第六篇文章，主要探讨了如何设计异常类，使其携带尽可能多的有效信息。   异常到底要不要用 —— Google 到底怎么看异常 C++ 的 mangle 与 demangle 过程 如何让异常携带友好的线程函数栈调用信息   本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/44a2de37-3cd7-4fa0-8822-2ce8889287c7.png">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/395917c1-6cd7-4d9f-ac76-39a5243a6d5f.png">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/78c97cd1-4761-4be2-8442-83c2b9d0ff0e.png">
 <meta property="article:published_time" content="2020-11-05T15:14:42.000Z">
-<meta property="article:modified_time" content="2020-11-05T15:14:42.418Z">
+<meta property="article:modified_time" content="2020-11-06T05:19:39.946Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="Exception">
+<meta property="article:tag" content="ABI">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/44a2de37-3cd7-4fa0-8822-2ce8889287c7.png">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
   
@@ -239,7 +246,7 @@
       <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
       <i class="icon-statistics"></i>
       <span class="post-meta-item-text"> 字数统计:</span>
-      <span class="post-count">4字</span>
+      <span class="post-count">1.7k字</span>
     </span>
   </span>
 
@@ -248,7 +255,7 @@
     <span class="post-meta-item-icon">
       <i class="icon-book icon"></i>
       <span class="post-meta-item-text"> 阅读时长≈</span>
-      <span class="post-count">1分</span>
+      <span class="post-count">7分</span>
     </span>
   </span>
 </div>
@@ -259,7 +266,64 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><a id="more"></a>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 源码剖析系列文章的第六篇文章，主要探讨了如何设计异常类，使其携带尽可能多的有效信息。</p>
+<blockquote>
+<ul>
+<li>异常到底要不要用 —— Google 到底怎么看异常</li>
+<li>C++ 的 mangle 与 demangle 过程</li>
+<li>如何让异常携带友好的线程函数栈调用信息</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#116;&#x40;&#103;&#x69;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#111;&#109;">&#103;&#x69;&#116;&#x40;&#103;&#x69;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#111;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<a id="more"></a>
+
+<p>在前一篇文章《对 muduo 网络库中的线程模型的思考与实践》中，在 Thread 的 <code>runInThread</code> 函数中涉及到了对异常的一些处理，而这篇文章的目的便是探讨自己在muduo网络库中所学到的异常实现的一点经验</p>
+<h4 id="异常到底要不要用-——-Google-到底怎么看异常"><a href="#异常到底要不要用-——-Google-到底怎么看异常" class="headerlink" title="异常到底要不要用 —— Google 到底怎么看异常"></a>异常到底要不要用 —— Google 到底怎么看异常</h4><p>在我最开始重新用自己的方式实现 tmuduo 的线程模型时，我并没有引入异常处理机制。在此之前，我对 Google 禁用异常的说法略有耳闻，而陈硕大佬作为 Google 的工程师，却在自己的开源项目中用到了异常！？带着好奇心，我去查看了《Google C++ Style Guide》<sub>[1]</sub>,在 Exception 的那章找到了如下内容：</p>
+<blockquote>
+<p>Exception:<br>  We do not use C++ exceptions.<br>…<br>Decision:<br>  On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.<br>  Given that Google’s existing code is not exception-tolerant, the costs of using exceptions are somewhat greater than the costs in a new project. The conversion process would be slow and error-prone. We don’t believe that the available alternatives to exceptions, such as error codes and assertions, introduce a significant burden.</p>
+</blockquote>
+<p>这下就清楚了，Google 不用异常的原因是 Google 有很多旧代码并不是异常安全的，将这些代码中引入异常处理，其工作量之巨大远超过异常所能够带来的好处。**如果你所做的项目没有历史包袱，那么适当的使用异常是利大于弊的(关于异常的优缺点，可以直接查看Google C++ Style Guide中的 Pros and Cons，这里就不做搬运工了)**。</p>
+<h4 id="tmuduo-的异常实现"><a href="#tmuduo-的异常实现" class="headerlink" title="tmuduo 的异常实现"></a>tmuduo 的异常实现</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Exception</span> :</span> <span class="keyword">public</span> <span class="built_in">std</span>::exception &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Exception(<span class="built_in">std</span>::<span class="built_in">string</span> what): message_(<span class="built_in">std</span>::move(msg)),</span><br><span class="line">      stack_(CurrentThread::stackTrace(<span class="comment">/*demangle = */</span> <span class="literal">false</span>)) &#123;&#125;</span><br><span class="line">  ~Exception() <span class="keyword">noexcept</span> <span class="keyword">override</span> = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">what</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">noexcept</span> <span class="keyword">override</span> </span>&#123; <span class="keyword">return</span> message_.c_str(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">stackTrace</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">noexcept</span> </span>&#123; <span class="keyword">return</span> stack_.c_str(); &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> message_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> stack_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>注意：本节内容中所用的异常代码和 muduo 网络库中是高度类似的，我仅是对其做了一点点微小的调整以使其适应我自己编写的 Thread 类。为了能和之前的文章保持一致，此处还是用 tmuduo 的代码。<br>从上述代码来看，整个异常类的代码非常简单，重点还是在于 <code>CurrentThread::stackTrace</code> 函数的实现上。不过在展示 <code>CurrentThread::stackTrace</code> 的代码实现之前，需要先了解两个基本概念 mangle 与 demangle</p>
+<h4 id="C-的-mangle-与-demangle"><a href="#C-的-mangle-与-demangle" class="headerlink" title="C++ 的 mangle 与 demangle"></a>C++ 的 mangle 与 demangle</h4><p>先简单地解释一下一些相关的概念：</p>
+<blockquote>
+<p>mangle   : 将 C++ 的源程序标识符(original C++ source identifier)转换成C++ ABI 标识符(C++ ABI identifier)的过程<br>demangle : 将 C++ 的 ABI 标识符转换为源程序标识符的过程<br>ABI(Application Binary Interface): 从命名上来看，指的是程序二进制层面上的接口，包括如符号修饰标准、变量内存布局、函数调用方式等等这些所有跟可执行代码二进制兼容性相关的内容。<br>API(Application Programming Interface): 指的往往是源码级别的接口，例如 POSIX 是一个 API 标准，POSIX 线程库下的 <code>pthread_create</code>函数是一个 API。</p>
+</blockquote>
+<p>由于历史原因，不同的编译器之间往往有各自的 C++ ABI 标准，所以同一份 C++ 代码使用不同的编译器，甚至是同一个编译器的不同版本所编译出来的程序都可能存在 ABI 不兼容问题。而 mangle 规则也算是 ABI 的一部分。我们可以先来看看在 Ubuntu-16.04 下的 clang 3.8.0-2 的 mangle 规则：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//mangle_test.cc</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">int</span> var)</span></span>&#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">float</span> var)</span></span>&#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们执行 <code>clang++ -c mangle_test.cc &amp;&amp; nm mangle_test.o</code> 后可以看到如下结果：</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/44a2de37-3cd7-4fa0-8822-2ce8889287c7.png"/>
+</div>
+<div class="image-caption" align="center">mangle_test</div> 
+
+<p>可以看到我们所写的重载函数 foo 经过了 mangle 后转变成了 _Z3foof 和 _Z3fooi。</p>
+<h4 id="CurrentThread-stackTrace-的实现"><a href="#CurrentThread-stackTrace-的实现" class="headerlink" title="CurrentThread::stackTrace 的实现"></a>CurrentThread::stackTrace 的实现</h4><p>CurrentThread::stackTrace 具体代码保存在 tmuduo/base/CurrentThread.cc 文件中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="built_in">std</span>::<span class="built_in">string</span> <span class="title">stackTrace</span><span class="params">(<span class="keyword">bool</span> demangle)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> <span class="built_in">stack</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> max_frames = <span class="number">200</span>;</span><br><span class="line">  <span class="keyword">void</span>* frame[max_frames];</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">int</span> nptrs = ::backtrace(frame, max_frames);</span><br><span class="line">  <span class="keyword">char</span>** strings = ::backtrace_symbols(frame, nptrs);</span><br><span class="line">  <span class="keyword">if</span> (strings) &#123;</span><br><span class="line">    <span class="keyword">size_t</span> len = <span class="number">256</span>;</span><br><span class="line">    <span class="keyword">char</span>* demangled = demangle ? <span class="keyword">static_cast</span>&lt;<span class="keyword">char</span>*&gt;(::<span class="built_in">malloc</span>(len)) : <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nptrs; ++i) &#123;</span><br><span class="line">      <span class="keyword">if</span> (demangle) &#123;</span><br><span class="line">        <span class="keyword">char</span>* left_par = <span class="literal">nullptr</span>;</span><br><span class="line">        <span class="keyword">char</span>* plus = <span class="literal">nullptr</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span>* p = strings[i]; *p; ++p) &#123;</span><br><span class="line">          <span class="keyword">if</span> (*p == <span class="string">&#x27;(&#x27;</span>)</span><br><span class="line">            left_par = p;</span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> (*p == <span class="string">&#x27;+&#x27;</span>)</span><br><span class="line">            plus = p;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (left_par &amp;&amp; plus) &#123;</span><br><span class="line">          *plus = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">          <span class="keyword">int</span> status = <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">char</span>* ret =</span><br><span class="line">              abi::__cxa_demangle(left_par + <span class="number">1</span>, demangled, &amp;len, &amp;status);</span><br><span class="line">          *plus = <span class="string">&#x27;+&#x27;</span>;</span><br><span class="line">          <span class="keyword">if</span> (status == <span class="number">0</span>) &#123;</span><br><span class="line">            demangled = ret;</span><br><span class="line">            <span class="built_in">stack</span>.append(strings[i], left_par + <span class="number">1</span>);</span><br><span class="line">            <span class="built_in">stack</span>.append(demangled);</span><br><span class="line">            <span class="built_in">stack</span>.append(plus);</span><br><span class="line">            <span class="built_in">stack</span>.push_back(<span class="string">&#x27;\n&#x27;</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">stack</span>.append(strings[i]);</span><br><span class="line">      <span class="built_in">stack</span>.push_back(<span class="string">&#x27;\n&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">free</span>(demangled);</span><br><span class="line">    <span class="built_in">free</span>(strings);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">stack</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中涉及到了三个新的函数：<code>backtrace</code>， <code>backtrace_symbols</code> 以及 <code>abi::__cxa_demangle</code>。其中 <code>backtrace</code> 和 <code>backtrace_symbols</code> 用于获得线程的函数调用栈信息，其具体用法可以在 linux 下的 man 手册中查看，这里不多展开。而 <code>abi::__cxa_demangle</code> 是 libstdc++ 库中的函数，具体的用法可以在 GNU 网站的《abi Namespace Reference》<sub>[2]</sub>中找到</p>
+<p>这里再额外补充点：</p>
+<blockquote>
+<ul>
+<li>某些编译器的优化选项对获取正确的函数调用栈有干扰</li>
+<li>内联函数的调用信息也不会出现在函数调用栈当中</li>
+<li>如果使用 <code>abi::__cxa_demangle</code> 函数，则在连接时需要加上选项 <code>-rdynamic</code>，　注意这是一个　linker option 而非 compiler option，如果你使用 cmake-3.13 或以上的版本，可以使用 <code>add_link_options(-rdynamic)</code></li>
+</ul>
+</blockquote>
+<h4 id="Exception-的测试结果"><a href="#Exception-的测试结果" class="headerlink" title="Exception 的测试结果"></a>Exception 的测试结果</h4><p>tmuduo 当中有关于 Exception 的测试，代码路径为 test/Exception_test.cc。由于调用栈信息比较长，以下只贴一部分的执行结果，有需要的可以自己把代码下下来跑一下<br>经 demangle 处理的异常信息</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/395917c1-6cd7-4d9f-ac76-39a5243a6d5f.png" width=735 height=120/>
+</div>
+<div class="image-caption" align="center">Exception with demangle</div> 
+
+<p>未经 demangle 处理的异常信息</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/78c97cd1-4761-4be2-8442-83c2b9d0ff0e.png"/>
+</div>
+<div class="image-caption" align="center">Exception without demangle</div> 
+
+<p>从上述结果可以看出，同一个函数 Bar::test 在经过 demangle 处理的异常信息中显示为 <code>Bar::test(...)</code>， 在没有经过 demangle 处理的异常信息中显示为 <code>_ZN3Bar4testEbSt6vectorINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESaIS6_EE+0x1c</code></p>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p>[1]. <a target="_blank" rel="noopener" href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a><br>[2]. <a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/a01696.html">abi Namespace Reference</a></p>
+
     
 
     
@@ -322,7 +386,41 @@
   <div class="article-info article-info-index">
     
     
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Exception</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ABI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
     
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
     
 
@@ -416,7 +514,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%88%B0%E5%BA%95%E8%A6%81%E4%B8%8D%E8%A6%81%E7%94%A8-%E2%80%94%E2%80%94-Google-%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E7%9C%8B%E5%BC%82%E5%B8%B8"><span class="toc-number">2.</span> <span class="toc-text">异常到底要不要用 —— Google 到底怎么看异常</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#tmuduo-%E7%9A%84%E5%BC%82%E5%B8%B8%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">tmuduo 的异常实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#C-%E7%9A%84-mangle-%E4%B8%8E-demangle"><span class="toc-number">4.</span> <span class="toc-text">C++ 的 mangle 与 demangle</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CurrentThread-stackTrace-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">5.</span> <span class="toc-text">CurrentThread::stackTrace 的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Exception-%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">Exception 的测试结果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">7.</span> <span class="toc-text">参考资料</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -586,14 +684,6 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">skynet框架</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">C语言</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">muduo网络库</a>
               </li>
              
@@ -606,15 +696,23 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">skynet框架</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C语言</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">动态库</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">lua</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Timer</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -635,6 +733,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Exception</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ABI</a>
               </li>
              
               <li class="article-tag-list-item">
