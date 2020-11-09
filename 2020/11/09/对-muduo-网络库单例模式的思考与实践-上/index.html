@@ -6,19 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: ABI | Hacker Cube</title>
+  <title>对 muduo 网络库单例模式的思考与实践(上) | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/tags/ABI/index.html">
+  <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：   对 muduo 网络库下单例模式的思考 线程全局单例模式 Singleton 的实现 线程局部单例模式 ThreadLocalSingleton 的实现   tmuduo 中单例模式的实现   本文中所涉及的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对 muduo 网络库单例模式的思考与实践(上)">
+<meta property="og:url" content="http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：   对 muduo 网络库下单例模式的思考 线程全局单例模式 Singleton 的实现 线程局部单例模式 ThreadLocalSingleton 的实现   tmuduo 中单例模式的实现   本文中所涉及的">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-09T06:16:56.000Z">
+<meta property="article:modified_time" content="2020-11-09T06:29:12.883Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="Singleton">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -214,41 +218,161 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-对-muduo-网络库单例模式的思考与实践-上" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/" class="archive-article-date">
-        <time datetime="2020-11-05T15:14:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-05</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/" target="_blank">对 muduo 网络库异常对象的实践与思考</a>
   
+    <h1 class="article-title" itemprop="name">
+      对 muduo 网络库单例模式的思考与实践(上)
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" class="archive-article-date">
+        <time datetime="2020-11-09T06:16:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-09</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">1.9k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">8分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>对 muduo 网络库下单例模式的思考<ul>
+<li>线程全局单例模式 Singleton 的实现</li>
+<li>线程局部单例模式 ThreadLocalSingleton 的实现</li>
+</ul>
+</li>
+<li>tmuduo 中单例模式的实现</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#116;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;">&#103;&#x69;&#116;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<a id="more"></a>
+
+<h4 id="对-muduo-网络库下单例模式的思考"><a href="#对-muduo-网络库下单例模式的思考" class="headerlink" title="对 muduo 网络库下单例模式的思考"></a>对 muduo 网络库下单例模式的思考</h4><h6 id="Singleton-的实现"><a href="#Singleton-的实现" class="headerlink" title="Singleton 的实现"></a>Singleton 的实现</h6><p>在 muduo 网络库的源代码中，单例模式分为两种，一种是线程全局单例模式，另一种是线程局部单例模式，相关的代码分别存放在 base/Singleton.h 和 base/ThreadLocalSingleton.h 文件中。我们先看下 Singleton 的实现</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Singleton.h</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> :</span> noncopyable&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Singleton() = <span class="keyword">delete</span>;</span><br><span class="line">  ~Singleton() = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> T&amp; <span class="title">instance</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    pthread_once(&amp;ponce_, &amp;Singleton::init);</span><br><span class="line">    assert(value_ != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span> *value_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    value_ = <span class="keyword">new</span> T();</span><br><span class="line">    <span class="keyword">if</span> (!detail::has_no_destroy&lt;T&gt;::value)</span><br><span class="line">    &#123;</span><br><span class="line">      ::atexit(destroy);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">// T_must_be_complete_type 的作用是检测 T 是不是不完全类型</span></span><br><span class="line">    <span class="comment">// 若 T 是不完全类型(仅有声明没有定义)，则 sizeof(T) = 0</span></span><br><span class="line">    <span class="comment">// 则此时 T_must_be_complete_type 相当于 char[-1]</span></span><br><span class="line">    <span class="comment">// 利用此类型定义了一个 dummy 对象会引发变异错误。</span></span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">char</span> T_must_be_complete_type[<span class="keyword">sizeof</span>(T) == <span class="number">0</span> ? <span class="number">-1</span> : <span class="number">1</span>];</span><br><span class="line">    T_must_be_complete_type dummy; (<span class="keyword">void</span>) dummy;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">delete</span> value_;</span><br><span class="line">    value_ = <span class="literal">NULL</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">pthread_once_t</span> ponce_;</span><br><span class="line">  <span class="keyword">static</span> T*             value_;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">pthread_once_t</span> Singleton&lt;T&gt;::ponce_ = PTHREAD_ONCE_INIT;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">T* Singleton&lt;T&gt;::value_ = <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+<p>从上述代码可以看出，Singleton 是一个模板类，且用户只能调用该类的静态成员函数<code>instance</code>。当用户调用 <code>Singleton&lt;T&gt;::instance()</code> 时，muduo 调用 <code>Singleton&lt;T&gt;::init</code> 进行 T 的初始化，而 <code>pthread_once</code> 保证了这一过程仅会在首次调用 <code>instance</code> 方法时发生。对于其中 <code>has_no_destroy</code> 的具体实现，我们先按下不表，留到下一篇文章再回来讨论。现在只需要知道， <code>has_no_destroy&lt;T&gt;::value</code> 是用来判断类型 T 当中是否声明了函数 <code>no_destroy</code> 即可。因此，如果 T 中没有声明 <code>no_destroy</code> 函数，那么 <code>init</code> 会调用 <code>atexit</code> 将 <code>destroy</code> 注册到进程当中，这样当进程退出时就会自动执行后 <code>destroy</code> 进行对象的析构工作。心细的同学应该很容易发现，<strong>如果单例对象中声明了 <code>no_destroy</code> 函数，那毫无疑问地会导致内存的泄露</strong>。</p>
+<h6 id="ThreadLocalSingleton-的实现"><a href="#ThreadLocalSingleton-的实现" class="headerlink" title="ThreadLocalSingleton 的实现"></a>ThreadLocalSingleton 的实现</h6><p>在大体知道了 Singleton 的实现后，我们再来看看 ThreadLocalSingleton 的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalSingleton</span> :</span> noncopyable&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  ThreadLocalSingleton() = <span class="keyword">delete</span>;</span><br><span class="line">  ~ThreadLocalSingleton() = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> T&amp; <span class="title">instance</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!t_value_)</span><br><span class="line">    &#123;</span><br><span class="line">      t_value_ = <span class="keyword">new</span> T();</span><br><span class="line">      deleter_.<span class="built_in">set</span>(t_value_);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *t_value_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">static</span> T* <span class="title">pointer</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t_value_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">destructor</span><span class="params">(<span class="keyword">void</span>* obj)</span></span>&#123;</span><br><span class="line">    assert(obj == t_value_);</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">char</span> T_must_be_complete_type[<span class="keyword">sizeof</span>(T) == <span class="number">0</span> ? <span class="number">-1</span> : <span class="number">1</span>];</span><br><span class="line">    T_must_be_complete_type dummy; (<span class="keyword">void</span>) dummy;</span><br><span class="line">    <span class="keyword">delete</span> t_value_;</span><br><span class="line">    t_value_ = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">Deleter</span>&#123;</span></span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">    Deleter()&#123;</span><br><span class="line">      pthread_key_create(&amp;pkey_, &amp;ThreadLocalSingleton::destructor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~Deleter()&#123;</span><br><span class="line">      pthread_key_delete(pkey_);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">set</span><span class="params">(T* newObj)</span></span>&#123;</span><br><span class="line">      assert(pthread_getspecific(pkey_) == <span class="literal">NULL</span>);</span><br><span class="line">      pthread_setspecific(pkey_, newObj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pthread_key_t</span> pkey_;</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">static</span> __thread T* t_value_;</span><br><span class="line">  <span class="keyword">static</span> Deleter deleter_;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">__thread T* ThreadLocalSingleton&lt;T&gt;::t_value_ = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> ThreadLocalSingleton&lt;T&gt;::Deleter ThreadLocalSingleton&lt;T&gt;::deleter_;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，我们可以看到，ThreadLocalSingleton 也是一个模板类，用户只能调用类中的静态方法 <code>instance</code> 以及 <code>pointer</code>。由于和 Singleton 的应用场景不同， ThreadLocalSingleton 只需要通过判断 <code>t_value_</code> 是否为空，就可以实现仅在首次调用 <code>instance</code> 方法进行初始化。基本的流程和前面 Singleton 是差不多的，其中最大的不同在于 ThreadLocalSingleton 多了一个 Deleter class，这是因为 <code>t_value_</code> 由 GCC 关键字 <code>__thread</code> 所修饰，因此不能自动调用析构函数，需要额外定义一个 Deleter 来完成这份工作。<code>deleter_</code> 实际上相当于一个 RAII 对象，在调用 <code>instance</code> 时将 <code>t_value_</code> 交由 <code>deleter_</code> 保管，当线程退出时析构 <code>deleter_</code> 时，会执行 <code>ThreadLocalSingleton::destructor</code> 来析构 <code>t_value_</code></p>
+<h4 id="tmuduo-中单例模式的实现"><a href="#tmuduo-中单例模式的实现" class="headerlink" title="tmuduo 中单例模式的实现"></a>tmuduo 中单例模式的实现</h4><p>在讨论 tmuduo 如何实现单例模式之前，我们需要先思考一个问题，一个单例对象需要符合哪些特质才能算得上是一个合格的单例？我想至少有以下几点：</p>
+<blockquote>
+<ul>
+<li>该对象必定是不可拷贝的</li>
+<li>用户只能够通过 instance 方法获得唯一的实例，且在若干次调用 instance() 方法中，仅会在首次调用时进行初始化</li>
+<li>必须是资源安全的，在程序退出时必须能够正确地析构，不会造成任何的资源泄露</li>
+<li>若是线程全局单例模式，则还需要考虑线程安全的问题。若是线程局部单例模式，则需要考虑线程局部存储的问题</li>
+</ul>
+</blockquote>
+<p>第一个问题非常好解决，我们只需要继承 noncopyable 标签类即可。真正需要注意的其实是第二和第三个问题。<br>如果看过我之前的文章 《对 muduo 网络库中的线程模型的思考与实践》，应该还记得其中提到了三个变量存储期概念，分别是 static stroage duration，thread storage duration 以及 dynamic storage duration。任何被声明为 static 或 thread_local 的局部变量具有 static storage duration 或 thread storage duration(这里的或指的是互斥或而非逻辑或，以下或如未特殊声明，均代表互斥或)，且他们都不被分配在堆内存上。<br>另外，在 C++11 的标准中，关于被声明为 <code>static</code> 或 <code>thread_local</code> 的局部变量，有如下的规定：</p>
+<blockquote>
+<p>Variables declared at block scope with the specifier static or thread_local (since C++11) have static or thread (since C++11) storage duration but are <strong>initialized the first time control passes through their declaration (unless their initialization is zero- or constant-initialization, which can be performed before the block is first entered). On all further calls, the declaration is skipped.</strong></p>
+<p>If the initialization throws an exception, the variable is not considered to be initialized, and initialization will be attempted again the next time control passes through the declaration.</p>
+<p>If the initialization recursively enters the block in which the variable is being initialized, the behavior is undefined.</p>
+<p><strong>If multiple threads attempt to initialize the same static local variable concurrently, the initialization occurs exactly once</strong> (similar behavior can be obtained for arbitrary functions with std::call_once).</p>
+</blockquote>
+<p>上述 C++11 标准保证了 <code>static</code> 或 <code>thread_local</code> 修饰局部变量只会在程序的控制流首次进入相应的块作用域才进行实例化工作，而且在实例化成功后，在程序或线程退出时能够自动调用相应的析构函数。另外，由于 <code>static</code> 或 <code>thread_local</code> 修饰的局部变量并不存储在堆内存当中，因此自然也不会造成任何的内存泄露。最后，对于线程全局单例模式，标准保证了 static local variable 的初始化是线程安全的，而 thread_local 本身就代表了线程局部存储。有了 C++11 标准的保驾护航，第二、第三和第四个问题将不再是问题，我们可以以一种非常简洁的方式来实现 tmuduo 中的单例模式</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Singleton.h 的实现</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Singleton() = <span class="keyword">delete</span>;</span><br><span class="line">  ~Singleton() = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> T&amp; <span class="title">instance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> T instance;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ThreadLocalSingleton.h 的实现</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalSingleton</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ThreadLocalSingleton() = <span class="keyword">delete</span>;</span><br><span class="line">  ~ThreadLocalSingleton() = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> T&amp; <span class="title">instance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">thread_local</span> T instance;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>为了验证 Singleton 以及 ThreadLocalSingleton 的正确性，我在自身代码的基础上运行 muduo 中的测试。与 muduo 本身的测试结果相当，具体测试代码可见:tmuduo/test/Singleton_test.cc 以及 tmuduo/test/ThreadLocalSingleton_test.cc</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/" title="对 muduo 网络库单例模式的思考与实践(上)" target="_blank">http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -262,17 +386,13 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Exception</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ABI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Singleton</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -285,17 +405,137 @@
 	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+    
 
     
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          对 muduo 网络库单例模式的思考与实践(下)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/06/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">对 muduo 网络库线程池的思考与实践</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%8B%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83"><span class="toc-number">2.</span> <span class="toc-text">对 muduo 网络库下单例模式的思考</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#Singleton-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.0.1.</span> <span class="toc-text">Singleton 的实现</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#ThreadLocalSingleton-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.0.2.</span> <span class="toc-text">ThreadLocalSingleton 的实现</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#tmuduo-%E4%B8%AD%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">tmuduo 中单例模式的实现</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+
+
+<div id="SOHUCS" sid="对-muduo-网络库单例模式的思考与实践-上" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -336,9 +576,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,

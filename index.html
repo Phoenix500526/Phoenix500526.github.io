@@ -221,6 +221,243 @@
             
 
   
+    <article id="post-对-muduo-网络库单例模式的思考与实践-下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" target="_blank">对 muduo 网络库单例模式的思考与实践(下)</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" class="archive-article-date">
+        <time datetime="2020-11-09T06:17:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-09</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/21314708">《C++模板进阶指南：SFINAE》</a>，以便对 SFINAE 有基本的了解。<br>本文主要包含以下内容</p>
+<blockquote>
+<ul>
+<li>SFINAE —— muduo Singleton 中 has_no_destroy 的启示</li>
+<li><code>has_no_destroy</code> 的进阶玩法<ul>
+<li><code>has_no_destroy</code> 为何无法判断子类中基类方法</li>
+<li>从一个简单的例子讲起 —— 从编译错误中得到的启示</li>
+<li><code>has_no_destroy</code> 的进阶实现与测试</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#x68;&#117;&#98;&#46;&#x63;&#x6f;&#109;">&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#x68;&#117;&#98;&#46;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+    
+    <a class="article-more-a" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">SFINAE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">泛型编程</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-对-muduo-网络库单例模式的思考与实践-上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" target="_blank">对 muduo 网络库单例模式的思考与实践(上)</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" class="archive-article-date">
+        <time datetime="2020-11-09T06:16:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-09</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>对 muduo 网络库下单例模式的思考<ul>
+<li>线程全局单例模式 Singleton 的实现</li>
+<li>线程局部单例模式 ThreadLocalSingleton 的实现</li>
+</ul>
+</li>
+<li>tmuduo 中单例模式的实现</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#116;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;">&#103;&#x69;&#116;&#x40;&#x67;&#x69;&#x74;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+    
+    <a class="article-more-a" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Singleton</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-对-muduo-网络库线程池的思考与实践" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -258,7 +495,7 @@
 <li>ThreadPool 的实现</li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#116;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#46;&#x63;&#111;&#x6d;">&#103;&#x69;&#116;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#46;&#x63;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#116;&#64;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#x63;&#111;&#x6d;">&#103;&#x69;&#116;&#64;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#x63;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
     
     <a class="article-more-a" href="/2020/11/06/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/#more">more >></a>
     
@@ -369,7 +606,7 @@
 <li>如何让异常携带友好的线程函数栈调用信息</li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#x75;&#98;&#x2e;&#99;&#x6f;&#109;">&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#x75;&#98;&#x2e;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#x74;&#64;&#103;&#105;&#116;&#104;&#117;&#x62;&#x2e;&#x63;&#x6f;&#x6d;">&#103;&#x69;&#x74;&#64;&#103;&#105;&#116;&#104;&#117;&#x62;&#x2e;&#x63;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
     
     <a class="article-more-a" href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/#more">more >></a>
     
@@ -489,7 +726,7 @@
 <li>用标准线程库实现 tmuduo 的线程模型</li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#x75;&#98;&#46;&#x63;&#111;&#109;">&#x67;&#x69;&#x74;&#64;&#x67;&#x69;&#x74;&#x68;&#x75;&#98;&#46;&#x63;&#111;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#98;&#46;&#99;&#x6f;&#x6d;">&#x67;&#105;&#116;&#64;&#103;&#x69;&#116;&#x68;&#117;&#98;&#46;&#99;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
     
     <a class="article-more-a" href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/#more">more >></a>
     
@@ -604,7 +841,7 @@
 <li>RAII 对象测试的一些 tips</li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#x69;&#116;&#64;&#103;&#x69;&#x74;&#104;&#x75;&#x62;&#x2e;&#99;&#111;&#x6d;">&#x67;&#x69;&#116;&#64;&#103;&#x69;&#x74;&#104;&#x75;&#x62;&#x2e;&#99;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#x69;&#x74;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#109;">&#103;&#x69;&#x74;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
     
     <a class="article-more-a" href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E4%BA%92%E6%96%A5%E9%87%8F%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/#more">more >></a>
     
@@ -1143,239 +1380,6 @@
 
 
   
-    <article id="post-skynet-源码阅读笔记-——-skynet中的定时器机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第四篇文章，探讨了 skynet 的定时器机制，主要包含了以下内容：</p>
-<blockquote>
-<ul>
-<li>定时器的基本数据结构</li>
-<li>starttime、current 以及 current_point 的意义，包括了 CLOCK_REALTIME 以及 CLOCK_MONOTONIC 等内容</li>
-<li>time、near 数组以及 t 数组的意义</li>
-<li>time、near 数组以及 t 数组三者之间的联系</li>
-</ul>
-</blockquote>
-    
-    <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-skynet-源码阅读笔记-——-配置文件的加载" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" target="_blank">skynet 源码阅读笔记 —— 配置文件的加载</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/" class="archive-article-date">
-        <time datetime="2020-11-04T09:15:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第三篇文章，主要探讨 skynet 的配置文件加载机制，包含了以下内容：</p>
-<blockquote>
-<ul>
-<li>main 函数是如何启动配置文件加载的？</li>
-<li>让代码描述自身：使用 lua 作为配置语言，并利用 lua 的解释器来解析配置文件</li>
-<li>main 函数是如何解析配置文件的？</li>
-</ul>
-</blockquote>
-    
-    <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">lua语言</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">配置文件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/skynet码剖析//" class="article-tag-list-link color5">skynet码剖析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1570,6 +1574,18 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Singleton</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">SFINAE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">泛型编程</a>
               </li>
              
               <li class="article-tag-list-item">

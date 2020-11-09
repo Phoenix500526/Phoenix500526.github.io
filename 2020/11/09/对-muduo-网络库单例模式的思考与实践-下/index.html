@@ -6,19 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: ABI | Hacker Cube</title>
+  <title>对 muduo 网络库单例模式的思考与实践(下) | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://example.com/tags/ABI/index.html">
+  <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 《C++模板进阶指南：SFINAE》，以便对 SFINAE 有基本的了解。本文主要包含以下内容   SFINAE —— mud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对 muduo 网络库单例模式的思考与实践(下)">
+<meta property="og:url" content="http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 《C++模板进阶指南：SFINAE》，以便对 SFINAE 有基本的了解。本文主要包含以下内容   SFINAE —— mud">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-09T06:17:27.000Z">
+<meta property="article:modified_time" content="2020-11-09T06:36:09.159Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="SFINAE">
+<meta property="article:tag" content="泛型编程">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
@@ -214,41 +218,169 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-对-muduo-网络库单例模式的思考与实践-下" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/" class="archive-article-date">
-        <time datetime="2020-11-05T15:14:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-05</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83/" target="_blank">对 muduo 网络库异常对象的实践与思考</a>
   
+    <h1 class="article-title" itemprop="name">
+      对 muduo 网络库单例模式的思考与实践(下)
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" class="archive-article-date">
+        <time datetime="2020-11-09T06:17:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-09</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">2.5k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">10分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/21314708">《C++模板进阶指南：SFINAE》</a>，以便对 SFINAE 有基本的了解。<br>本文主要包含以下内容</p>
+<blockquote>
+<ul>
+<li>SFINAE —— muduo Singleton 中 has_no_destroy 的启示</li>
+<li><code>has_no_destroy</code> 的进阶玩法<ul>
+<li><code>has_no_destroy</code> 为何无法判断子类中基类方法</li>
+<li>从一个简单的例子讲起 —— 从编译错误中得到的启示</li>
+<li><code>has_no_destroy</code> 的进阶实现与测试</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#x68;&#117;&#98;&#46;&#x63;&#x6f;&#109;">&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#x68;&#117;&#98;&#46;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<a id="more"></a>
+
+<h4 id="SFINAE-——-muduo-Singleton-中-has-no-destroy-的启示"><a href="#SFINAE-——-muduo-Singleton-中-has-no-destroy-的启示" class="headerlink" title="SFINAE —— muduo Singleton 中 has_no_destroy 的启示"></a>SFINAE —— muduo Singleton 中 has_no_destroy 的启示</h4><p>再讲完了 tmuduo 中单例模式的实现后，我们来看看 muduo 中 Singleton 使用到的另一个技术 —— SFINAE(Substitution failure is not an error)。我们先来看看 Singleton 中 <code>has_no_destroy</code> 的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">has_no_destroy</span>&#123;</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt; <span class="function"><span class="keyword">static</span> <span class="keyword">char</span> <span class="title">test</span><span class="params">(<span class="keyword">decltype</span>(&amp;C::no_destroy))</span></span>;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt; <span class="function"><span class="keyword">static</span> <span class="keyword">int32_t</span> <span class="title">test</span><span class="params">(...)</span></span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">static</span> <span class="keyword">bool</span> value = <span class="keyword">sizeof</span>(test&lt;T&gt;(<span class="number">0</span>)) == <span class="number">1</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>如前言所述，<code>has_no_destroy</code> 的作用是用来判断一个类中是否声明了 <code>no_destroy</code> 函数。我们先来看看它的具体用法：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">no_destroy</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">no_destroy</span><span class="params">(<span class="keyword">int</span>)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> :</span> A&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">D</span>&#123;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether A has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;A&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;  </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether B has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;B&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;   </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether C has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;C&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;  </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether D has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;D&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<blockquote>
+<p>Whether A has no_destroy or not? yes<br>Whether B has no_destroy or not? yes<br>Whether C has no_destroy or not? no<br>Whether D has no_destroy or not? no</p>
+</blockquote>
+<p>在讲述 <code>has_no_destroy</code> 的原理前，我们先看下面的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int32_t</span> <span class="title">foo1</span><span class="params">(<span class="keyword">int</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">char</span> <span class="title">foo2</span><span class="params">(<span class="keyword">void</span>*)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;sizeof foo1(0) is &quot;</span> &lt;&lt; <span class="keyword">sizeof</span>(foo1(<span class="number">0</span>)) &lt;&lt; <span class="built_in">endl</span>;   </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;sizeof foo2(0) is &quot;</span> &lt;&lt; <span class="keyword">sizeof</span>(foo2(<span class="number">0</span>)) &lt;&lt; <span class="built_in">endl</span>;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果:</p>
+<blockquote>
+<p>sizeof foo1(0) is 4<br>sizeof foo2(0) is 1</p>
+</blockquote>
+<p>在上述代码中，我们声明了两个函数: <code>foo1</code> 和 <code>foo2</code>。注意这两个函数都是只声明未定义。当我们执行 <code>sizeof(foo1(0))</code> 时，实际上是在检测 <code>foo1</code> 返回值类型的大小。这里简单提一下，编译器会在编译时使用 <code>sizeof(int32_t)</code> 代替 <code>sizeof(foo1(0))</code> 进行求值。虽然 <code>sizeof(foo1(0))</code> 看似产生了函数调用，实则不然。由于编译器没有编译出函数调用的命令，所以链接器并不会去查找 <code>foo1</code> 的定义，也就不会产生任何错误。</p>
+<p>让我们重新看看 <code>has_no_destroy</code> 的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">has_no_destroy</span>&#123;</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt; <span class="function"><span class="keyword">static</span> <span class="keyword">char</span> <span class="title">test</span><span class="params">(<span class="keyword">decltype</span>(&amp;C::no_destroy))</span></span>;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt; <span class="function"><span class="keyword">static</span> <span class="keyword">int32_t</span> <span class="title">test</span><span class="params">(...)</span></span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">static</span> <span class="keyword">bool</span> value = <span class="keyword">sizeof</span>(test&lt;T&gt;(<span class="literal">nullptr</span>)) == <span class="number">1</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，两个 <code>test</code> 函数都只是只声明未定义。当我们查看 <code>has_no_destroy&lt;A&gt;::value</code> 的值时，会先执行 <code>has_no_destroy&lt;A&gt;</code> 的实例化。由于 A 中声明了 <code>no_destroy</code> 函数，根据模板实例化的原则，函数 <code>static char test(decltype(&amp;C::no_destroy))</code>是最佳匹配，因此会实例化该函数，此时 <code>test&lt;T&gt;(nullptr)</code> 的返回值便是 char 类型，大小为 1 ，故 value 的值为 true。当执行 <code>has_no_destroy&lt;D&gt;::value</code>，同样会执行 <code>has_no_destroy&lt;D&gt;</code> 的实例化。由于 D 中没有声明 <code>no_destroy</code> 函数，因此只能实例化 <code>static int32_t test(...)</code> 函数，其返回值为 <code>int32_t</code>, 故 value 的值为 false(…代表接受任意数量任意类型的参数)。这样我们就实现了一种能够判断类中是否具有成员函数 <code>no_destroy</code> 的方法。</p>
+<h4 id="has-no-destroy-的进阶玩法"><a href="#has-no-destroy-的进阶玩法" class="headerlink" title="has_no_destroy 的进阶玩法"></a><code>has_no_destroy</code> 的进阶玩法</h4><h6 id="has-no-destroy-为何无法判断子类中基类方法"><a href="#has-no-destroy-为何无法判断子类中基类方法" class="headerlink" title="has_no_destroy 为何无法判断子类中基类方法"></a><code>has_no_destroy</code> 为何无法判断子类中基类方法</h6><p>从前面的实例当中我们可以看出，<code>has_no_destroy</code> 不能用于判断具有子类中是否具有基类的 <code>no_destroy</code> 方法，例如前面例子中的 C 类型。有没有什么办法能够增强 <code>has_no_destroy</code> 的功能，使其既能保持当前的用法不变，同时又能自动判断子类中的基类子类型是否包含 <code>no_destroy</code> 函数。</p>
+<p>我们先看看为什么 <code>has_no_destroy</code> 无法干这个活。<code>has_no_destroy</code> 的基本工作原理，是利用了模板的匹配原则，如果 C 中恰好声明了函数 <code>no_destroy</code>,那么函数 <code>static char test(decltype(&amp;C::no_destroy))</code> 将会得到实例化。但是当子类型中包含了基类函数时，以上述的 C 为例子，C 中虽然包含了从基类 A 中继承来的成员函数 <code>no_destroy</code>，但其函数签名应当是 <code>A::no_destroy</code> 而非　<code>no_destroy</code>。当我们对 C 实例化对象调用 <code>no_destroy</code> 函数时，编译器在 C 自身类型中找不到对应 <code>no_destroy</code> 函数，便会去基类子类型中查找 <code>no_destroy</code> 函数。<strong>为了便于理解，你可以将这个过程看成是一次隐式类型转换：编译器将 <code>no_destroy</code> 转换成了 <code>A::no_destroy</code>。</strong>不过由于模板自身有类型推导规则，因此编译器不会为 <code>has_no_destroy</code> 执行这个转换工作。我们需要自己来。<br>显然现在摆在我们面前的只有两条路，要么多增加一个模板类型参数，让用户把基类类型传进来，然后在 <code>has_no_destroy</code> 中做手动转换；要么反过来，让所有没有定义 <code>no_destroy</code> 的函数匹配成功，然后对 value 取反就可以。第一条路非常不好走，一方面是因为我之前说明了，我希望做一个 <code>has_no_destroy</code> 的增强版，因此我不希望增加多余的类型参数，另一方面，这种做法对于没有继承体系的类非常不友好，甚至来说是错误的存在。因此我选择了第二种做法，不仅能保持 <code>has_no_destroy</code> 的基本用法不变，而且对带继承或不带继承的类型等同视之，能够简化判断的策略。</p>
+<h6 id="从一个简单例子讲起-——-从编译错误中得到的启示"><a href="#从一个简单例子讲起-——-从编译错误中得到的启示" class="headerlink" title="从一个简单例子讲起 —— 从编译错误中得到的启示"></a>从一个简单例子讲起 —— 从编译错误中得到的启示</h6><p>既然明确了要采用反证的思想来解决这个问题，我们希望所有定义了 <code>no_destroy</code> 函数的类型均无法正确匹配。在这之前先用一个例子来说明一下我的思路：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">no_destroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;A::no_destroy()&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">no_destroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;B::no_destroy()&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span>:</span> <span class="keyword">public</span> A&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">D</span>:</span> <span class="keyword">public</span> A, <span class="keyword">public</span> B&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">F</span>:</span> <span class="keyword">public</span> C, <span class="keyword">public</span> B&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    C c;</span><br><span class="line">    c.no_destroy();</span><br><span class="line">    D d;</span><br><span class="line">    <span class="comment">//d.no_destroy(): // error: member &#x27;no_destroy&#x27; found in multiple base classes of different types</span></span><br><span class="line">    F f;</span><br><span class="line">    <span class="comment">//f.no_destroy(): // error: member &#x27;no_destroy&#x27; found in multiple base classes of different types</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，D 由于同时继承 A 和 B，因此当我们执行 <code>d.no_destroy()</code>函数时，会产生二义性错误(f 亦同理)。反观 C，由于 C 只继承了 A，因此当执行 <code>c.no_destroy()</code>， 编译器在 C 的类型中找不到 <code>no_destroy</code> 的定义时，会自动到 C 的基类子类型中寻找。我们可以模仿这种做法，<strong>先在 <code>has_no_destroy</code> 中定义一个声明了 <code>no_destroy</code> 函数 <code>Base</code> 作为基类，然后让类型 T 也作为基类，并让 Derive 作为二者的联合派生类。接着在对 Derive 中的 <code>no_destroy</code> 进行模板类型推导。如果 T 中或 T 的基类子类型中包含了 <code>no_destroy</code> 类型，那么都会产生二义性错误从而导致相应的函数模板实例化失效。</strong></p>
+<h6 id="进阶-has-no-destroy-的实现与测试"><a href="#进阶-has-no-destroy-的实现与测试" class="headerlink" title="进阶 has_no_destroy 的实现与测试"></a>进阶 <code>has_no_destroy</code> 的实现与测试</h6><p>讲完了上述想法后，我们可以开始着手 <code>has_no_destroy</code> 进阶版的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//SFINAE.h</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">has_no_destroy</span></span></span><br><span class="line"><span class="class">&#123;</span> </span><br><span class="line">   <span class="keyword">using</span> yes = <span class="keyword">char</span>;</span><br><span class="line">   <span class="keyword">using</span> no = <span class="keyword">int32_t</span>;</span><br><span class="line">   <span class="class"><span class="keyword">struct</span> <span class="title">Base</span> </span></span><br><span class="line"><span class="class">   &#123;</span> </span><br><span class="line">     <span class="function"><span class="keyword">void</span> <span class="title">no_destroy</span><span class="params">()</span></span>;</span><br><span class="line">   &#125;; </span><br><span class="line">   <span class="class"><span class="keyword">struct</span> <span class="title">Derive</span> :</span> <span class="keyword">public</span> T, <span class="keyword">public</span> Base &#123;&#125;; </span><br><span class="line">   <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C, C&gt;  <span class="class"><span class="keyword">class</span> <span class="title">Helper</span>&#123;</span>&#125;; </span><br><span class="line">   <span class="keyword">template</span> &lt;<span class="keyword">typename</span> U&gt; </span><br><span class="line">   <span class="function"><span class="keyword">static</span> no <span class="title">test</span><span class="params">(U*, Helper&lt;<span class="keyword">decltype</span>(&amp;Base::no_destroy), &amp;U::no_destroy&gt;* = <span class="literal">nullptr</span>)</span></span>; </span><br><span class="line">   <span class="function"><span class="keyword">static</span> yes <span class="title">test</span><span class="params">(...)</span></span>; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">   <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">bool</span> value = <span class="keyword">sizeof</span>(yes) == <span class="keyword">sizeof</span>(test(<span class="keyword">static_cast</span>&lt;Derive*&gt;(<span class="literal">nullptr</span>))); </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>在上述代码中，由于采用了反证的思想，逻辑比较绕，我采用了更有意义的类型别名 <code>yes</code> 和 <code>no</code> 来描述结果。其中 Helper 是用来辅助模板类型推断的辅助类模板，不管 U 类型或者 U 的基类子类型中声明了 <code>no_destroy</code>，都会产生二义性错误而导致 Helper 实例化失败，进而导致 <code>static yes test(...)</code> 实例化成功。以下是我对进阶版 <code>has_no_destroy</code> 的测试。<br>测试代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;SFINAE.h&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">no_destroy</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> :</span> A &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> &#123;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether A has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;A&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;  </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether B has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;B&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;   </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Whether C has no_destroy or not? &quot;</span> &lt;&lt; (has_no_destroy&lt;C&gt;::value ? <span class="string">&quot;yes&quot;</span> : <span class="string">&quot;no&quot;</span>) &lt;&lt; <span class="built_in">endl</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试结果：</p>
+<blockquote>
+<p>Whether A has no_destroy or not? yes<br>Whether B has no_destroy or not? yes<br>Whether C has no_destroy or not? no</p>
+</blockquote>
+<p>关于进阶版的 <code>has_no_destroy</code> 的实现代码我放在了 tmuduo/base/Singleton.h 当中，不过由于这个功能仅是兴趣，没有涉及到 tmuduo 本身的使用，我没有将测试代码添加到 tmuduo/test 当中，测试本身不复杂，有需要的可以自己实现。</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/" title="对 muduo 网络库单例模式的思考与实践(下)" target="_blank">http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -258,21 +390,17 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">SFINAE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Exception</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ABI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">泛型编程</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -285,17 +413,128 @@
 	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+    
 
     
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">对 muduo 网络库单例模式的思考与实践(上)</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SFINAE-%E2%80%94%E2%80%94-muduo-Singleton-%E4%B8%AD-has-no-destroy-%E7%9A%84%E5%90%AF%E7%A4%BA"><span class="toc-number">2.</span> <span class="toc-text">SFINAE —— muduo Singleton 中 has_no_destroy 的启示</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#has-no-destroy-%E7%9A%84%E8%BF%9B%E9%98%B6%E7%8E%A9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">has_no_destroy 的进阶玩法</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#has-no-destroy-%E4%B8%BA%E4%BD%95%E6%97%A0%E6%B3%95%E5%88%A4%E6%96%AD%E5%AD%90%E7%B1%BB%E4%B8%AD%E5%9F%BA%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="toc-number">3.0.1.</span> <span class="toc-text">has_no_destroy 为何无法判断子类中基类方法</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BB%8E%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E4%BE%8B%E5%AD%90%E8%AE%B2%E8%B5%B7-%E2%80%94%E2%80%94-%E4%BB%8E%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF%E4%B8%AD%E5%BE%97%E5%88%B0%E7%9A%84%E5%90%AF%E7%A4%BA"><span class="toc-number">3.0.2.</span> <span class="toc-text">从一个简单例子讲起 —— 从编译错误中得到的启示</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6-has-no-destroy-%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%8E%E6%B5%8B%E8%AF%95"><span class="toc-number">3.0.3.</span> <span class="toc-text">进阶 has_no_destroy 的实现与测试</span></a></li></ol></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+
+
+<div id="SOHUCS" sid="对-muduo-网络库单例模式的思考与实践-下" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -336,9 +575,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,
