@@ -5,7 +5,7 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://example.com">
+  <link rel="dns-prefetch" href="http://hacker-cube.com">
   <title>skynet 源码阅读笔记 —— lua 服务间是如何交互的 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -13,7 +13,7 @@
   <meta name="description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：   lua 服务的消息协议 lua 服务如何注册自己的消息及对应的回调函数 lua 服务是如何接受消息的？ lua 服务是如何发送消息的？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="skynet 源码阅读笔记 —— lua 服务间是如何交互的">
-<meta property="og:url" content="http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/index.html">
+<meta property="og:url" content="http://hacker-cube.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/index.html">
 <meta property="og:site_name" content="Hacker Cube">
 <meta property="og:description" content="文前导读skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：   lua 服务的消息协议 lua 服务如何注册自己的消息及对应的回调函数 lua 服务是如何接受消息的？ lua 服务是如何发送消息的？">
 <meta property="og:locale" content="en_US">
@@ -352,7 +352,7 @@
         </li>
         <li>
           <strong>本文链接：</strong>
-          <a href="http://example.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/" title="skynet 源码阅读笔记 —— lua 服务间是如何交互的" target="_blank">http://example.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/</a>
+          <a href="http://hacker-cube.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/" title="skynet 源码阅读笔记 —— lua 服务间是如何交互的" target="_blank">http://hacker-cube.com/2020/11/04/skynet-源码阅读笔记-——-lua-服务间是如何交互的/</a>
         </li>
         
         <li>
@@ -445,7 +445,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" alt="微信分享二维码"> -->
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://hacker-cube.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-lua-%E6%9C%8D%E5%8A%A1%E9%97%B4%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92%E7%9A%84/" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -537,7 +537,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 <a href="http://example.com/" target="_blank">Phoenix</a>
+    		&copy; 2020 <a href="http://hacker-cube.com/" target="_blank">Phoenix</a>
     	</div>
       	<div class="footer-right">
 			

@@ -5,7 +5,7 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://example.com">
+  <link rel="dns-prefetch" href="http://hacker-cube.com">
   <title>对 muduo 网络库单例模式的思考与实践(上) | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -13,7 +13,7 @@
   <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：   对 muduo 网络库下单例模式的思考 线程全局单例模式 Singleton 的实现 线程局部单例模式 ThreadLocalSingleton 的实现   tmuduo 中单例模式的实现   本文中所涉及的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对 muduo 网络库单例模式的思考与实践(上)">
-<meta property="og:url" content="http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/index.html">
+<meta property="og:url" content="http://hacker-cube.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/index.html">
 <meta property="og:site_name" content="Hacker Cube">
 <meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第七篇文章，主要涉及了对 muduo 网络库中单例模式的分析，以及 C++11 标准下一种更加简洁的单例模式实现，其中包含了以下内容：   对 muduo 网络库下单例模式的思考 线程全局单例模式 Singleton 的实现 线程局部单例模式 ThreadLocalSingleton 的实现   tmuduo 中单例模式的实现   本文中所涉及的">
 <meta property="og:locale" content="en_US">
@@ -276,7 +276,7 @@
 <li>tmuduo 中单例模式的实现</li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#105;&#116;&#64;&#x67;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;">&#103;&#105;&#116;&#64;&#x67;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#x69;&#116;&#64;&#x67;&#x69;&#x74;&#104;&#x75;&#98;&#46;&#x63;&#111;&#109;">&#x67;&#x69;&#116;&#64;&#x67;&#x69;&#x74;&#104;&#x75;&#98;&#46;&#x63;&#111;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
 <a id="more"></a>
 
 <h4 id="对-muduo-网络库下单例模式的思考"><a href="#对-muduo-网络库下单例模式的思考" class="headerlink" title="对 muduo 网络库下单例模式的思考"></a>对 muduo 网络库下单例模式的思考</h4><h6 id="Singleton-的实现"><a href="#Singleton-的实现" class="headerlink" title="Singleton 的实现"></a>Singleton 的实现</h6><p>在 muduo 网络库的源代码中，单例模式分为两种，一种是线程全局单例模式，另一种是线程局部单例模式，相关的代码分别存放在 base/Singleton.h 和 base/ThreadLocalSingleton.h 文件中。我们先看下 Singleton 的实现</p>
@@ -350,7 +350,7 @@
         </li>
         <li>
           <strong>本文链接：</strong>
-          <a href="http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/" title="对 muduo 网络库单例模式的思考与实践(上)" target="_blank">http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/</a>
+          <a href="http://hacker-cube.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/" title="对 muduo 网络库单例模式的思考与实践(上)" target="_blank">http://hacker-cube.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-上/</a>
         </li>
         
         <li>
@@ -447,7 +447,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" alt="微信分享二维码"> -->
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://hacker-cube.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8A/" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -539,7 +539,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 <a href="http://example.com/" target="_blank">Phoenix</a>
+    		&copy; 2020 <a href="http://hacker-cube.com/" target="_blank">Phoenix</a>
     	</div>
       	<div class="footer-right">
 			

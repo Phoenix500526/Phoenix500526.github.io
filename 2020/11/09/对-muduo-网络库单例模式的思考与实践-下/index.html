@@ -5,7 +5,7 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://example.com">
+  <link rel="dns-prefetch" href="http://hacker-cube.com">
   <title>对 muduo 网络库单例模式的思考与实践(下) | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -13,7 +13,7 @@
   <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 《C++模板进阶指南：SFINAE》，以便对 SFINAE 有基本的了解。本文主要包含以下内容   SFINAE —— mud">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对 muduo 网络库单例模式的思考与实践(下)">
-<meta property="og:url" content="http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/index.html">
+<meta property="og:url" content="http://hacker-cube.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/index.html">
 <meta property="og:site_name" content="Hacker Cube">
 <meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第八篇文章，是对前一篇文章的一个补充。另外需要注意，本文假定读者已经了解了 SFINAE 的基本含义，因此没有花费笔墨具体讨论什么是 SFINAE，如果读者不知道什么是 SFINAE ，建议先阅读知乎大佬：空明流转的文章 《C++模板进阶指南：SFINAE》，以便对 SFINAE 有基本的了解。本文主要包含以下内容   SFINAE —— mud">
 <meta property="og:locale" content="en_US">
@@ -277,7 +277,7 @@
 </li>
 </ul>
 </blockquote>
-<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#105;&#x74;&#64;&#103;&#105;&#116;&#104;&#x75;&#x62;&#46;&#x63;&#x6f;&#109;">&#103;&#105;&#x74;&#64;&#103;&#105;&#116;&#104;&#x75;&#x62;&#46;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>本文中所涉及的代码来源于我的个人项目：tmuduo。本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#105;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#117;&#x62;&#x2e;&#x63;&#x6f;&#109;">&#103;&#105;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#117;&#x62;&#x2e;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
 <a id="more"></a>
 
 <h4 id="SFINAE-——-muduo-Singleton-中-has-no-destroy-的启示"><a href="#SFINAE-——-muduo-Singleton-中-has-no-destroy-的启示" class="headerlink" title="SFINAE —— muduo Singleton 中 has_no_destroy 的启示"></a>SFINAE —— muduo Singleton 中 has_no_destroy 的启示</h4><p>再讲完了 tmuduo 中单例模式的实现后，我们来看看 muduo 中 Singleton 使用到的另一个技术 —— SFINAE(Substitution failure is not an error)。我们先来看看 Singleton 中 <code>has_no_destroy</code> 的实现：</p>
@@ -358,7 +358,7 @@
         </li>
         <li>
           <strong>本文链接：</strong>
-          <a href="http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/" title="对 muduo 网络库单例模式的思考与实践(下)" target="_blank">http://example.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/</a>
+          <a href="http://hacker-cube.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/" title="对 muduo 网络库单例模式的思考与实践(下)" target="_blank">http://hacker-cube.com/2020/11/09/对-muduo-网络库单例模式的思考与实践-下/</a>
         </li>
         
         <li>
@@ -455,7 +455,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" alt="微信分享二维码"> -->
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://hacker-cube.com/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -538,7 +538,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 <a href="http://example.com/" target="_blank">Phoenix</a>
+    		&copy; 2020 <a href="http://hacker-cube.com/" target="_blank">Phoenix</a>
     	</div>
       	<div class="footer-right">
 			
