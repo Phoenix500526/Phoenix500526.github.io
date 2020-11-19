@@ -6,20 +6,28 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://hacker-cube.com">
-  <title>Tag: Timer | Hacker Cube</title>
+  <title>对 muduo 网络库中的进程监控方法的思考与实践 | Hacker Cube</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="思想来得快，去得也快，偶尔会在这里停留">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hacker Cube">
-<meta property="og:url" content="http://hacker-cube.com/tags/Timer/index.html">
+  <meta name="description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第九篇文章，主要涉及了 muduo 网络库中是如何获取进程信息，又是以什么样的方式展现给客户的，其中包含了以下内容：   幕后功臣 ： FileUtil 的实现 一种基于 REST 风格的进程监控 一种基于 Observer Pattern 实现的进程监控 最后一点碎碎念   注：由于这两种进程监控的方法都涉及到了与其他组件的配合，例如 Http">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对 muduo 网络库中的进程监控方法的思考与实践">
+<meta property="og:url" content="http://hacker-cube.com/2020/11/14/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9B%91%E6%8E%A7%E6%96%B9%E6%B3%95%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="思想来得快，去得也快，偶尔会在这里停留">
+<meta property="og:description" content="文前导读本文是 muduo 网络库源码剖析系列文章的第九篇文章，主要涉及了 muduo 网络库中是如何获取进程信息，又是以什么样的方式展现给客户的，其中包含了以下内容：   幕后功臣 ： FileUtil 的实现 一种基于 REST 风格的进程监控 一种基于 Observer Pattern 实现的进程监控 最后一点碎碎念   注：由于这两种进程监控的方法都涉及到了与其他组件的配合，例如 Http">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/43866203-b1b7-49b1-b803-6dbe6a337944.png">
+<meta property="og:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/88b75116-5611-4d72-a8a4-b0abe7bcc837.png">
+<meta property="article:published_time" content="2020-11-14T14:11:23.000Z">
+<meta property="article:modified_time" content="2020-11-14T14:15:15.739Z">
 <meta property="article:author" content="Phoenix">
-<meta property="article:tag" content="C++, Go, Backend Programmer, Open Source">
+<meta property="article:tag" content="muduo网络库">
+<meta property="article:tag" content="进程监控">
+<meta property="article:tag" content="Observer Pattern">
+<meta property="article:tag" content="REST">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/43866203-b1b7-49b1-b803-6dbe6a337944.png">
   
     <link rel="alternative" href="/atom.xml" title="Hacker Cube" type="application/atom+xml">
   
@@ -208,84 +216,351 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-对-muduo-网络库中的进程监控方法的思考与实践" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-        <time datetime="2020-11-04T09:22:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-04</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-skynet%E4%B8%AD%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E6%9C%BA%E5%88%B6/" target="_blank">skynet 源码阅读笔记 —— skynet中的定时器机制</a>
   
+    <h1 class="article-title" itemprop="name">
+      对 muduo 网络库中的进程监控方法的思考与实践
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2020/11/14/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9B%91%E6%8E%A7%E6%96%B9%E6%B3%95%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" class="archive-article-date">
+        <time datetime="2020-11-14T14:11:23.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-11-14</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">3k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">13分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>本文是 muduo 网络库源码剖析系列文章的第九篇文章，主要涉及了 muduo 网络库中是如何获取进程信息，又是以什么样的方式展现给客户的，其中包含了以下内容：</p>
+<blockquote>
+<ul>
+<li>幕后功臣 ： FileUtil 的实现</li>
+<li>一种基于 REST 风格的进程监控</li>
+<li>一种基于 Observer Pattern 实现的进程监控</li>
+<li>最后一点碎碎念</li>
+</ul>
+</blockquote>
+<p>注：由于这两种进程监控的方法都涉及到了与其他组件的配合，例如 HttpServer、hub 等组件，碍于篇幅原因，本文中不会粘贴过多的代码，主要以图表的形式阐述。本文假定读者了解 Http 协议， Observer Pattern 以及 linux 下文件系统等相关知识。另外，为了避免代码与我之前文章代码不一致，此处涉及代码引用自 tmuduo。在进程相关方面， tmuduo 只做了及其微小的修改，与 muduo 源码差距很小。在设计上以 muduo 的思路为主，但代码还是来自于 tmuduo，望知悉。<br>本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#105;&#x74;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#x63;&#111;&#x6d;">&#x67;&#105;&#x74;&#64;&#103;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#x63;&#111;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<a id="more"></a>
+<h4 id="幕后功臣-：-FileUtil-的实现"><a href="#幕后功臣-：-FileUtil-的实现" class="headerlink" title="幕后功臣 ： FileUtil 的实现"></a>幕后功臣 ： FileUtil 的实现</h4><p>linux 的设计哲学之一便是“一切皆文件”，连进程信息也不例外。在 linux 系统下，想要获取进程信息不是一件难事，只需要读取 procfs 下相应的文件即可。在 tmuduo 中，用来读取文件信息的类有两个，一个是用来获取文件信息的 ReadSmallFile，另一个则是用来向文件中追加信息的 AppendFile，它们均被定义在 tmuduo/base/FileUtil.{h,cc} 文件中，而本文要关注的是 ReadSmallFile</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read small file &lt; 64KB</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReadSmallFile</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ReadSmallFile(StringArg filename): fd_(::open(filename.c_str(), O_RDONLY | O_CLOEXEC)), err_(<span class="number">0</span>) &#123;</span><br><span class="line">    buf_[<span class="number">0</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (fd_ &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      err_ = errno;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ~ReadSmallFile() &#123;</span><br><span class="line">    <span class="keyword">if</span> (fd_ &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">      ::close(fd_);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// return errno</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> String&gt;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">readToString</span><span class="params">(<span class="keyword">int</span> maxSize, String* content, <span class="keyword">int64_t</span>* fileSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="keyword">int64_t</span>* modifyTime, <span class="keyword">int64_t</span>* createTime)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Read at maxium kBufferSize into buf_</span></span><br><span class="line">  <span class="comment">// return errno</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">readToBuffer</span><span class="params">(<span class="keyword">int</span>* size)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">buffer</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> buf_; &#125;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> kBufferSize = <span class="number">64</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">int</span> fd_;</span><br><span class="line">  <span class="keyword">int</span> err_;</span><br><span class="line">  <span class="keyword">char</span> buf_[kBufferSize];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// read the file content, returns errno if error happens.</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> String&gt;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">readFile</span><span class="params">(StringArg filename, <span class="keyword">int</span> maxSize, String* content,</span></span></span><br><span class="line"><span class="function"><span class="params">             <span class="keyword">int64_t</span>* fileSize = <span class="literal">nullptr</span>, <span class="keyword">int64_t</span>* modifyTime = <span class="literal">nullptr</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">             <span class="keyword">int64_t</span>* createTime = <span class="literal">nullptr</span>)</span> </span>&#123;</span><br><span class="line">  <span class="function">ReadSmallFile <span class="title">file</span><span class="params">(filename)</span></span>;</span><br><span class="line">  <span class="keyword">return</span> file.readToString(maxSize, content, fileSize, modifyTime, createTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>muduo 中在 ProcessInfo.h 中提供了一系列的 API，提供给用户调用以获得进程信息，我们来看一个例子：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="built_in">std</span>::<span class="built_in">string</span> <span class="title">ProcessInfo::procStatus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> result;</span><br><span class="line">  FileUtil::readFile(<span class="string">&quot;/proc/self/status&quot;</span>, <span class="number">65536</span>, &amp;result);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上例可以看到，由于 linux 系统本身的支持，使得获取进程信息这件事情变得非常简单。然而，procfs 虽然便利，但是也有两个不足：</p>
+<ul>
+<li>只能暴露 system-wide 的数据，不能查看每个进程内部的数据</li>
+<li>procfs 是本地文件系统，必须登录到这台机器上才能查看，如果要管理多台机器，那么工作量就会大大增加。<br>对于第一个问题，我们可以通过让程序主动暴露出内部状态，而针对第二个问题，muduo 中提供了两种不同的做法，以下分别讨论。</li>
+</ul>
+<h4 id="基于-REST-风格的进程监控"><a href="#基于-REST-风格的进程监控" class="headerlink" title="基于 REST 风格的进程监控"></a>基于 REST 风格的进程监控</h4><p>针对 procfs 的第二个问题，muduo 中所提供的第一种是一种基于 REST 风格的进程监控。所谓 REST 风格，简而言之便是以 “<strong>URL 定位资源，用 HTTP 动词描述操作</strong>”。在分布式系统当中，使用 HTTP 获取进程信息有以下好处：</p>
+<blockquote>
+<ul>
+<li>使用 HTTP 协议，无需使用特定的客户端程序，只需要使用普通的 Web 浏览器就可以实现远程访问，紧急情况下，也可以使用 curl/wget 甚至是 telnet 来访问。</li>
+<li>实现方便，而且也很容易编写一些脚本来进行自动化的状态收集与分析</li>
+<li>可以通过 URL 区分资源，很容易实现有选择地查看信息，而不是把进程信息一股脑全 dump 出来</li>
+<li>HTTP 天生支持聚合，一个浏览器页面内可以内置多个 iframe，能一眼看清多个进程的状态。</li>
+<li>除了 GET 方法外，如果有必要，还可以实现 PUT/POST/DELETE 等方法，通过 HTTP 协议来控制并修改进程状态，让程序做到“能观能控”</li>
+</ul>
+</blockquote>
+<p>其中，Inspector 的实现框图大致如下：</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/43866203-b1b7-49b1-b803-6dbe6a337944.png"/>
+</div>
+<div class="image-caption" align="center">HttpInspector框图</div>
+
+
+<p>muduo 中相关代码位于 net/inspect/ 下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Inspector</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> ArgList = <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;;</span><br><span class="line">  <span class="keyword">using</span> Callback =</span><br><span class="line">      <span class="built_in">std</span>::function&lt;<span class="built_in">std</span>::<span class="built_in">string</span>(HttpRequest::Method, <span class="keyword">const</span> ArgList&amp; arg)&gt;;</span><br><span class="line">  Inspector(EventLoop* loop, <span class="keyword">const</span> InetAddress&amp; httpAddr, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name)</span><br><span class="line">    : server_(loop, httpAddr, <span class="string">&quot;Inspector:&quot;</span> + name),</span><br><span class="line">      processInspector_(<span class="keyword">new</span> ProcessInspector),</span><br><span class="line">      systemInspector_(<span class="keyword">new</span> SystemInspector) &#123;</span><br><span class="line">    assert(CurrentThread::isMainThread());</span><br><span class="line">    assert(g_globalInspector == <span class="number">0</span>);</span><br><span class="line">    <span class="comment">/* omitted some code */</span></span><br><span class="line">    server_.setHttpCallback(<span class="built_in">std</span>::bind(&amp;Inspector::onRequest, <span class="keyword">this</span>, _1, _2));</span><br><span class="line">    processInspector_-&gt;registerCommands(<span class="keyword">this</span>);</span><br><span class="line">    systemInspector_-&gt;registerCommands(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> HAVE_TCMALLOC</span></span><br><span class="line">    performanceInspector_.reset(<span class="keyword">new</span> PerformanceInspector);</span><br><span class="line">    performanceInspector_-&gt;registerCommands(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    loop-&gt;runAfter(<span class="number">0</span>, <span class="built_in">std</span>::bind(&amp;Inspector::start, <span class="keyword">this</span>));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// Add a Callback for handling the special uri : /module/command</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; <span class="keyword">module</span>, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; command,</span></span></span><br><span class="line"><span class="function"><span class="params">           <span class="keyword">const</span> Callback&amp; cb, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; help)</span></span>&#123;</span><br><span class="line">    <span class="function">UniqueLock <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">    modules_[<span class="keyword">module</span>][command] = cb;</span><br><span class="line">    helps_[<span class="keyword">module</span>][command] = help;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">using</span> CommandList = <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, Callback&gt;;</span><br><span class="line">  <span class="keyword">using</span> HelpList = <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, <span class="built_in">std</span>::<span class="built_in">string</span>&gt;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">onRequest</span><span class="params">(<span class="keyword">const</span> HttpRequest&amp; req, HttpResponse* resp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (req.path() == <span class="string">&quot;/&quot;</span>) &#123;</span><br><span class="line">      <span class="built_in">std</span>::<span class="built_in">string</span> result;</span><br><span class="line">      <span class="function">UniqueLock <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">      <span class="keyword">for</span> (<span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, HelpList&gt;::const_iterator helpListI = helps_.begin();</span><br><span class="line">          helpListI != helps_.end(); ++helpListI) &#123;</span><br><span class="line">        <span class="keyword">const</span> HelpList&amp; <span class="built_in">list</span> = helpListI-&gt;second;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; it : <span class="built_in">list</span>) &#123;</span><br><span class="line">          result += <span class="string">&quot;/&quot;</span>;</span><br><span class="line">          result += helpListI-&gt;first;</span><br><span class="line">          result += <span class="string">&quot;/&quot;</span>;</span><br><span class="line">          result += it.first;</span><br><span class="line">          <span class="keyword">size_t</span> len = helpListI-&gt;first.size() + it.first.size();</span><br><span class="line">          result += <span class="built_in">std</span>::<span class="built_in">string</span>(len &gt;= <span class="number">25</span> ? <span class="number">1</span> : <span class="number">25</span> - len, <span class="string">&#x27; &#x27;</span>);</span><br><span class="line">          result += it.second;</span><br><span class="line">          result += <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      resp-&gt;setStatusCode(HttpResponse::HttpStatusCode::k200Ok);</span><br><span class="line">      resp-&gt;setStatusMessage(<span class="string">&quot;OK&quot;</span>);</span><br><span class="line">      resp-&gt;setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">      resp-&gt;setBody(result);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; result = split(req.path());</span><br><span class="line">      <span class="keyword">bool</span> ok = <span class="literal">false</span>;</span><br><span class="line">      <span class="comment">/* omitted some code */</span></span><br><span class="line">      <span class="built_in">std</span>::<span class="built_in">string</span> <span class="keyword">module</span> = result[<span class="number">0</span>];</span><br><span class="line">      <span class="function">UniqueLock <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">      <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, CommandList&gt;::const_iterator commListI =</span><br><span class="line">          modules_.begin();</span><br><span class="line">      <span class="keyword">if</span> (commListI != modules_.end()) &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> command = result[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">const</span> CommandList&amp; commList = commListI-&gt;second;</span><br><span class="line">        CommandList::const_iterator it = commList.find(command);</span><br><span class="line">        <span class="keyword">if</span> (it != commList.end()) &#123;</span><br><span class="line">          <span class="function">ArgList <span class="title">args</span><span class="params">(result.begin() + <span class="number">2</span>, result.end())</span></span>;</span><br><span class="line">          <span class="keyword">if</span> (it-&gt;second) &#123;</span><br><span class="line">            resp-&gt;setStatusCode(HttpResponse::HttpStatusCode::k200Ok);</span><br><span class="line">            resp-&gt;setStatusMessage(<span class="string">&quot;OK&quot;</span>);</span><br><span class="line">            resp-&gt;setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">            <span class="keyword">const</span> Callback&amp; cb = it-&gt;second;</span><br><span class="line">            resp-&gt;setBody(cb(req.method(), args));</span><br><span class="line">            ok = <span class="literal">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">      <span class="keyword">if</span> (!ok) &#123;</span><br><span class="line">        resp-&gt;setStatusCode(HttpResponse::HttpStatusCode::k404NotFound);</span><br><span class="line">        resp-&gt;setStatusMessage(<span class="string">&quot;Not Found&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  HttpServer server_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;ProcessInspector&gt; processInspector_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;PerformanceInspector&gt; performanceInspector_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;SystemInspector&gt; systemInspector_;</span><br><span class="line">  Mutex mutex_;</span><br><span class="line">  std::map&lt;std::string, CommandList&gt; modules_ GUARDED_BY(mutex_);</span><br><span class="line">  std::map&lt;std::string, HelpList&gt; helps_ GUARDED_BY(mutex_);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>其中，结合大致的框图和相应的代码，可以看出 Inspector 的大致工作流程如下：</p>
+<blockquote>
+<ol>
+<li>将 onRequest 注册为 server_ 的 HttpCallback 函数</li>
+<li>在 Inspector 构造初期调用 processInspector_ 等对象的 registerCommands 函数，将其中的命令都注册到 Inspector 的 modules_ 和 helps_ 当中。</li>
+<li>启动事件循环，等待客户端发送相应的 http 请求，然后根据 url 指向相应 module 的命令，并将执行结果打包成为 http 响应报文，发送给用户。</li>
+</ol>
+</blockquote>
+<p>其中 <code>ProcessInspector</code>, <code>SystemInspector</code> 以及 <code>PerformanceInspector</code> 的实现是大体一致的，我们以 <code>ProcessInspector</code> 为例，看看其对应的实现如何：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProcessInspector</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">registerCommands</span><span class="params">(Inspector* ins)</span> </span>&#123;</span><br><span class="line">    ins-&gt;add(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;overview&quot;</span>, ProcessInspector::overview,</span><br><span class="line">           <span class="string">&quot;print basic overview&quot;</span>);</span><br><span class="line">    ins-&gt;add(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;pid&quot;</span>, ProcessInspector::pid, <span class="string">&quot;print pid&quot;</span>);</span><br><span class="line">    ins-&gt;add(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;status&quot;</span>, ProcessInspector::procStatus,</span><br><span class="line">           <span class="string">&quot;print /proc/self/status&quot;</span>);</span><br><span class="line">    ins-&gt;add(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;opened_files&quot;</span>, ProcessInspector::openedFiles,</span><br><span class="line">           <span class="string">&quot;count /proc/self/fd&quot;</span>);</span><br><span class="line">    ins-&gt;add(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;threads&quot;</span>, ProcessInspector::threads,</span><br><span class="line">           <span class="string">&quot;list /proc/self/task&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="built_in">std</span>::<span class="built_in">string</span> <span class="title">ProcessInspector::pid</span><span class="params">(HttpRequest::Method,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  <span class="keyword">const</span> Inspector::ArgList&amp;)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">32</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;%d&quot;</span>, ProcessInfo::pid());</span><br><span class="line">    <span class="keyword">return</span> buf;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/* omitted */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其中 <code>registerCommands</code> 会调用 <code>Inspector</code> 的 <code>add</code> 函数将对应的命令名称、描述信息以及对应对调函数注册到 <code>Inspector</code> 中。</p>
+<h4 id="基于-Observer-Pattern-实现的进程监控"><a href="#基于-Observer-Pattern-实现的进程监控" class="headerlink" title="基于 Observer Pattern 实现的进程监控"></a>基于 Observer Pattern 实现的进程监控</h4><p>muduo 还提供了另外一种基于 Observer Pattern 的实现。这种方式有点像 redis 的集群机制，让不同的节点将自身的相关信息发布到对应的 topic 上，有需要的节点只需要订阅相关的 topic 就可以获得相应节点的进程信息。</p>
+<p>在基于 Observer Pattern 模式实现的进程监控方式中，主要涉及了四个不同的概念，分别是话题<code>Topic</code>, 集线器<code>Hub</code>，发布者<code>Pub</code>以及订阅者<code>Sub</code>,它们之间的关系如下：</p>
+<div style="text-align:center">
+ <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/88b75116-5611-4d72-a8a4-b0abe7bcc837.png"/>
+</div>
+<div class="image-caption" align="center">基于 Observer Pattern 模式实现的进程监控</div>
+
+<p>muduo 当中的 Hub 示例采用了 “\r\n” 分界的文本协议，这样做可以简单地使用 telnet 测试 Hub，使用时采用命令的方式，如：</p>
+<blockquote>
+<ul>
+<li>订阅 topic: sub &lt;topic&gt;\r\n</li>
+<li>退订 topic: unsub &lt;topic&gt;\r\n</li>
+<li>发布 content: pub &lt;topic&gt;\r\n&lt;content&gt;\r\n</li>
+</ul>
+</blockquote>
+<p>由于代码篇幅过长且 sub 和 pub 都可以用 telnet 来代替，因此这里只放了 hub 以及 Topic 的相关实现。，有需要的可以自行将代码下下来研究。先来看看 Topic 的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Topic</span> :</span> <span class="keyword">public</span> tmuduo::copyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Topic(<span class="keyword">const</span> <span class="built_in">string</span>&amp; topic) : topic_(topic) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">const</span> TcpConnectionPtr&amp; conn)</span> </span>&#123;</span><br><span class="line">    audiences_.insert(conn);</span><br><span class="line">    <span class="keyword">if</span> (lastPubTime_.valid()) &#123;</span><br><span class="line">      conn-&gt;send(makeMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/* omitted */</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">publish</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; content, Timestamp time)</span> </span>&#123;</span><br><span class="line">    content_ = content;</span><br><span class="line">    lastPubTime_ = time;</span><br><span class="line">    <span class="built_in">string</span> message = makeMessage();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = audiences_.begin(); it != audiences_.end(); ++it) &#123;</span><br><span class="line">      (*it)-&gt;send(message);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="built_in">string</span> <span class="title">makeMessage</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="string">&quot;pub &quot;</span> + topic_ + <span class="string">&quot;\r\n&quot;</span> + content_ + <span class="string">&quot;\r\n&quot;</span>; &#125;</span><br><span class="line">  <span class="built_in">string</span> topic_;</span><br><span class="line">  <span class="built_in">string</span> content_;</span><br><span class="line">  Timestamp lastPubTime_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">set</span>&lt;TcpConnectionPtr&gt; audiences_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>对于 Topic 而言，关键的接口为 <code>add</code> 和 <code>publish</code>，其中 <code>add</code> 会将订阅了该 topic 的连接保存到 <code>audiences_</code> 当中，而 <code>publish</code> 则负责向 <code>audiences_</code> 中的连接发送发布消息。从框图中也可以看到在 hub 当中保存了一个 <code>topics_</code> 的 map, 用于保存所有的 <code>topic</code>,其实现相关部分如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PubSubServer</span> :</span> tmuduo::noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  PubSubServer(EventLoop* loop, <span class="keyword">const</span> InetAddress&amp; serverAddr)</span><br><span class="line">      : loop_(loop), server_(loop, serverAddr, <span class="string">&quot;PubSubServer&quot;</span>) &#123;</span><br><span class="line">    server_.setConnectionCallback(</span><br><span class="line">        <span class="built_in">std</span>::bind(&amp;PubSubServer::onConnection, <span class="keyword">this</span>, _1));</span><br><span class="line">    server_.setMessageCallback(</span><br><span class="line">        <span class="built_in">std</span>::bind(&amp;PubSubServer::onMessage, <span class="keyword">this</span>, _1, _2, _3));</span><br><span class="line">    loop_-&gt;runEvery(<span class="number">1.0</span>, <span class="built_in">std</span>::bind(&amp;PubSubServer::timePublish, <span class="keyword">this</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/* omitted */</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">onMessage</span><span class="params">(<span class="keyword">const</span> TcpConnectionPtr&amp; conn, Buffer* buf,</span></span></span><br><span class="line"><span class="function"><span class="params">                 Timestamp receiveTime)</span> </span>&#123;</span><br><span class="line">    ParseResult result = ParseResult::kSuccess;</span><br><span class="line">    <span class="keyword">while</span> (result == ParseResult::kSuccess) &#123;</span><br><span class="line">      <span class="built_in">string</span> cmd;</span><br><span class="line">      <span class="built_in">string</span> topic;</span><br><span class="line">      <span class="built_in">string</span> content;</span><br><span class="line">      result = parseMessage(buf, &amp;cmd, &amp;topic, &amp;content);</span><br><span class="line">      <span class="keyword">if</span> (result == ParseResult::kSuccess) &#123;</span><br><span class="line">        <span class="keyword">if</span> (cmd == <span class="string">&quot;pub&quot;</span>) &#123;</span><br><span class="line">          doPublish(conn-&gt;name(), topic, content, receiveTime);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cmd == <span class="string">&quot;sub&quot;</span>) &#123;</span><br><span class="line">          LOG_INFO &lt;&lt; conn-&gt;name() &lt;&lt; <span class="string">&quot; subscribes &quot;</span> &lt;&lt; topic;</span><br><span class="line">          doSubscribe(conn, topic);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cmd == <span class="string">&quot;unsub&quot;</span>) &#123;</span><br><span class="line">          doUnsubscribe(conn, topic);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          conn-&gt;shutdown();</span><br><span class="line">          result = ParseResult::kError;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (result == ParseResult::kError) &#123;</span><br><span class="line">        conn-&gt;shutdown();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">timePublish</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Timestamp now = Timestamp::now();</span><br><span class="line">    doPublish(<span class="string">&quot;internal&quot;</span>, <span class="string">&quot;utc_time&quot;</span>, now.toFormattedString(), now);</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  EventLoop* loop_;</span><br><span class="line">  TcpServer server_;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">map</span>&lt;<span class="built_in">string</span>, Topic&gt; topics_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在 hub 的实现上，比较关键的两个函数是 <code>onMessage</code> 和 <code>timePublish</code>，当其他节点向 hub 发送消息时，会触发 <code>onMessage</code> 函数的执行，该函数会根据消息的内容执行相应的函数，而 <code>timePublish</code> 则由定时事件进行触发。这里 <code>timePublish</code> 保留了原有的实现，如果需要发布进程信息可以直接在此进行修改。</p>
+<h4 id="最后一点想法"><a href="#最后一点想法" class="headerlink" title="最后一点想法"></a>最后一点想法</h4><p>到了这里，基于 Observer Pattern 模式实现的进程监控也大体说完。这两种方式实现不难，只需要了解其中大体流程及 muduo 的相关用法，也可以很快地写出来。在基于 Observer Pattern 的进程监控方式中，一个比较大的问题是 hub 很容易成为 single point of failure. 关于这点，也许在 Redis 的源码中会有解决的方案。而这也是我写这篇文章的目的之一：如果未来有时间，我希望在解决这个问题后，可以直接从这篇文章中接续下去，而不必重新开始。<br>这篇文章其实并不好写，原因是由于 linux 的 procfs 的实现使得获取进程信息非常简单，如果单独写篇文章比较划不来。可如果将这两种模式总结进来，又很容易使得文章变得非常冗长。</p>
+
+    
+
+    
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/alipay.png">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/img/wechatpay.png">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Phoenix
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="http://hacker-cube.com/2020/11/14/对-muduo-网络库中的进程监控方法的思考与实践/" title="对 muduo 网络库中的进程监控方法的思考与实践" target="_blank">http://hacker-cube.com/2020/11/14/对-muduo-网络库中的进程监控方法的思考与实践/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">skynet框架</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">muduo网络库</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C语言</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">进程监控</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Timer</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Observer Pattern</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">REST</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/skynet源码剖析//" class="article-tag-list-link color1">skynet源码剖析</a>
+        			<a href="/categories/muduo源码剖析//" class="article-tag-list-link color5">muduo源码剖析</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+    
 
     
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=http://hacker-cube.com/2020/11/14/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9B%91%E6%8E%A7%E6%96%B9%E6%B3%95%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/09/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5-%E4%B8%8B/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">对 muduo 网络库单例模式的思考与实践(下)</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E5%89%8D%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">文前导读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%95%E5%90%8E%E5%8A%9F%E8%87%A3-%EF%BC%9A-FileUtil-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">幕后功臣 ： FileUtil 的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-REST-%E9%A3%8E%E6%A0%BC%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9B%91%E6%8E%A7"><span class="toc-number">3.</span> <span class="toc-text">基于 REST 风格的进程监控</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-Observer-Pattern-%E5%AE%9E%E7%8E%B0%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9B%91%E6%8E%A7"><span class="toc-number">4.</span> <span class="toc-text">基于 Observer Pattern 实现的进程监控</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E7%82%B9%E6%83%B3%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">最后一点想法</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+
+
+<div id="SOHUCS" sid="对-muduo-网络库中的进程监控方法的思考与实践" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyv8BdI7z",
+        conf: "8b7a3e6eba4d6f0f3e59ab236594167b"
+    });
+</script>
+</script>
+
+
+
+
+
+
+
+
 
 
           </div>
@@ -326,9 +601,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: true,
 		toc_hide_index: true,
