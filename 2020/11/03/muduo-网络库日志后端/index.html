@@ -11,12 +11,12 @@
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#x40;&amp;#103;&amp;#105;&amp;#116;&amp;#104;&amp;#x75;&amp;#98;&amp;#46;&amp;#x63;&amp;">
+  <meta name="description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#x74;&amp;#64;&amp;#103;&amp;#x69;&amp;#116;&amp;#104;&amp;#117;&amp;#x62;&amp;#46;&amp;#99;&amp;#">
 <meta property="og:type" content="article">
 <meta property="og:title" content="muduo 网络库日志后端">
 <meta property="og:url" content="http://hacker-cube.com/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%90%8E%E7%AB%AF/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#x40;&amp;#103;&amp;#105;&amp;#116;&amp;#104;&amp;#x75;&amp;#98;&amp;#46;&amp;#x63;&amp;">
+<meta property="og:description" content="文前导读muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#x69;&amp;#x74;&amp;#64;&amp;#103;&amp;#x69;&amp;#116;&amp;#104;&amp;#117;&amp;#x62;&amp;#46;&amp;#99;&amp;#">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-11-03T14:47:50.000Z">
 <meta property="article:modified_time" content="2020-11-05T08:15:46.861Z">
@@ -73,8 +73,6 @@
 		<hgroup>
 			<h1 class="header-author"><a href="/">Phoenix</a></h1>
 		</hgroup>
-		
-		<p class="header-subtitle">骇客立方</p>
 		
 
 		<nav class="header-menu">
@@ -154,8 +152,6 @@
 			<hgroup>
 			  <h1 class="header-author js-header-author">Phoenix</h1>
 			</hgroup>
-			
-			<p class="header-subtitle"><i class="icon icon-quo-left"></i>骇客立方<i class="icon icon-quo-right"></i></p>
 			
 			
 			
@@ -271,7 +267,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#105;&#116;&#x40;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#x63;&#x6f;&#109;">&#103;&#105;&#116;&#x40;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第二篇文章，主要着眼于 muduo 网络库中的日志系统后端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#x69;&#x74;&#64;&#103;&#x69;&#116;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#x6d;">&#103;&#x69;&#x74;&#64;&#103;&#x69;&#116;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
 <a id="more"></a>
 <h4 id="AsyncLogging-h，cc-的实现"><a href="#AsyncLogging-h，cc-的实现" class="headerlink" title="AsyncLogging.{h，cc} 的实现"></a>AsyncLogging.{h，cc} 的实现</h4><p>AsyncLogging 是整个日志系统的后端线程，其中 <code>append()</code> 函数作为前端 Logger 类的输出回调函数。当用户使用如<code>LOG_DEBUG &lt;&lt; &quot;Hello world&quot;</code>语句时，会将日志信息封装为 Buffer</p>
 <!-- more -->
@@ -770,6 +766,10 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">思维与认知</a>
               </li>
              
@@ -783,10 +783,6 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">读书笔记</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
               </li>
              
               <li class="article-tag-list-item">
