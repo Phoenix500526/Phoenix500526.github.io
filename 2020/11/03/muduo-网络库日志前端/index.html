@@ -12,12 +12,12 @@
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="文前导读muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#64;&amp;#103;&amp;#105;&amp;#x74;&amp;#104;&amp;#x75;&amp;#x62;&amp;#46;&amp;#x63;&amp;">
+  <meta name="description" content="文前导读muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#x40;&amp;#103;&amp;#105;&amp;#x74;&amp;#x68;&amp;#x75;&amp;#98;&amp;#x2e;&amp;#x63;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="muduo 网络库日志前端">
 <meta property="og:url" content="http://hacker-cube.com/2020/11/03/muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E6%97%A5%E5%BF%97%E5%89%8D%E7%AB%AF/index.html">
 <meta property="og:site_name" content="Hacker Cube">
-<meta property="og:description" content="文前导读muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#64;&amp;#103;&amp;#105;&amp;#x74;&amp;#104;&amp;#x75;&amp;#x62;&amp;#46;&amp;#x63;&amp;">
+<meta property="og:description" content="文前导读muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。仓库地址为：&amp;#103;&amp;#105;&amp;#116;&amp;#x40;&amp;#103;&amp;#105;&amp;#x74;&amp;#x68;&amp;#x75;&amp;#98;&amp;#x2e;&amp;#x63;">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-11-03T12:52:36.000Z">
 <meta property="article:modified_time" content="2020-11-05T08:16:10.123Z">
@@ -289,7 +289,7 @@
   
   <div class="article-entry" itemprop="articleBody">
     
-    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#105;&#116;&#64;&#103;&#105;&#x74;&#104;&#x75;&#x62;&#46;&#x63;&#x6f;&#x6d;">&#103;&#105;&#116;&#64;&#103;&#105;&#x74;&#104;&#x75;&#x62;&#46;&#x63;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
+    <h4 id="文前导读"><a href="#文前导读" class="headerlink" title="文前导读"></a>文前导读</h4><p>muduo 网络库源码剖析系列的第一篇文章，主要着眼于 muduo 网络库中的日志系统前端的设计与实现<br>为了保证自己对 muduo 的代码有较为深入的理解，我自己写了一个 tmuduo 网络库，用来验证自己对 muduo 源码上的一些想法。<br>仓库地址为：<a href="mailto:&#103;&#105;&#116;&#x40;&#103;&#105;&#x74;&#x68;&#x75;&#98;&#x2e;&#x63;&#x6f;&#109;">&#103;&#105;&#116;&#x40;&#103;&#105;&#x74;&#x68;&#x75;&#98;&#x2e;&#x63;&#x6f;&#109;</a>:Phoenix500526/Tmuduo.git，欢迎 fork、start 以及 follow，一起学习。</p>
 <a id="more"></a>
 
 <h4 id="muduo-网络库日志模块简介"><a href="#muduo-网络库日志模块简介" class="headerlink" title="muduo 网络库日志模块简介"></a>muduo 网络库日志模块简介</h4><p>muduo 网络库中提供了一个高效的异步日志模块，其本质是一个多生产者单消费者的模型，可以分为前端(frontend) 和后端(backend)。</p>
@@ -784,11 +784,27 @@
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">lvalue</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">xvalue</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">prvalue</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">mutex</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">condition_variable</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Singleton</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -820,10 +836,6 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Singleton</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">线程池</a>
               </li>
              
@@ -848,11 +860,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
+                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">睡眠</a>
+                <a href="javascript:void(0)" class="js-tag color1">意志力科学</a>
               </li>
             
             <div class="clearfix"></div>
