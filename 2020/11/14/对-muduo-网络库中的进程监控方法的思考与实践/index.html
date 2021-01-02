@@ -302,7 +302,7 @@
 <li>最后一点碎碎念</li>
 </ul>
 </blockquote>
-<p>注：由于这两种进程监控的方法都涉及到了与其他组件的配合，例如 HttpServer、hub 等组件，碍于篇幅原因，本文中不会粘贴过多的代码，主要以图表的形式阐述。本文假定读者了解 Http 协议， Observer Pattern 以及 linux 下文件系统等相关知识。另外，为了避免代码与我之前文章代码不一致，此处涉及代码引用自 tmuduo。在进程相关方面， tmuduo 只做了及其微小的修改，与 muduo 源码差距很小。在设计上以 muduo 的思路为主，但代码还是来自于 tmuduo，望知悉。<br>本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#103;&#105;&#116;&#x40;&#103;&#x69;&#116;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;">&#103;&#105;&#116;&#x40;&#103;&#x69;&#116;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
+<p>注：由于这两种进程监控的方法都涉及到了与其他组件的配合，例如 HttpServer、hub 等组件，碍于篇幅原因，本文中不会粘贴过多的代码，主要以图表的形式阐述。本文假定读者了解 Http 协议， Observer Pattern 以及 linux 下文件系统等相关知识。另外，为了避免代码与我之前文章代码不一致，此处涉及代码引用自 tmuduo。在进程相关方面， tmuduo 只做了及其微小的修改，与 muduo 源码差距很小。在设计上以 muduo 的思路为主，但代码还是来自于 tmuduo，望知悉。<br>本着“纸上学来终觉浅，绝知此事要躬行”的想法，我将 muduo 网络库重新实现了一遍，并在上面验证了自己的不少猜想。项目的仓库地址为 <a href="mailto:&#x67;&#105;&#x74;&#64;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#x63;&#111;&#109;">&#x67;&#105;&#x74;&#64;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#x63;&#111;&#109;</a>:Phoenix500526/Tmuduo.git, 欢迎各位fork + star，一起加入学习</p>
 <a id="more"></a>
 <h4 id="幕后功臣-：-FileUtil-的实现"><a href="#幕后功臣-：-FileUtil-的实现" class="headerlink" title="幕后功臣 ： FileUtil 的实现"></a>幕后功臣 ： FileUtil 的实现</h4><p>linux 的设计哲学之一便是“一切皆文件”，连进程信息也不例外。在 linux 系统下，想要获取进程信息不是一件难事，只需要读取 procfs 下相应的文件即可。在 tmuduo 中，用来读取文件信息的类有两个，一个是用来获取文件信息的 ReadSmallFile，另一个则是用来向文件中追加信息的 AppendFile，它们均被定义在 tmuduo/base/FileUtil.{h,cc} 文件中，而本文要关注的是 ReadSmallFile</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read small file &lt; 64KB</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReadSmallFile</span> :</span> noncopyable &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ReadSmallFile(StringArg filename): fd_(::open(filename.c_str(), O_RDONLY | O_CLOEXEC)), err_(<span class="number">0</span>) &#123;</span><br><span class="line">    buf_[<span class="number">0</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (fd_ &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      err_ = errno;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ~ReadSmallFile() &#123;</span><br><span class="line">    <span class="keyword">if</span> (fd_ &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">      ::close(fd_);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// return errno</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> String&gt;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">readToString</span><span class="params">(<span class="keyword">int</span> maxSize, String* content, <span class="keyword">int64_t</span>* fileSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="keyword">int64_t</span>* modifyTime, <span class="keyword">int64_t</span>* createTime)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Read at maxium kBufferSize into buf_</span></span><br><span class="line">  <span class="comment">// return errno</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">readToBuffer</span><span class="params">(<span class="keyword">int</span>* size)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">buffer</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> buf_; &#125;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> kBufferSize = <span class="number">64</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">int</span> fd_;</span><br><span class="line">  <span class="keyword">int</span> err_;</span><br><span class="line">  <span class="keyword">char</span> buf_[kBufferSize];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// read the file content, returns errno if error happens.</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> String&gt;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">readFile</span><span class="params">(StringArg filename, <span class="keyword">int</span> maxSize, String* content,</span></span></span><br><span class="line"><span class="function"><span class="params">             <span class="keyword">int64_t</span>* fileSize = <span class="literal">nullptr</span>, <span class="keyword">int64_t</span>* modifyTime = <span class="literal">nullptr</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">             <span class="keyword">int64_t</span>* createTime = <span class="literal">nullptr</span>)</span> </span>&#123;</span><br><span class="line">  <span class="function">ReadSmallFile <span class="title">file</span><span class="params">(filename)</span></span>;</span><br><span class="line">  <span class="keyword">return</span> file.readToString(maxSize, content, fileSize, modifyTime, createTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -603,7 +603,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 <a href="http://hacker-cube.com/" target="_blank">Phoenix</a>
+    		&copy; 2020-2021 <a href="http://hacker-cube.com/" target="_blank">Phoenix</a>
     	</div>
       	<div class="footer-right">
 			
@@ -750,11 +750,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">C语言</a>
+                <a href="javascript:void(0)" class="js-tag color4">动态库</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">动态库</a>
+                <a href="javascript:void(0)" class="js-tag color4">C语言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -802,15 +802,15 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Singleton</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">SFINAE</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">泛型编程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Singleton</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -823,6 +823,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">线程池</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++ 并发编程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">C++ 内存模型</a>
               </li>
              
               <li class="article-tag-list-item">
