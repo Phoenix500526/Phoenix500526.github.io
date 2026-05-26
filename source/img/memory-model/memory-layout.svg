@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <style>
+    .box        { fill:#fff; stroke:#334155; stroke-width:1.2; }
+    .pad        { fill:#f1f5f9; stroke:#cbd5e1; stroke-width:1; stroke-dasharray:3 3; }
+    .ml-tag     { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+    .bitfield   { fill:#fef3c7; stroke:#b45309; stroke-width:1.2; }
+    .zero-width { fill:#fee2e2; stroke:#b91c1c; stroke-width:1.2; stroke-dasharray:4 3; }
+    .title      { font-weight:600; fill:#1f2937; }
+    .mono       { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; }
+    .ml-text    { font-weight:700; fill:#1e3a8a; font-size:12px; }
+    .dim        { fill:#475569; font-size:11px; font-style:italic; }
+    .bitfield-sep { stroke:#b45309; }
+    .zero-tag   { fill:#b91c1c; }
+
+    @media (prefers-color-scheme: dark) {
+      .box        { fill:#0f172a; stroke:#94a3b8; }
+      .pad        { fill:#1e293b; stroke:#475569; }
+      .ml-tag     { fill:#1e3a8a; stroke:#60a5fa; }
+      .bitfield   { fill:#78350f; stroke:#f59e0b; }
+      .zero-width { fill:#7f1d1d; stroke:#f87171; }
+      .title      { fill:#f1f5f9; }
+      .mono       { fill:#f1f5f9; }
+      .ml-text    { fill:#93c5fd; }
+      .dim        { fill:#cbd5e1; }
+      .bitfield-sep { stroke:#f59e0b; }
+      .zero-tag   { fill:#fca5a5; }
+    }
+  </style>
+
+  <!-- struct header -->
+  <text class="title mono" x="120" y="30">struct my_data {</text>
+
+  <!-- ML 1: var_1 (int) -->
+  <rect class="box"    x="120" y="50" width="280" height="40"/>
+  <text class="mono"   x="135" y="75">int var_1;</text>
+  <rect class="ml-tag" x="420" y="55" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="75" text-anchor="middle">Memory Location 1</text>
+
+  <!-- padding -->
+  <rect class="pad"  x="120" y="92" width="280" height="22"/>
+  <text class="dim"  x="260" y="107" text-anchor="middle">padding · align(double)</text>
+
+  <!-- ML 2: var_2 (double) -->
+  <rect class="box"    x="120" y="116" width="280" height="50"/>
+  <text class="mono"   x="135" y="146">double var_2;</text>
+  <rect class="ml-tag" x="420" y="124" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="144" text-anchor="middle">Memory Location 2</text>
+
+  <!-- ML 3: bitfield run -->
+  <rect class="bitfield" x="120" y="174" width="280" height="70"/>
+  <line x1="120" y1="210" x2="400" y2="210" class="bitfield-sep" stroke-dasharray="3 3"/>
+  <text class="mono" x="135" y="199">unsigned var_3 : 10;</text>
+  <text class="mono" x="135" y="232">int      var_4 : 25;</text>
+  <rect class="ml-tag" x="420" y="194" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="214" text-anchor="middle">Memory Location 3</text>
+  <text class="dim"     x="490" y="234" text-anchor="middle">adjacent bit-fields share one ML</text>
+
+  <!-- zero-width separator -->
+  <rect class="zero-width" x="120" y="252" width="280" height="22"/>
+  <text class="mono zero-tag" x="135" y="268">int : 0;</text>
+  <text class="dim"        x="380" y="268" text-anchor="end">zero-width — break the bit-field run</text>
+
+  <!-- ML 4: var_6 (int) -->
+  <rect class="box"    x="120" y="282" width="280" height="40"/>
+  <text class="mono"   x="135" y="307">int var_6;</text>
+  <rect class="ml-tag" x="420" y="287" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="307" text-anchor="middle">Memory Location 4</text>
+
+  <!-- padding -->
+  <rect class="pad"  x="120" y="324" width="280" height="22"/>
+  <text class="dim"  x="260" y="339" text-anchor="middle">padding · align(pointer)</text>
+
+  <!-- ML 5: var_7 (char*) -->
+  <rect class="box"    x="120" y="348" width="280" height="50"/>
+  <text class="mono"   x="135" y="378">char* var_7;</text>
+  <rect class="ml-tag" x="420" y="356" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="376" text-anchor="middle">Memory Location 5</text>
+
+  <!-- ML 6: var_8 (std::string, scalar object) -->
+  <rect class="box"    x="120" y="406" width="280" height="60"/>
+  <text class="mono"   x="135" y="438">std::string var_8;</text>
+  <text class="dim"    x="135" y="456">(non-trivial type — its own ML)</text>
+  <rect class="ml-tag" x="420" y="421" width="140" height="30" rx="4"/>
+  <text class="ml-text" x="490" y="441" text-anchor="middle">Memory Location 6</text>
+
+  <!-- closing brace -->
+  <text class="title mono" x="120" y="495">};</text>
+
+  <!-- footnote -->
+  <text class="dim" x="120" y="530">Every memory location is either a scalar object or a run of adjacent bit-fields.</text>
+</svg>

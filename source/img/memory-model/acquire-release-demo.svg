@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="sync-head"/>
+    </marker>
+    <style>
+      .box        { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .header     { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+      .release    { fill:#fee2e2; stroke:#b91c1c; stroke-width:1.6; }
+      .acquire    { fill:#dcfce7; stroke:#16a34a; stroke-width:1.6; }
+      .title      { font-weight:700; fill:#1f2937; font-size:14px; }
+      .mono       { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:13px; }
+      .dim        { fill:#475569; font-size:11px; font-style:italic; }
+      .sync-line  { stroke:#7c3aed; stroke-width:2; stroke-dasharray:6 4; fill:none; }
+      .sync-head  { fill:#7c3aed; }
+      .sync-lbl   { fill:#7c3aed; font-weight:700; font-size:12px; }
+      .ok         { fill:#16a34a; font-weight:700; font-size:12px; }
+
+      @media (prefers-color-scheme: dark) {
+        .box       { fill:#0f172a; stroke:#94a3b8; }
+        .header    { fill:#1e293b; stroke:#94a3b8; }
+        .release   { fill:#7f1d1d; stroke:#f87171; }
+        .acquire   { fill:#14532d; stroke:#4ade80; }
+        .title     { fill:#f1f5f9; }
+        .mono      { fill:#f1f5f9; }
+        .dim       { fill:#cbd5e1; }
+        .sync-line { stroke:#c4b5fd; }
+        .sync-head { fill:#c4b5fd; }
+        .sync-lbl  { fill:#c4b5fd; }
+        .ok        { fill:#4ade80; }
+      }
+    </style>
+  </defs>
+
+  <!-- Thread A (writer) -->
+  <g transform="translate(40,30)">
+    <rect class="header" x="0" y="0" width="300" height="32" rx="4"/>
+    <text class="title" x="150" y="22" text-anchor="middle">Thread A (writer)</text>
+    <rect class="box" x="0" y="32" width="300" height="280"/>
+    <text class="mono" x="20" y="60">x = 1;</text>
+    <text class="dim"  x="20" y="76">plain write</text>
+    <text class="mono" x="20" y="106">y = 2;</text>
+    <text class="dim"  x="20" y="122">plain write</text>
+    <text class="mono" x="20" y="152">other_atomic.store(...);</text>
+    <text class="dim"  x="20" y="168">relaxed atomic write</text>
+
+    <rect class="release" x="14" y="200" width="272" height="44" rx="4"/>
+    <text class="mono" x="28" y="220">var.store(value,</text>
+    <text class="mono" x="28" y="238">  std::memory_order_release);</text>
+
+    <text class="dim" x="20" y="278">↑ all writes above are</text>
+    <text class="dim" x="20" y="293">  pushed out before this store</text>
+  </g>
+
+  <!-- Thread B (reader) -->
+  <g transform="translate(460,30)">
+    <rect class="header" x="0" y="0" width="300" height="32" rx="4"/>
+    <text class="title" x="150" y="22" text-anchor="middle">Thread B (reader)</text>
+    <rect class="box" x="0" y="32" width="300" height="280"/>
+
+    <rect class="acquire" x="14" y="48" width="272" height="44" rx="4"/>
+    <text class="mono" x="28" y="68">while (!var.load(</text>
+    <text class="mono" x="28" y="86">    std::memory_order_acquire));</text>
+
+    <text class="mono" x="20" y="130">read x;</text>
+    <text class="ok"   x="180" y="130">→ sees 1 ✓</text>
+    <text class="mono" x="20" y="160">read y;</text>
+    <text class="ok"   x="180" y="160">→ sees 2 ✓</text>
+    <text class="mono" x="20" y="190">read other_atomic;</text>
+    <text class="ok"   x="180" y="190">→ sees latest ✓</text>
+
+    <text class="dim" x="20" y="248">all of Thread A's writes</text>
+    <text class="dim" x="20" y="263">before the release</text>
+    <text class="dim" x="20" y="278">are now visible here</text>
+  </g>
+
+  <!-- synchronizes-with arrow between release and acquire -->
+  <path class="sync-line" d="M312,222 C 380,222 380,70 458,70" marker-end="url(#ar2)"/>
+  <text class="sync-lbl" x="400" y="148" text-anchor="middle">synchronizes-with</text>
+
+  <!-- footer -->
+  <text class="dim" x="40" y="370">Any plain or atomic write sequenced-before the release in A is visible to any read sequenced-after the acquire in B.</text>
+</svg>

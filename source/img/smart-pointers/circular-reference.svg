@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .box        { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .header     { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+      .title      { font-weight:600; fill:#1f2937; }
+      .mono       { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; }
+      .dim        { fill:#475569; font-size:11px; }
+      .leak       { fill:#b91c1c; font-weight:600; }
+      .arrow-lbl  { fill:#b91c1c; font-weight:600; font-size:14px; }
+      .edge       { stroke:#b91c1c; stroke-width:1.6; fill:none; }
+      .arrow-head { fill:#b91c1c; }
+
+      @media (prefers-color-scheme: dark) {
+        .box        { fill:#0f172a; stroke:#94a3b8; }
+        .header     { fill:#1e293b; stroke:#94a3b8; }
+        .title      { fill:#f1f5f9; }
+        .mono       { fill:#f1f5f9; }
+        .dim        { fill:#cbd5e1; }
+        .leak       { fill:#f87171; }
+        .arrow-lbl  { fill:#fca5a5; }
+        .edge       { stroke:#f87171; }
+        .arrow-head { fill:#f87171; }
+      }
+    </style>
+  </defs>
+
+  <!-- Object A -->
+  <g transform="translate(60,90)">
+    <rect class="header" x="0" y="0" width="180" height="28" rx="4"/>
+    <text class="title" x="90" y="18" text-anchor="middle">Object A</text>
+    <rect class="box" x="0" y="28" width="180" height="60"/>
+    <text class="mono" x="14" y="50">shared_ptr&lt;B&gt; b_</text>
+    <text class="dim"  x="14" y="72">use_count = 1</text>
+  </g>
+
+  <!-- Object B -->
+  <g transform="translate(400,90)">
+    <rect class="header" x="0" y="0" width="180" height="28" rx="4"/>
+    <text class="title" x="90" y="18" text-anchor="middle">Object B</text>
+    <rect class="box" x="0" y="28" width="180" height="60"/>
+    <text class="mono" x="14" y="50">shared_ptr&lt;A&gt; a_</text>
+    <text class="dim"  x="14" y="72">use_count = 1</text>
+  </g>
+
+  <!-- A -> B (top arc) -->
+  <path class="edge" d="M240,110 C 300,70 340,70 400,110" marker-end="url(#arrow2)"/>
+  <text class="mono arrow-lbl" x="320" y="72" text-anchor="middle">a.b_ ── shared_ptr ──►</text>
+
+  <!-- B -> A (bottom arc) -->
+  <path class="edge" d="M400,168 C 340,208 300,208 240,168" marker-end="url(#arrow2)"/>
+  <text class="mono arrow-lbl" x="320" y="222" text-anchor="middle">◄── shared_ptr ── b.a_</text>
+
+  <!-- Verdict line -->
+  <text class="leak" x="320" y="262" text-anchor="middle">
+    Neither use_count can drop to 0 — both objects leak.
+  </text>
+</svg>

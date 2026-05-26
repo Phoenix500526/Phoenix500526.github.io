@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <style>
+    .box        { fill:#fff; stroke:#334155; stroke-width:1.2; }
+    .header     { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+    .core       { fill:#dbeafe; stroke:#334155; stroke-width:1.2; }
+    .bus        { fill:#fde68a; stroke:#334155; stroke-width:1.2; }
+    .mem        { fill:#e2e8f0; stroke:#334155; stroke-width:1.2; }
+    .title      { font-weight:600; fill:#1f2937; }
+    .dim        { fill:#475569; font-size:11px; }
+    .wire       { stroke:#475569; stroke-width:1.2; fill:none; }
+
+    @media (prefers-color-scheme: dark) {
+      .box    { fill:#0f172a; stroke:#94a3b8; }
+      .header { fill:#1e293b; stroke:#94a3b8; }
+      .core   { fill:#1e3a8a; stroke:#94a3b8; }
+      .bus    { fill:#78350f; stroke:#94a3b8; }
+      .mem    { fill:#1e293b; stroke:#94a3b8; }
+      .title  { fill:#f1f5f9; }
+      .dim    { fill:#cbd5e1; }
+      .wire   { stroke:#cbd5e1; }
+    }
+  </style>
+
+  <!-- 4 cores -->
+  <g><rect class="core" x="40"  y="30" width="140" height="50" rx="4"/>
+     <text class="title" x="110" y="60"  text-anchor="middle">Core 1</text></g>
+  <g><rect class="core" x="200" y="30" width="140" height="50" rx="4"/>
+     <text class="title" x="270" y="60"  text-anchor="middle">Core 2</text></g>
+  <g><rect class="core" x="360" y="30" width="140" height="50" rx="4"/>
+     <text class="title" x="430" y="60"  text-anchor="middle">Core 3</text></g>
+  <g><rect class="core" x="520" y="30" width="140" height="50" rx="4"/>
+     <text class="title" x="590" y="60"  text-anchor="middle">Core 4</text></g>
+
+  <!-- L1 caches -->
+  <g><rect class="box" x="40"  y="100" width="140" height="36" rx="3"/>
+     <text class="title" x="110" y="123" text-anchor="middle">L1 Cache</text></g>
+  <g><rect class="box" x="200" y="100" width="140" height="36" rx="3"/>
+     <text class="title" x="270" y="123" text-anchor="middle">L1 Cache</text></g>
+  <g><rect class="box" x="360" y="100" width="140" height="36" rx="3"/>
+     <text class="title" x="430" y="123" text-anchor="middle">L1 Cache</text></g>
+  <g><rect class="box" x="520" y="100" width="140" height="36" rx="3"/>
+     <text class="title" x="590" y="123" text-anchor="middle">L1 Cache</text></g>
+
+  <!-- L2 caches -->
+  <g><rect class="box" x="40"  y="156" width="140" height="36" rx="3"/>
+     <text class="title" x="110" y="179" text-anchor="middle">L2 Cache</text></g>
+  <g><rect class="box" x="200" y="156" width="140" height="36" rx="3"/>
+     <text class="title" x="270" y="179" text-anchor="middle">L2 Cache</text></g>
+  <g><rect class="box" x="360" y="156" width="140" height="36" rx="3"/>
+     <text class="title" x="430" y="179" text-anchor="middle">L2 Cache</text></g>
+  <g><rect class="box" x="520" y="156" width="140" height="36" rx="3"/>
+     <text class="title" x="590" y="179" text-anchor="middle">L2 Cache</text></g>
+
+  <!-- vertical wires Core→L1→L2 -->
+  <line class="wire" x1="110" y1="80"  x2="110" y2="100"/>
+  <line class="wire" x1="110" y1="136" x2="110" y2="156"/>
+  <line class="wire" x1="270" y1="80"  x2="270" y2="100"/>
+  <line class="wire" x1="270" y1="136" x2="270" y2="156"/>
+  <line class="wire" x1="430" y1="80"  x2="430" y2="100"/>
+  <line class="wire" x1="430" y1="136" x2="430" y2="156"/>
+  <line class="wire" x1="590" y1="80"  x2="590" y2="100"/>
+  <line class="wire" x1="590" y1="136" x2="590" y2="156"/>
+
+  <!-- L2 → Bus -->
+  <line class="wire" x1="110" y1="192" x2="110" y2="220"/>
+  <line class="wire" x1="270" y1="192" x2="270" y2="220"/>
+  <line class="wire" x1="430" y1="192" x2="430" y2="220"/>
+  <line class="wire" x1="590" y1="192" x2="590" y2="220"/>
+
+  <!-- System bus -->
+  <rect class="bus" x="30" y="220" width="660" height="32" rx="4"/>
+  <text class="title" x="360" y="241" text-anchor="middle">System Bus</text>
+
+  <!-- bus → memory -->
+  <line class="wire" x1="360" y1="252" x2="360" y2="280"/>
+
+  <!-- Main memory -->
+  <rect class="mem" x="200" y="280" width="320" height="60" rx="4"/>
+  <text class="title" x="360" y="308" text-anchor="middle">Main Memory (DRAM)</text>
+  <text class="dim"   x="360" y="328" text-anchor="middle">shared by all cores</text>
+</svg>

@@ -75,7 +75,7 @@ int main(){
 ```
 我们执行 `clang++ -c mangle_test.cc && nm mangle_test.o` 后可以看到如下结果：
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/44a2de37-3cd7-4fa0-8822-2ce8889287c7.png"/>
+ <img src="/img/muduo-exception/nm-mangle-test.svg"/>
 </div>
 <div class="image-caption" align="center">mangle_test</div> 
 
@@ -141,13 +141,13 @@ tmuduo 当中有关于 Exception 的测试，代码路径为 test/Exception_test
 经 demangle 处理的异常信息
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/395917c1-6cd7-4d9f-ac76-39a5243a6d5f.png" width=735 height=120/>
+ <img src="/img/muduo-exception/exception-with-demangle.svg" width=735/>
 </div>
 <div class="image-caption" align="center">Exception with demangle</div> 
 
 未经 demangle 处理的异常信息
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/78c97cd1-4761-4be2-8442-83c2b9d0ff0e.png"/>
+ <img src="/img/muduo-exception/exception-without-demangle.svg"/>
 </div>
 <div class="image-caption" align="center">Exception without demangle</div> 
 

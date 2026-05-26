@@ -102,7 +102,7 @@ $ run hello world
 在 C++ 中，任何表达式都具备两个独立的属性：类型(type)和值类别(value category)。关于表达式的 type，指的是常量表达式，整型表达式等概念，而 **value category 虽然名字上带有 `value`，但实际上描述的是表达式而非值**，主要包括 glvalue、rvalue、lvalue、xvalue 以及 prvalue，它们之间的关系如下图：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/7d1d6e2a-9dbe-4341-b09f-2bfe4c848544.png"/>
+ <img src="/img/value-categories/expression-category-taxonomy.svg"/>
 </div>
 <div class="image-caption" align="center">Expression category taxonomy</div>
 

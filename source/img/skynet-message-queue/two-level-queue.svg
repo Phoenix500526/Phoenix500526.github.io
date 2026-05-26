@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 505" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .box     { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .header  { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+      .global  { fill:#fde68a; stroke:#b45309; stroke-width:1.4; }
+      .mq      { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+      .msg     { fill:#fff; stroke:#94a3b8; stroke-width:1; }
+      .title   { font-weight:700; fill:#1f2937; font-size:14px; }
+      .label   { font-weight:600; fill:#1f2937; font-size:13px; }
+      .mono    { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:12px; }
+      .dim     { fill:#475569; font-size:11px; font-style:italic; }
+      .edge    { stroke:#475569; stroke-width:1.4; fill:none; }
+      .edge-h  { stroke:#b45309; stroke-width:1.6; fill:none; }
+      .arrow-head { fill:#475569; }
+
+      @media (prefers-color-scheme: dark) {
+        .box     { fill:#0f172a; stroke:#94a3b8; }
+        .header  { fill:#1e293b; stroke:#94a3b8; }
+        .global  { fill:#78350f; stroke:#f59e0b; }
+        .mq      { fill:#1e3a8a; stroke:#60a5fa; }
+        .msg     { fill:#0f172a; stroke:#475569; }
+        .title   { fill:#f1f5f9; }
+        .label   { fill:#f1f5f9; }
+        .mono    { fill:#f1f5f9; }
+        .dim     { fill:#cbd5e1; }
+        .edge    { stroke:#cbd5e1; }
+        .edge-h  { stroke:#f59e0b; }
+        .arrow-head { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <text class="title" x="400" y="26" text-anchor="middle">skynet two-level message queue</text>
+
+  <!-- Global queue -->
+  <g transform="translate(40,60)">
+    <rect class="header" x="0" y="0" width="720" height="28" rx="4"/>
+    <text class="label"  x="360" y="19" text-anchor="middle">struct global_queue</text>
+    <rect class="global" x="0" y="28" width="720" height="80"/>
+    <rect class="box"    x="20" y="44" width="120" height="48"/>
+    <text class="mono"   x="80" y="63" text-anchor="middle">head</text>
+    <text class="mono"   x="80" y="81" text-anchor="middle">●</text>
+    <rect class="box"    x="160" y="44" width="120" height="48"/>
+    <text class="mono"   x="220" y="63" text-anchor="middle">tail</text>
+    <text class="mono"   x="220" y="81" text-anchor="middle">●</text>
+    <rect class="box"    x="300" y="44" width="120" height="48"/>
+    <text class="mono"   x="360" y="63" text-anchor="middle">spinlock</text>
+    <text class="dim"    x="440" y="76">guarded by the spinlock; manages a linked-list of per-service message_queue.</text>
+  </g>
+
+  <!-- Service message queues row -->
+  <g transform="translate(40,210)">
+    <rect class="header" x="0" y="0" width="720" height="28" rx="4"/>
+    <text class="label"  x="360" y="19" text-anchor="middle">struct message_queue · one per service (linked list, holds skynet_message items)</text>
+  </g>
+
+  <!-- 4 mq blocks -->
+  <g transform="translate(40,250)">
+    <rect class="mq" x="0" y="0" width="160" height="180" rx="4"/>
+    <text class="label" x="80" y="20" text-anchor="middle">message_queue</text>
+    <text class="mono"  x="80" y="36" text-anchor="middle">handle = 0x01</text>
+    <rect class="msg" x="14" y="50" width="132" height="24"/>
+    <text class="mono" x="80" y="67" text-anchor="middle">skynet_message #1</text>
+    <rect class="msg" x="14" y="78" width="132" height="24"/>
+    <text class="mono" x="80" y="95" text-anchor="middle">skynet_message #2</text>
+    <rect class="msg" x="14" y="106" width="132" height="24"/>
+    <text class="mono" x="80" y="123" text-anchor="middle">skynet_message #3</text>
+    <text class="dim"   x="80" y="146" text-anchor="middle">…</text>
+    <text class="mono"  x="14" y="170">next →</text>
+  </g>
+
+  <g transform="translate(220,250)">
+    <rect class="mq" x="0" y="0" width="160" height="180" rx="4"/>
+    <text class="label" x="80" y="20" text-anchor="middle">message_queue</text>
+    <text class="mono"  x="80" y="36" text-anchor="middle">handle = 0x02</text>
+    <rect class="msg" x="14" y="50" width="132" height="24"/>
+    <text class="mono" x="80" y="67" text-anchor="middle">skynet_message #1</text>
+    <rect class="msg" x="14" y="78" width="132" height="24"/>
+    <text class="mono" x="80" y="95" text-anchor="middle">skynet_message #2</text>
+    <text class="dim"   x="80" y="120" text-anchor="middle">…</text>
+    <text class="mono"  x="14" y="170">next →</text>
+  </g>
+
+  <g transform="translate(400,250)">
+    <rect class="mq" x="0" y="0" width="160" height="180" rx="4"/>
+    <text class="label" x="80" y="20" text-anchor="middle">message_queue</text>
+    <text class="mono"  x="80" y="36" text-anchor="middle">handle = 0x03</text>
+    <rect class="msg" x="14" y="50" width="132" height="24"/>
+    <text class="mono" x="80" y="67" text-anchor="middle">skynet_message #1</text>
+    <text class="dim"   x="80" y="92" text-anchor="middle">…</text>
+    <text class="mono"  x="14" y="170">next →</text>
+  </g>
+
+  <g transform="translate(580,250)">
+    <rect class="mq" x="0" y="0" width="180" height="180" rx="4"/>
+    <text class="label" x="90" y="20" text-anchor="middle">message_queue</text>
+    <text class="mono"  x="90" y="36" text-anchor="middle">handle = 0x04</text>
+    <rect class="msg" x="14" y="50" width="152" height="24"/>
+    <text class="mono" x="90" y="67" text-anchor="middle">skynet_message #1</text>
+    <rect class="msg" x="14" y="78" width="152" height="24"/>
+    <text class="mono" x="90" y="95" text-anchor="middle">skynet_message #2</text>
+    <text class="dim"   x="90" y="120" text-anchor="middle">…</text>
+    <text class="mono"  x="14" y="170">next → NULL</text>
+  </g>
+
+  <!-- Linking arrows: global.head → mq0; mq.next → next mq; mq3 → global.tail -->
+  <path class="edge-h" d="M120,152 C 120,220 120,230 120,250" marker-end="url(#arr)"/>
+  <text class="dim" x="50" y="200">head</text>
+
+  <path class="edge-h" d="M260,152 C 260,200 670,200 670,250" marker-end="url(#arr)"/>
+  <text class="dim" x="600" y="200">tail</text>
+
+  <line class="edge" x1="200" y1="340" x2="220" y2="340" marker-end="url(#arr)"/>
+  <line class="edge" x1="380" y1="340" x2="400" y2="340" marker-end="url(#arr)"/>
+  <line class="edge" x1="560" y1="340" x2="580" y2="340" marker-end="url(#arr)"/>
+
+  <!-- Footnote -->
+  <text class="dim" x="400" y="475" text-anchor="middle">A service's mq joins the global queue only when its own message queue is non-empty;</text>
+  <text class="dim" x="400" y="492" text-anchor="middle">worker threads pop one mq at a time, drain a slice of messages, and push it back if still non-empty.</text>
+</svg>

@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <marker id="arr-urgency" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head-urgency"/>
+    </marker>
+    <style>
+      .reg-cell { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+      .reg-near { fill:#fde68a; stroke:#b45309; stroke-width:1.2; }
+      .arr-box  { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .arr-near { fill:#fefce8; stroke:#b45309; stroke-width:1.4; }
+      .title    { font-weight:700; fill:#1f2937; font-size:14px; }
+      .mono     { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-weight:600; }
+      .bit-lbl  { fill:#64748b; font-size:11px; font-family: ui-monospace, monospace; }
+      .slot     { fill:#475569; font-size:11px; }
+      .dim      { fill:#475569; font-size:11px; font-style:italic; }
+      .urgency  { stroke:#7c3aed; stroke-width:2; fill:none; }
+      .urgency-lbl { fill:#7c3aed; font-weight:600; font-size:12px; }
+      .arrow-head-urgency { fill:#7c3aed; }
+      .edge     { stroke:#2b6cb0; stroke-width:1.4; fill:none; }
+      .edge-near{ stroke:#b45309; stroke-width:1.4; fill:none; }
+      .arrow-head { fill:#475569; }
+
+      @media (prefers-color-scheme: dark) {
+        .reg-cell { fill:#1e3a8a; stroke:#60a5fa; }
+        .reg-near { fill:#78350f; stroke:#f59e0b; }
+        .arr-box  { fill:#0f172a; stroke:#94a3b8; }
+        .arr-near { fill:#422006; stroke:#f59e0b; }
+        .title    { fill:#f1f5f9; }
+        .mono     { fill:#f1f5f9; }
+        .bit-lbl  { fill:#94a3b8; }
+        .slot     { fill:#cbd5e1; }
+        .dim      { fill:#cbd5e1; }
+        .urgency  { stroke:#c4b5fd; }
+        .urgency-lbl { fill:#c4b5fd; }
+        .arrow-head-urgency { fill:#c4b5fd; }
+        .edge     { stroke:#60a5fa; }
+        .edge-near{ stroke:#f59e0b; }
+        .arrow-head { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <text class="title" x="360" y="26" text-anchor="middle">time — 32-bit tick counter, decomposed by bit-field</text>
+
+  <!-- Bit position labels -->
+  <text class="bit-lbl" x="22"  y="56">31</text>
+  <text class="bit-lbl" x="135" y="56" text-anchor="end">26</text>
+  <text class="bit-lbl" x="153" y="56">25</text>
+  <text class="bit-lbl" x="265" y="56" text-anchor="end">20</text>
+  <text class="bit-lbl" x="283" y="56">19</text>
+  <text class="bit-lbl" x="395" y="56" text-anchor="end">14</text>
+  <text class="bit-lbl" x="413" y="56">13</text>
+  <text class="bit-lbl" x="525" y="56" text-anchor="end">8</text>
+  <text class="bit-lbl" x="543" y="56">7</text>
+  <text class="bit-lbl" x="698" y="56" text-anchor="end">0</text>
+
+  <!-- Register cells -->
+  <rect class="reg-cell" x="20"  y="62" width="120" height="56"/>
+  <text class="mono"     x="80"  y="92"  text-anchor="middle">t[3]</text>
+  <text class="bit-lbl"  x="80"  y="108" text-anchor="middle">6 bits · 64 slots</text>
+
+  <rect class="reg-cell" x="150" y="62" width="120" height="56"/>
+  <text class="mono"     x="210" y="92"  text-anchor="middle">t[2]</text>
+  <text class="bit-lbl"  x="210" y="108" text-anchor="middle">6 bits · 64 slots</text>
+
+  <rect class="reg-cell" x="280" y="62" width="120" height="56"/>
+  <text class="mono"     x="340" y="92"  text-anchor="middle">t[1]</text>
+  <text class="bit-lbl"  x="340" y="108" text-anchor="middle">6 bits · 64 slots</text>
+
+  <rect class="reg-cell" x="410" y="62" width="120" height="56"/>
+  <text class="mono"     x="470" y="92"  text-anchor="middle">t[0]</text>
+  <text class="bit-lbl"  x="470" y="108" text-anchor="middle">6 bits · 64 slots</text>
+
+  <rect class="reg-near" x="540" y="62" width="160" height="56"/>
+  <text class="mono"     x="620" y="92"  text-anchor="middle">near</text>
+  <text class="bit-lbl"  x="620" y="108" text-anchor="middle">8 bits · 256 slots</text>
+
+  <!-- Connecting arrows -->
+  <line class="edge"      x1="80"  y1="118" x2="80"  y2="178" marker-end="url(#arr)"/>
+  <line class="edge"      x1="210" y1="118" x2="210" y2="178" marker-end="url(#arr)"/>
+  <line class="edge"      x1="340" y1="118" x2="340" y2="178" marker-end="url(#arr)"/>
+  <line class="edge"      x1="470" y1="118" x2="470" y2="178" marker-end="url(#arr)"/>
+  <line class="edge-near" x1="620" y1="118" x2="620" y2="178" marker-end="url(#arr)"/>
+
+  <!-- Arrays -->
+  <rect class="arr-box" x="20"  y="188" width="120" height="80" rx="4"/>
+  <text class="mono"    x="80"  y="220" text-anchor="middle">t[3][64]</text>
+  <text class="slot"    x="80"  y="240" text-anchor="middle">least urgent</text>
+  <text class="dim"     x="80"  y="258" text-anchor="middle">≤ 64 ticks/level</text>
+
+  <rect class="arr-box" x="150" y="188" width="120" height="80" rx="4"/>
+  <text class="mono"    x="210" y="220" text-anchor="middle">t[2][64]</text>
+
+  <rect class="arr-box" x="280" y="188" width="120" height="80" rx="4"/>
+  <text class="mono"    x="340" y="220" text-anchor="middle">t[1][64]</text>
+
+  <rect class="arr-box" x="410" y="188" width="120" height="80" rx="4"/>
+  <text class="mono"    x="470" y="220" text-anchor="middle">t[0][64]</text>
+
+  <rect class="arr-near" x="540" y="188" width="160" height="80" rx="4"/>
+  <text class="mono"     x="620" y="220" text-anchor="middle">near[256]</text>
+  <text class="slot"     x="620" y="240" text-anchor="middle">most urgent</text>
+  <text class="dim"      x="620" y="258" text-anchor="middle">timer_execute only fires here</text>
+
+  <!-- Urgency arrow -->
+  <line class="urgency" x1="60"  y1="318" x2="660" y2="318" marker-end="url(#arr-urgency)"/>
+  <text class="urgency-lbl" x="80"  y="312">less urgent</text>
+  <text class="urgency-lbl" x="640" y="312" text-anchor="end">more urgent</text>
+
+  <!-- Footnote -->
+  <text class="dim" x="360" y="362" text-anchor="middle">Each tick increments time by 1. When a low-order bit-field wraps, timers from the next level cascade down into near.</text>
+  <text class="dim" x="360" y="380" text-anchor="middle">A timer's remaining ticks decide which level it lives in; the closer to firing, the higher (rightward) it climbs.</text>
+  <text class="dim" x="360" y="406" text-anchor="middle">Total span: near covers 2^8 = 256 ticks; full wheel covers 2^32 ticks ≈ 497 days at 10 ms/tick.</text>
+</svg>

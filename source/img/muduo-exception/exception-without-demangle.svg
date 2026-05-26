@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12">
+  <defs>
+    <clipPath id="term"><rect x="0" y="0" width="760" height="240" rx="8"/></clipPath>
+    <style>
+      .bg     { fill:#1e1e1e; }
+      .head   { fill:#2d2d2d; }
+      .title  { fill:#9aa0a6; font-size:12px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; }
+      .dot-r  { fill:#ff5f56; }
+      .dot-y  { fill:#ffbd2e; }
+      .dot-g  { fill:#27c93f; }
+      .txt    { fill:#d4d4d4; }
+      .err    { fill:#f48771; }
+      .what   { fill:#ce9178; }
+      .frame  { fill:#9cdcfe; }
+      .mangled{ fill:#dcdcaa; }
+      .off    { fill:#808080; }
+      .warn-tag{ fill:#ff8a65; font-weight:bold; }
+    </style>
+  </defs>
+  <g clip-path="url(#term)">
+    <rect class="bg"   x="0" y="0" width="760" height="240"/>
+    <rect class="head" x="0" y="0" width="760" height="28"/>
+    <circle class="dot-r" cx="14" cy="14" r="5.5"/>
+    <circle class="dot-y" cx="32" cy="14" r="5.5"/>
+    <circle class="dot-g" cx="50" cy="14" r="5.5"/>
+    <text class="title" x="380" y="18" text-anchor="middle">Exception_test — without demangle</text>
+
+    <text class="err" x="16" y="56">terminate called after throwing an instance of 'tmuduo::Exception'</text>
+    <text x="16" y="76"><tspan class="txt">  what(): </tspan><tspan class="what">"Oops, something went wrong"</tspan></text>
+
+    <text class="txt" x="16" y="104">Stack trace:</text>
+
+    <text x="16" y="126"><tspan class="frame">  [0] </tspan><tspan class="mangled">_ZN3Bar4testEbSt6vectorINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESaIS6_EE</tspan><tspan class="off">+0x1c</tspan></text>
+    <text x="16" y="148"><tspan class="frame">  [1] </tspan><tspan class="mangled">_Z3foov</tspan><tspan class="off">+0x12</tspan></text>
+    <text x="16" y="170"><tspan class="frame">  [2] </tspan><tspan class="txt">main</tspan><tspan class="off">+0x35</tspan></text>
+    <text x="16" y="192"><tspan class="frame">  [3] </tspan><tspan class="txt">__libc_start_main</tspan><tspan class="off">+0xe7</tspan></text>
+
+    <text class="warn-tag" x="610" y="56" text-anchor="end">raw mangled symbols ⚠</text>
+    <text class="off" x="16" y="222">↑ same Bar::test as the previous figure, but unreadable without abi::__cxa_demangle</text>
+  </g>
+</svg>

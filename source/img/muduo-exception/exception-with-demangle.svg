@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 735 220" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13">
+  <defs>
+    <clipPath id="term"><rect x="0" y="0" width="735" height="220" rx="8"/></clipPath>
+    <style>
+      .bg     { fill:#1e1e1e; }
+      .head   { fill:#2d2d2d; }
+      .title  { fill:#9aa0a6; font-size:12px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; }
+      .dot-r  { fill:#ff5f56; }
+      .dot-y  { fill:#ffbd2e; }
+      .dot-g  { fill:#27c93f; }
+      .txt    { fill:#d4d4d4; }
+      .err    { fill:#f48771; }
+      .what   { fill:#ce9178; }
+      .frame  { fill:#9cdcfe; }
+      .fn-hl  { fill:#dcdcaa; font-weight:700; }
+      .off    { fill:#808080; }
+      .dim    { fill:#808080; font-style:italic; }
+      .ok-tag { fill:#4ec9b0; font-weight:bold; }
+    </style>
+  </defs>
+  <g clip-path="url(#term)">
+    <rect class="bg"   x="0" y="0" width="735" height="220"/>
+    <rect class="head" x="0" y="0" width="735" height="28"/>
+    <circle class="dot-r" cx="14" cy="14" r="5.5"/>
+    <circle class="dot-y" cx="32" cy="14" r="5.5"/>
+    <circle class="dot-g" cx="50" cy="14" r="5.5"/>
+    <text class="title" x="367" y="18" text-anchor="middle">Exception_test — with demangle</text>
+
+    <text class="err" x="20" y="56">terminate called after throwing an instance of 'tmuduo::Exception'</text>
+    <text x="20" y="78"><tspan class="txt">  what(): </tspan><tspan class="what">"Oops, something went wrong"</tspan></text>
+
+    <text class="txt" x="20" y="106">Stack trace:</text>
+
+    <text x="20" y="128"><tspan class="frame">  [0] </tspan><tspan class="fn-hl">Bar::test(bool, std::vector&lt;std::string&gt;)</tspan><tspan class="off"> +0x1c</tspan></text>
+    <text x="20" y="148"><tspan class="frame">  [1] </tspan><tspan class="fn-hl">foo()</tspan><tspan class="off"> +0x12</tspan></text>
+    <text x="20" y="168"><tspan class="frame">  [2] </tspan><tspan class="fn-hl">main</tspan><tspan class="off"> +0x35</tspan></text>
+    <text x="20" y="188"><tspan class="frame">  [3] </tspan><tspan class="txt">__libc_start_main</tspan><tspan class="off"> +0xe7</tspan></text>
+
+    <text class="ok-tag" x="555" y="56" text-anchor="end">readable symbols ✓</text>
+  </g>
+</svg>

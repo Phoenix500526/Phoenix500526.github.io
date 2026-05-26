@@ -29,7 +29,7 @@ categories: C++沉思录
 在 C++11 中，`shared_ptr`的大小为裸指针的两倍，它包含两个数据成员：一个指向共享资源的指针和一个指向控制块的指针。控制块中存放了引用计数、用户自定义删除器的副本以及分配器的副本(后两个要求用户显式指出)，而结构如下：
 
 <div style="text-align:center">
-    <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/13b6cad0-d3c6-44a9-b077-2a10bc137c14.png">
+    <img src="/img/smart-pointers/shared-ptr-layout.svg">
 </div>
 <div class="image-caption" align="center">shared_ptr 的内存布局</div>
 
@@ -256,7 +256,7 @@ void process(weak_ptr<Object> objPtr){
 **作用三：解决环形引用问题**
 
 <div style="text-align:center">
-    <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/68c7521c-60c3-404f-a4df-3b424c0d2c54.png" width="80%">
+    <img src="/img/smart-pointers/circular-reference.svg" width="80%">
 </div>
 <div class="image-caption" align="center">环形引用</div>
 

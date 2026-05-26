@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13">
+  <defs>
+    <clipPath id="term"><rect x="0" y="0" width="720" height="300" rx="8"/></clipPath>
+    <style>
+      .bg     { fill:#1e1e1e; }
+      .head   { fill:#2d2d2d; }
+      .title  { fill:#9aa0a6; font-size:12px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; }
+      .dot-r  { fill:#ff5f56; }
+      .dot-y  { fill:#ffbd2e; }
+      .dot-g  { fill:#27c93f; }
+      .txt    { fill:#d4d4d4; }
+      .hdr    { fill:#9cdcfe; font-weight:600; }
+      .num    { fill:#b5cea8; }
+      .name   { fill:#dcdcaa; font-weight:600; }
+      .dim    { fill:#808080; }
+    </style>
+  </defs>
+  <g clip-path="url(#term)">
+    <rect class="bg"   x="0" y="0" width="720" height="300"/>
+    <rect class="head" x="0" y="0" width="720" height="28"/>
+    <circle class="dot-r" cx="14" cy="14" r="5.5"/>
+    <circle class="dot-y" cx="32" cy="14" r="5.5"/>
+    <circle class="dot-g" cx="50" cy="14" r="5.5"/>
+    <text class="title" x="360" y="18" text-anchor="middle">$ top -H -p $(pgrep Thread_test)</text>
+
+    <text class="txt" x="20" y="58">top - 14:23:01 up  2:45,  1 user,  load average: 0.05, 0.04, 0.00</text>
+    <text class="txt" x="20" y="78">Threads: <tspan class="num">5</tspan> total, <tspan class="num">0</tspan> running, <tspan class="num">5</tspan> sleeping</text>
+    <text class="txt" x="20" y="98">%Cpu(s):  2.0 us,  0.5 sy,  0.0 ni, 97.4 id,  0.1 wa</text>
+    <text class="txt" x="20" y="118">KiB Mem : 16384288 total, 10243012 free,  2148000 used</text>
+
+    <text class="hdr"  x="20"  y="158">  PID   USER     PR  NI    VIRT    RES  S  %CPU  %MEM  COMMAND</text>
+
+    <text class="num"  x="20"  y="180">14852</text>
+    <text class="txt"  x="80"  y="180">phoenix  20   0   76420   3940  S   0.3   0.1</text>
+    <text class="name" x="535" y="180">Thread_test</text>
+
+    <text class="num"  x="20"  y="200">14853</text>
+    <text class="txt"  x="80"  y="200">phoenix  20   0   76420   3940  S   0.0   0.1</text>
+    <text class="name" x="535" y="200">worker0</text>
+
+    <text class="num"  x="20"  y="220">14854</text>
+    <text class="txt"  x="80"  y="220">phoenix  20   0   76420   3940  S   0.0   0.1</text>
+    <text class="name" x="535" y="220">worker1</text>
+
+    <text class="num"  x="20"  y="240">14855</text>
+    <text class="txt"  x="80"  y="240">phoenix  20   0   76420   3940  S   0.0   0.1</text>
+    <text class="name" x="535" y="240">worker2</text>
+
+    <text class="num"  x="20"  y="260">14856</text>
+    <text class="txt"  x="80"  y="260">phoenix  20   0   76420   3940  S   0.0   0.1</text>
+    <text class="name" x="535" y="260">io_loop</text>
+
+    <text class="dim" x="20" y="288">↑ each Thread carries its own pthread name, visible to top/htop/ps</text>
+  </g>
+</svg>

@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .box      { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .pub      { fill:#dcfce7; stroke:#16a34a; stroke-width:1.4; }
+      .sub      { fill:#ede9fe; stroke:#7c3aed; stroke-width:1.4; }
+      .hub      { fill:#fde68a; stroke:#b45309; stroke-width:1.6; }
+      .topic    { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+      .role     { font-weight:700; fill:#1f2937; font-size:13px; }
+      .title    { font-weight:700; fill:#1f2937; font-size:14px; }
+      .label    { font-weight:600; fill:#1f2937; font-size:12px; }
+      .mono     { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:12px; }
+      .dim      { fill:#475569; font-size:11px; font-style:italic; }
+      .edge-pub { stroke:#16a34a; stroke-width:1.4; fill:none; }
+      .edge-sub { stroke:#7c3aed; stroke-width:1.4; fill:none; }
+      .arrow-head { fill:#475569; }
+
+      @media (prefers-color-scheme: dark) {
+        .box      { fill:#0f172a; stroke:#94a3b8; }
+        .pub      { fill:#14532d; stroke:#4ade80; }
+        .sub      { fill:#4c1d95; stroke:#c4b5fd; }
+        .hub      { fill:#78350f; stroke:#f59e0b; }
+        .topic    { fill:#1e3a8a; stroke:#60a5fa; }
+        .role     { fill:#f1f5f9; }
+        .title    { fill:#f1f5f9; }
+        .label    { fill:#f1f5f9; }
+        .mono     { fill:#f1f5f9; }
+        .dim      { fill:#cbd5e1; }
+        .edge-pub { stroke:#4ade80; }
+        .edge-sub { stroke:#c4b5fd; }
+        .arrow-head { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <text class="title" x="400" y="26" text-anchor="middle">Observer-pattern process monitoring · Topic · Hub · Pub · Sub</text>
+
+  <!-- Publishers (left column) -->
+  <g transform="translate(30,80)">
+    <rect class="pub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role"  x="75" y="22" text-anchor="middle">Service A</text>
+    <text class="dim"   x="75" y="40" text-anchor="middle">Publisher</text>
+    <text class="mono"  x="14" y="60">pub metrics ...</text>
+  </g>
+  <g transform="translate(30,170)">
+    <rect class="pub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role"  x="75" y="22" text-anchor="middle">Service B</text>
+    <text class="dim"   x="75" y="40" text-anchor="middle">Publisher</text>
+    <text class="mono"  x="14" y="60">pub status ...</text>
+  </g>
+  <g transform="translate(30,260)">
+    <rect class="pub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role"  x="75" y="22" text-anchor="middle">Service C</text>
+    <text class="dim"   x="75" y="40" text-anchor="middle">Publisher</text>
+    <text class="mono"  x="14" y="60">pub events ...</text>
+  </g>
+
+  <!-- Hub (center) -->
+  <g transform="translate(280,80)">
+    <rect class="hub" x="0" y="0" width="240" height="290" rx="8"/>
+    <text class="role" x="120" y="24" text-anchor="middle">Hub</text>
+    <text class="dim"  x="120" y="42" text-anchor="middle">central message broker</text>
+
+    <text class="label" x="120" y="68" text-anchor="middle">Topics</text>
+
+    <rect class="topic" x="20" y="80" width="200" height="50" rx="4"/>
+    <text class="mono"  x="120" y="100" text-anchor="middle">"metrics"</text>
+    <text class="dim"   x="120" y="118" text-anchor="middle">subscribers: Monitor 1, Monitor 3</text>
+
+    <rect class="topic" x="20" y="140" width="200" height="50" rx="4"/>
+    <text class="mono"  x="120" y="160" text-anchor="middle">"status"</text>
+    <text class="dim"   x="120" y="178" text-anchor="middle">subscribers: Monitor 2</text>
+
+    <rect class="topic" x="20" y="200" width="200" height="50" rx="4"/>
+    <text class="mono"  x="120" y="220" text-anchor="middle">"events"</text>
+    <text class="dim"   x="120" y="238" text-anchor="middle">subscribers: Monitor 1, Monitor 2</text>
+
+    <text class="dim" x="120" y="276" text-anchor="middle">text protocol · \r\n delimited</text>
+  </g>
+
+  <!-- Subscribers (right column) -->
+  <g transform="translate(620,80)">
+    <rect class="sub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role" x="75" y="22" text-anchor="middle">Monitor 1</text>
+    <text class="dim"  x="75" y="40" text-anchor="middle">Subscriber</text>
+    <text class="mono" x="14" y="60">sub metrics, events</text>
+  </g>
+  <g transform="translate(620,170)">
+    <rect class="sub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role" x="75" y="22" text-anchor="middle">Monitor 2</text>
+    <text class="dim"  x="75" y="40" text-anchor="middle">Subscriber</text>
+    <text class="mono" x="14" y="60">sub status, events</text>
+  </g>
+  <g transform="translate(620,260)">
+    <rect class="sub" x="0" y="0" width="150" height="70" rx="6"/>
+    <text class="role" x="75" y="22" text-anchor="middle">Monitor 3</text>
+    <text class="dim"  x="75" y="40" text-anchor="middle">Subscriber</text>
+    <text class="mono" x="14" y="60">sub metrics</text>
+  </g>
+
+  <!-- pub arrows (left → hub) -->
+  <line class="edge-pub" x1="180" y1="115" x2="280" y2="105" marker-end="url(#arr)"/>
+  <line class="edge-pub" x1="180" y1="205" x2="280" y2="165" marker-end="url(#arr)"/>
+  <line class="edge-pub" x1="180" y1="295" x2="280" y2="225" marker-end="url(#arr)"/>
+
+  <!-- sub arrows (hub → right) -->
+  <line class="edge-sub" x1="520" y1="105" x2="620" y2="115" marker-end="url(#arr)"/>
+  <line class="edge-sub" x1="520" y1="165" x2="620" y2="205" marker-end="url(#arr)"/>
+  <line class="edge-sub" x1="520" y1="225" x2="620" y2="295" marker-end="url(#arr)"/>
+
+  <!-- Command crib at the bottom -->
+  <g transform="translate(60,400)">
+    <rect class="box" x="0" y="0" width="680" height="68" rx="6"/>
+    <text class="label" x="340" y="20" text-anchor="middle">text-protocol commands (telnet-compatible)</text>
+    <text class="mono"  x="20"  y="42">sub &lt;topic&gt;\r\n</text>
+    <text class="mono"  x="180" y="42">unsub &lt;topic&gt;\r\n</text>
+    <text class="mono"  x="360" y="42">pub &lt;topic&gt;\r\n&lt;content&gt;\r\n</text>
+    <text class="dim"   x="20"  y="58">subscribe</text>
+    <text class="dim"   x="180" y="58">unsubscribe</text>
+    <text class="dim"   x="360" y="58">publish message body</text>
+  </g>
+</svg>

@@ -88,7 +88,7 @@ std::string ProcessInfo::procStatus() {
 
 其中，Inspector 的实现框图大致如下：
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/43866203-b1b7-49b1-b803-6dbe6a337944.png"/>
+ <img src="/img/muduo-inspect/http-inspector.svg"/>
 </div>
 <div class="image-caption" align="center">HttpInspector框图</div>
 
@@ -228,7 +228,7 @@ muduo 还提供了另外一种基于 Observer Pattern 的实现。这种方式�
 
 在基于 Observer Pattern 模式实现的进程监控方式中，主要涉及了四个不同的概念，分别是话题`Topic`, 集线器`Hub`，发布者`Pub`以及订阅者`Sub`,它们之间的关系如下：
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/88b75116-5611-4d72-a8a4-b0abe7bcc837.png"/>
+ <img src="/img/muduo-inspect/observer-pubsub.svg"/>
 </div>
 <div class="image-caption" align="center">基于 Observer Pattern 模式实现的进程监控</div>
 

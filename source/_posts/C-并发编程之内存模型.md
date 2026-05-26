@@ -51,7 +51,7 @@ categories: C++沉思录
 而对于多核系统而言，往往多个核心之间配备有不同的 L1 Cache 和 L2 Cache，如图示：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/a878211f-a4ec-4a8b-8459-6e945e1e51af.png"/>
+ <img src="/img/memory-model/multi-core-cache.svg"/>
 </div>
 <div class="image-caption" align="center">多核 CPU 结构</div>
 
@@ -89,7 +89,7 @@ struct my_data{
 ```
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/1027fc3a-f3f1-4663-a2d3-ee39a9ef04c5.png"/>
+ <img src="/img/memory-model/memory-layout.svg"/>
 </div>
 <div class="image-caption" align="center">Memory Layout</div>
 
@@ -184,7 +184,7 @@ typedef enum memory_order {
 C++ 中提供了三种不同的内存序，按照约束条件强弱划分，由弱到强可分为：Relaxed Ordering、Release-Acquire Ordering 以及 Sequential Consistent Ordering。它们和 C++ 中的 memory_order 之间的关系如下：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/d394ee7b-3ec5-4db9-8b4b-63928766d5f9.png" width=800 height=400/>
+ <img src="/img/memory-model/memory-order-mapping.svg" width=800 height=400/>
 </div>
 <div class="image-caption" align="center">原子操作、内存序模型与memory_order</div>
 
@@ -241,7 +241,7 @@ int main(){
 假设现有两个线程 A 和 B，以及一个全局的原子变量 var，如果 A 先对 var 执行了 release 操作(store操作)，而 B 后对 var 执行了 acquire 操作(load操作)，那么当 B 执行完 load 操作后，它将能够看到 A 在 store 操作之前所执行的所有写操作(不管是对非原子变量还是其他的原子变量)，如下图：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/2e45bb10-2727-4684-9fad-ed598f4d0af4.png" width=800 height=400/>
+ <img src="/img/memory-model/acquire-release-demo.svg" width=800 height=400/>
 </div>
 <div class="image-caption" align="center">Acquire-Release Ordering Demo</div>
 
@@ -352,7 +352,7 @@ C++ 并发编程困难不仅在于开发人员需要捋清不同线程之间复�
 指令重排的结果可以用下面这张图来表示(其中文字代表操作类型，箭头表示指令重排的移动方向)：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/acd43408-e2fa-4c43-8d0f-7995f488b4b0.png"/>
+ <img src="/img/memory-model/instruction-reordering.svg"/>
 </div>
 <div class="image-caption" align="center">Instruction Reordering</div>
 
@@ -363,7 +363,7 @@ C++ 并发编程困难不仅在于开发人员需要捋清不同线程之间复�
 如同前面所提到的 acquire 基线那样， Acquire Fence 可以防止 Fence 后的读写操作重排到 Fence 前的**任意** load 操作之前，即抑制 Load-Load 重排和 Load-Store 重排，如下图：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/0d925d2a-3758-40a7-b940-bb4241d14855.png"/>
+ <img src="/img/memory-model/acquire-fence.svg"/>
 </div>
 <div class="image-caption" align="center">Acquire Fence</div>
 
@@ -372,7 +372,7 @@ C++ 并发编程困难不仅在于开发人员需要捋清不同线程之间复�
 如同前面所提到的 release 基线那样， 防止 Fence 前的读写操作重排到 Fence 后的**任意** store 操作之后，即抑制 Load-Store 重排和 Store-Store 重排，如下图：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/0388aa3e-d098-4770-9ae9-7114ba8a5d50.png"/>
+ <img src="/img/memory-model/release-fence.svg"/>
 </div>
 <div class="image-caption" align="center">Release Fence</div>
 
@@ -383,7 +383,7 @@ C++ 并发编程困难不仅在于开发人员需要捋清不同线程之间复�
 Full Fence 就相当于是前面 Acquire Fence 和 Release Fence 功能的并集，它能够抑制 Load-Load、Load-Store 以及 Store-Store 重排，但是它不能抑制 Store-Load 重排。
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/d19c5829-c7e5-4a48-8f9e-322d0a268966.png"/>
+ <img src="/img/memory-model/full-fence.svg"/>
 </div>
 <div class="image-caption" align="center">Full Fence</div>
 

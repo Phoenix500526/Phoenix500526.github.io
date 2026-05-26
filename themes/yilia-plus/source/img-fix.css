@@ -1,0 +1,26 @@
+/* Responsive image override.
+ *
+ * Theme's main CSS has `img { max-width: 100% }` (good) but does NOT also set
+ * `height: auto`. As a result, when an <img> has explicit `width` and `height`
+ * HTML attributes (a relic from the original PNG era of this blog), the width
+ * is correctly capped at the container width but the height attribute keeps
+ * its absolute pixel value — squashing or stretching the rendered aspect
+ * ratio. This override restores proportional scaling.
+ *
+ * Also caps very tall content images so they don't dominate the viewport on
+ * narrow screens.
+ */
+img,
+.article img,
+.article-inner img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Defensive cap: no single content image should consume more than ~80vh
+ * vertically. Keeps tall portrait images readable in the article flow. */
+.article img,
+.article-inner img {
+  max-height: 80vh;
+  object-fit: contain;
+}

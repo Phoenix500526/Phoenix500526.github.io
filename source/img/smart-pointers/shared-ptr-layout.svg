@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .box        { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .header     { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+      .title      { font-weight:600; fill:#1f2937; }
+      .label      { fill:#1f2937; }
+      .mono       { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; }
+      .dim        { fill:#475569; font-size:11px; }
+      .edge       { stroke:#2b6cb0; stroke-width:1.4; fill:none; }
+      .arrow-head { fill:#2b6cb0; }
+      .ptr-dot    { fill:#2b6cb0; }
+      .sep        { stroke:#cbd5e1; }
+
+      @media (prefers-color-scheme: dark) {
+        .box        { fill:#0f172a; stroke:#94a3b8; }
+        .header     { fill:#1e293b; stroke:#94a3b8; }
+        .title      { fill:#f1f5f9; }
+        .label      { fill:#f1f5f9; }
+        .mono       { fill:#f1f5f9; }
+        .dim        { fill:#cbd5e1; }
+        .edge       { stroke:#60a5fa; }
+        .arrow-head { fill:#60a5fa; }
+        .ptr-dot    { fill:#60a5fa; }
+        .sep        { stroke:#475569; }
+      }
+    </style>
+  </defs>
+
+  <!-- shared_ptr<T> on the left -->
+  <g transform="translate(20,80)">
+    <rect class="header" x="0" y="0" width="180" height="28" rx="4"/>
+    <text class="title mono" x="90" y="18" text-anchor="middle">shared_ptr&lt;T&gt;</text>
+    <rect class="box" x="0" y="28" width="180" height="36"/>
+    <text class="mono" x="14" y="50">ptr</text>
+    <circle cx="160" cy="46" r="3" class="ptr-dot"/>
+    <rect class="box" x="0" y="64" width="180" height="36"/>
+    <text class="mono" x="14" y="86">ctrl</text>
+    <circle cx="160" cy="82" r="3" class="ptr-dot"/>
+    <text class="dim" x="90" y="118" text-anchor="middle">two raw pointers (2x sizeof(T*))</text>
+  </g>
+
+  <!-- Managed Object on the top right -->
+  <g transform="translate(420,40)">
+    <rect class="header" x="0" y="0" width="200" height="28" rx="4"/>
+    <text class="title" x="100" y="18" text-anchor="middle">Managed Object</text>
+    <rect class="box" x="0" y="28" width="200" height="60"/>
+    <text class="mono" x="100" y="64" text-anchor="middle">T</text>
+  </g>
+
+  <!-- Control Block on the bottom right -->
+  <g transform="translate(380,170)">
+    <rect class="header" x="0" y="0" width="240" height="28" rx="4"/>
+    <text class="title" x="120" y="18" text-anchor="middle">Control Block</text>
+    <rect class="box" x="0" y="28" width="240" height="132"/>
+    <text class="mono" x="14" y="52">use_count</text>     <text class="dim" x="226" y="52" text-anchor="end">atomic&lt;long&gt;</text>
+    <line x1="8" y1="62" x2="232" y2="62" class="sep"/>
+    <text class="mono" x="14" y="80">weak_count</text>    <text class="dim" x="226" y="80" text-anchor="end">atomic&lt;long&gt;</text>
+    <line x1="8" y1="90" x2="232" y2="90" class="sep"/>
+    <text class="mono" x="14" y="108">deleter</text>      <text class="dim" x="226" y="108" text-anchor="end">user-supplied</text>
+    <line x1="8" y1="118" x2="232" y2="118" class="sep"/>
+    <text class="mono" x="14" y="136">allocator</text>    <text class="dim" x="226" y="136" text-anchor="end">user-supplied</text>
+  </g>
+
+  <!-- edges -->
+  <path class="edge" d="M180,126 C 280,126 320,70 420,70" marker-end="url(#arrow)"/>
+  <path class="edge" d="M180,162 C 290,162 300,236 380,236" marker-end="url(#arrow)"/>
+</svg>

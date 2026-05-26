@@ -246,6 +246,6 @@ Thread::~Thread() {
 上述代码的实现经过测试，运行良好。由于测试代码比较冗长，且案例覆盖上存在重复的部分，这里就不贴出代码。具体的测试代码位于 tmuduo/test/Thread_test.cc 中，编译后的可执行文件为 tmuduo/build/bin/Thread_test，其执行结果可以通过 `top -H -p pid` 来观测，具体结果如下：
 
 <div style="text-align:center">
- <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-imgbed/f86e74f0-ec09-498e-bc40-c7d1bffc2caa.png"/>
+ <img src="/img/muduo-thread/thread-test-top.svg"/>
 </div>
 <div class="image-caption" align="center">Thread_test 运行结果</div>

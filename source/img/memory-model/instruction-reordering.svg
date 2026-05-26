@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 490" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .cell      { fill:#fff; stroke:#94a3b8; stroke-width:1.2; }
+      .op-load   { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+      .op-store  { fill:#fde68a; stroke:#b45309; stroke-width:1.2; }
+      .op-text   { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-weight:600; fill:#1f2937; font-size:13px; }
+      .cell-lbl  { font-weight:700; fill:#1f2937; font-size:14px; }
+      .title     { font-weight:700; fill:#1f2937; font-size:15px; }
+      .swap      { stroke:#475569; stroke-width:1.6; fill:none; }
+      .arrow-head{ fill:#475569; }
+      .dim       { fill:#475569; font-size:11px; font-style:italic; }
+
+      @media (prefers-color-scheme: dark) {
+        .cell      { fill:#0f172a; stroke:#94a3b8; }
+        .op-load   { fill:#1e3a8a; stroke:#60a5fa; }
+        .op-store  { fill:#78350f; stroke:#f59e0b; }
+        .op-text   { fill:#f1f5f9; }
+        .cell-lbl  { fill:#f1f5f9; }
+        .title     { fill:#f1f5f9; }
+        .swap      { stroke:#cbd5e1; }
+        .arrow-head{ fill:#cbd5e1; }
+        .dim       { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <text class="title" x="320" y="28" text-anchor="middle">Instruction Reordering — 4 reorder patterns</text>
+
+  <!-- Load-Load -->
+  <g transform="translate(40,50)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-load" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Load</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-load" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Load</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Load-Load</text>
+  </g>
+
+  <!-- Load-Store -->
+  <g transform="translate(340,50)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-load" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Load</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-store" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Store</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Load-Store</text>
+  </g>
+
+  <!-- Store-Load -->
+  <g transform="translate(40,250)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-store" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Store</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-load" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Load</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Store-Load</text>
+  </g>
+
+  <!-- Store-Store -->
+  <g transform="translate(340,250)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-store" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Store</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-store" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Store</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Store-Store</text>
+  </g>
+
+  <text class="dim" x="320" y="455" text-anchor="middle">Arrows mark the direction in which the compiler or CPU may swap the two operations.</text>
+  <text class="dim" x="320" y="475" text-anchor="middle">Later fence diagrams replace the arrow with a faded ✗ to mark a reorder suppressed by that fence.</text>
+</svg>

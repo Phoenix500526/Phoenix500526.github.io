@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <marker id="arr-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head-dim"/>
+    </marker>
+    <style>
+      .cell           { fill:#fff; stroke:#94a3b8; stroke-width:1.2; }
+      .cell-blocked   { fill:#fee2e2; stroke:#b91c1c; stroke-width:1.6; }
+      .op-load        { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.2; }
+      .op-store       { fill:#fde68a; stroke:#b45309; stroke-width:1.2; }
+      .op-text        { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-weight:600; fill:#1f2937; font-size:13px; }
+      .cell-lbl       { font-weight:700; fill:#1f2937; font-size:13px; }
+      .cell-lbl-blk   { font-weight:700; fill:#b91c1c; font-size:13px; }
+      .title          { font-weight:700; fill:#1f2937; font-size:15px; }
+      .subtitle       { fill:#b91c1c; font-weight:600; font-size:12px; }
+      .swap           { stroke:#475569; stroke-width:1.6; fill:none; }
+      .swap-dim       { stroke:#cbd5e1; stroke-width:1.4; fill:none; }
+      .arrow-head     { fill:#475569; }
+      .arrow-head-dim { fill:#cbd5e1; }
+      .x-mark         { stroke:#b91c1c; stroke-width:4; stroke-linecap:round; fill:none; }
+      .dim            { fill:#475569; font-size:11px; font-style:italic; }
+
+      @media (prefers-color-scheme: dark) {
+        .cell           { fill:#0f172a; stroke:#94a3b8; }
+        .cell-blocked   { fill:#5c2128; stroke:#f87171; }
+        .op-load        { fill:#1e3a8a; stroke:#60a5fa; }
+        .op-store       { fill:#78350f; stroke:#f59e0b; }
+        .op-text        { fill:#f1f5f9; }
+        .cell-lbl       { fill:#f1f5f9; }
+        .cell-lbl-blk   { fill:#f1f5f9; }
+        .title          { fill:#f1f5f9; }
+        .subtitle       { fill:#f1f5f9; }
+        .swap           { stroke:#cbd5e1; }
+        .swap-dim       { stroke:#475569; }
+        .arrow-head     { fill:#cbd5e1; }
+        .arrow-head-dim { fill:#475569; }
+        .x-mark         { stroke:#fca5a5; }
+        .dim            { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <text class="title"    x="320" y="26" text-anchor="middle">Acquire Fence</text>
+  <text class="subtitle" x="320" y="46" text-anchor="middle">blocks Load-Load &amp; Load-Store · allows Store-Load &amp; Store-Store</text>
+
+  <!-- Load-Load: BLOCKED -->
+  <g transform="translate(40,60)">
+    <rect class="cell-blocked" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-load" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Load</text>
+    <line class="swap-dim" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr-dim)" marker-end="url(#arr-dim)"/>
+    <line class="x-mark" x1="118" y1="78" x2="142" y2="102"/>
+    <line class="x-mark" x1="118" y1="102" x2="142" y2="78"/>
+    <rect class="op-load" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Load</text>
+    <text class="cell-lbl-blk" x="130" y="172" text-anchor="middle">Load-Load · BLOCKED</text>
+  </g>
+
+  <!-- Load-Store: BLOCKED -->
+  <g transform="translate(340,60)">
+    <rect class="cell-blocked" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-load" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Load</text>
+    <line class="swap-dim" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr-dim)" marker-end="url(#arr-dim)"/>
+    <line class="x-mark" x1="118" y1="78" x2="142" y2="102"/>
+    <line class="x-mark" x1="118" y1="102" x2="142" y2="78"/>
+    <rect class="op-store" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Store</text>
+    <text class="cell-lbl-blk" x="130" y="172" text-anchor="middle">Load-Store · BLOCKED</text>
+  </g>
+
+  <!-- Store-Load: allowed -->
+  <g transform="translate(40,260)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-store" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Store</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-load" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Load</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Store-Load · allowed</text>
+  </g>
+
+  <!-- Store-Store: allowed -->
+  <g transform="translate(340,260)">
+    <rect class="cell" x="0" y="0" width="260" height="180" rx="6"/>
+    <rect class="op-store" x="80" y="22" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="43" text-anchor="middle">Store</text>
+    <line class="swap" x1="130" y1="62" x2="130" y2="118" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <rect class="op-store" x="80" y="124" width="100" height="32" rx="4"/>
+    <text class="op-text" x="130" y="145" text-anchor="middle">Store</text>
+    <text class="cell-lbl" x="130" y="172" text-anchor="middle">Store-Store · allowed</text>
+  </g>
+</svg>

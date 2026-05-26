@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .box      { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .producer { fill:#dcfce7; stroke:#16a34a; stroke-width:1.4; }
+      .mq-empty { fill:#f1f5f9; stroke:#94a3b8; stroke-width:1.2; stroke-dasharray:4 3; }
+      .mq-full  { fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.4; }
+      .global   { fill:#fde68a; stroke:#b45309; stroke-width:1.6; }
+      .worker   { fill:#ede9fe; stroke:#7c3aed; stroke-width:1.4; }
+      .role     { font-weight:700; fill:#1f2937; font-size:13px; }
+      .label    { font-weight:600; fill:#1f2937; font-size:12px; }
+      .mono     { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:12px; }
+      .dim      { fill:#475569; font-size:11px; font-style:italic; }
+      .role-tag { fill:#475569; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+      .edge     { stroke:#475569; stroke-width:1.4; fill:none; }
+      .edge-promote { stroke:#b45309; stroke-width:1.6; fill:none; stroke-dasharray:5 4; }
+      .edge-consume { stroke:#7c3aed; stroke-width:1.6; fill:none; }
+      .arrow-head { fill:#475569; }
+
+      @media (prefers-color-scheme: dark) {
+        .box      { fill:#0f172a; stroke:#94a3b8; }
+        .producer { fill:#14532d; stroke:#4ade80; }
+        .mq-empty { fill:#1e293b; stroke:#475569; }
+        .mq-full  { fill:#1e3a8a; stroke:#60a5fa; }
+        .global   { fill:#78350f; stroke:#f59e0b; }
+        .worker   { fill:#4c1d95; stroke:#c4b5fd; }
+        .role     { fill:#f1f5f9; }
+        .label    { fill:#f1f5f9; }
+        .mono     { fill:#f1f5f9; }
+        .dim      { fill:#cbd5e1; }
+        .role-tag { fill:#cbd5e1; }
+        .edge     { stroke:#cbd5e1; }
+        .edge-promote { stroke:#f59e0b; }
+        .edge-consume { stroke:#c4b5fd; }
+        .arrow-head { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <!-- Producer row -->
+  <text class="role-tag" x="20" y="30">① PRODUCER · services send messages to a target service</text>
+  <g transform="translate(30,40)">
+    <rect class="producer" x="0"   y="0" width="140" height="56" rx="6"/>
+    <text class="role"     x="70"  y="22" text-anchor="middle">Service A</text>
+    <text class="dim"      x="70"  y="42" text-anchor="middle">producer</text>
+    <rect class="producer" x="180" y="0" width="140" height="56" rx="6"/>
+    <text class="role"     x="250" y="22" text-anchor="middle">Service B</text>
+    <text class="dim"      x="250" y="42" text-anchor="middle">producer</text>
+    <rect class="producer" x="360" y="0" width="140" height="56" rx="6"/>
+    <text class="role"     x="430" y="22" text-anchor="middle">Service C</text>
+    <text class="dim"      x="430" y="42" text-anchor="middle">producer</text>
+    <rect class="producer" x="540" y="0" width="140" height="56" rx="6"/>
+    <text class="role"     x="610" y="22" text-anchor="middle">Service D</text>
+    <text class="dim"      x="610" y="42" text-anchor="middle">producer</text>
+  </g>
+
+  <!-- Arrows: producers → secondary queues (push skynet_message) -->
+  <line class="edge" x1="100" y1="96"  x2="100" y2="140" marker-end="url(#arr)"/>
+  <line class="edge" x1="280" y1="96"  x2="280" y2="140" marker-end="url(#arr)"/>
+  <line class="edge" x1="460" y1="96"  x2="460" y2="140" marker-end="url(#arr)"/>
+  <line class="edge" x1="640" y1="96"  x2="640" y2="140" marker-end="url(#arr)"/>
+
+  <text class="dim" x="755" y="124">push skynet_message into target service's mq</text>
+
+  <!-- Secondary queues row -->
+  <text class="role-tag" x="20" y="135">② PER-SERVICE SECONDARY QUEUES</text>
+  <g transform="translate(30,145)">
+    <rect class="mq-full"  x="0"   y="0" width="140" height="76" rx="4"/>
+    <text class="label"    x="70"  y="20" text-anchor="middle">mq_A</text>
+    <text class="mono"     x="70"  y="40" text-anchor="middle">[ msg msg msg ]</text>
+    <text class="dim"      x="70"  y="60" text-anchor="middle">non-empty</text>
+
+    <rect class="mq-full"  x="180" y="0" width="140" height="76" rx="4"/>
+    <text class="label"    x="250" y="20" text-anchor="middle">mq_B</text>
+    <text class="mono"     x="250" y="40" text-anchor="middle">[ msg ]</text>
+    <text class="dim"      x="250" y="60" text-anchor="middle">non-empty</text>
+
+    <rect class="mq-empty" x="360" y="0" width="140" height="76" rx="4"/>
+    <text class="label"    x="430" y="20" text-anchor="middle">mq_C</text>
+    <text class="mono"     x="430" y="40" text-anchor="middle">[ ]</text>
+    <text class="dim"      x="430" y="60" text-anchor="middle">empty</text>
+
+    <rect class="mq-full"  x="540" y="0" width="140" height="76" rx="4"/>
+    <text class="label"    x="610" y="20" text-anchor="middle">mq_D</text>
+    <text class="mono"     x="610" y="40" text-anchor="middle">[ msg msg ]</text>
+    <text class="dim"      x="610" y="60" text-anchor="middle">non-empty</text>
+  </g>
+
+  <!-- Promotion arrows: only non-empty mqs go into global queue -->
+  <path class="edge-promote" d="M100,221 C 100,260 200,272 280,290" marker-end="url(#arr)"/>
+  <path class="edge-promote" d="M280,221 C 280,260 290,275 330,290" marker-end="url(#arr)"/>
+  <path class="edge-promote" d="M640,221 C 640,260 540,275 460,290" marker-end="url(#arr)"/>
+  <text class="dim" x="400" y="260" text-anchor="middle">promote to global queue when mq becomes non-empty</text>
+
+  <!-- Global queue (manager) -->
+  <text class="role-tag" x="20" y="300">③ MANAGER · skynet runtime maintains a global queue of non-empty mqs</text>
+  <g transform="translate(160,310)">
+    <rect class="global" x="0" y="0" width="420" height="60" rx="6"/>
+    <text class="label"  x="210" y="22" text-anchor="middle">global_queue</text>
+    <text class="mono"   x="210" y="44" text-anchor="middle">[ mq_A → mq_B → mq_D ]</text>
+  </g>
+
+  <!-- Arrow: global → workers -->
+  <line class="edge-consume" x1="200" y1="370" x2="120" y2="420" marker-end="url(#arr)"/>
+  <line class="edge-consume" x1="320" y1="370" x2="320" y2="420" marker-end="url(#arr)"/>
+  <line class="edge-consume" x1="440" y1="370" x2="520" y2="420" marker-end="url(#arr)"/>
+
+  <text class="dim" x="650" y="400">workers pop one mq, drain a slice,</text>
+  <text class="dim" x="650" y="414">push back if still non-empty</text>
+
+  <!-- Worker row -->
+  <text class="role-tag" x="20" y="412">④ CONSUMER · worker threads from the pool</text>
+  <g transform="translate(40,425)">
+    <rect class="worker" x="0"   y="0" width="160" height="50" rx="6"/>
+    <text class="role"   x="80"  y="22" text-anchor="middle">Worker 1</text>
+    <text class="dim"    x="80"  y="40" text-anchor="middle">consumer</text>
+
+    <rect class="worker" x="200" y="0" width="160" height="50" rx="6"/>
+    <text class="role"   x="280" y="22" text-anchor="middle">Worker 2</text>
+    <text class="dim"    x="280" y="40" text-anchor="middle">consumer</text>
+
+    <rect class="worker" x="400" y="0" width="160" height="50" rx="6"/>
+    <text class="role"   x="480" y="22" text-anchor="middle">Worker 3</text>
+    <text class="dim"    x="480" y="40" text-anchor="middle">consumer</text>
+  </g>
+
+  <text class="dim" x="400" y="500" text-anchor="middle">Producer = service, Consumer = worker thread, Manager = skynet runtime maintaining the queue-of-queues.</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13">
+  <defs>
+    <clipPath id="term"><rect x="0" y="0" width="720" height="240" rx="8"/></clipPath>
+    <style>
+      .bg     { fill:#1e1e1e; }
+      .head   { fill:#2d2d2d; }
+      .title  { fill:#9aa0a6; font-size:12px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; }
+      .dot-r  { fill:#ff5f56; }
+      .dot-y  { fill:#ffbd2e; }
+      .dot-g  { fill:#27c93f; }
+      .txt    { fill:#d4d4d4; }
+      .prompt { fill:#4ec9b0; font-weight:bold; }
+      .cmd    { fill:#dcdcaa; }
+      .addr   { fill:#9cdcfe; }
+      .sym    { fill:#ce9178; }
+      .hl-sym { fill:#dcdcaa; font-weight:700; }
+      .dim    { fill:#808080; font-style:italic; }
+    </style>
+  </defs>
+  <g clip-path="url(#term)">
+    <rect class="bg"   x="0" y="0" width="720" height="240"/>
+    <rect class="head" x="0" y="0" width="720" height="28"/>
+    <circle class="dot-r" cx="14" cy="14" r="5.5"/>
+    <circle class="dot-y" cx="32" cy="14" r="5.5"/>
+    <circle class="dot-g" cx="50" cy="14" r="5.5"/>
+    <text class="title" x="360" y="18" text-anchor="middle">mangle_test — nm</text>
+
+    <text x="20" y="58">
+      <tspan class="prompt">$ </tspan><tspan class="cmd">clang++ -c mangle_test.cc &amp;&amp; nm mangle_test.o</tspan>
+    </text>
+
+    <text class="addr"  x="20" y="86">0000000000000010</text>
+    <text class="txt"   x="170" y="86">T</text>
+    <text class="hl-sym" x="200" y="86">_Z3foof</text>
+    <text class="dim"   x="320" y="86">// foo(float) — mangled</text>
+
+    <text class="addr"  x="20" y="108">0000000000000000</text>
+    <text class="txt"   x="170" y="108">T</text>
+    <text class="hl-sym" x="200" y="108">_Z3fooi</text>
+    <text class="dim"   x="320" y="108">// foo(int) — mangled</text>
+
+    <text class="addr"  x="20" y="130">0000000000000020</text>
+    <text class="txt"   x="170" y="130">T</text>
+    <text class="sym"   x="200" y="130">main</text>
+
+    <text class="txt"   x="170" y="152">U</text>
+    <text class="sym"   x="200" y="152">_Unwind_Resume</text>
+
+    <text class="txt"   x="170" y="174">U</text>
+    <text class="sym"   x="200" y="174">__gxx_personality_v0</text>
+
+    <text class="prompt" x="20" y="208">$ </text>
+    <rect x="34" y="198" width="8" height="14" fill="#d4d4d4"/>
+
+    <text class="dim" x="20" y="232">↑ overloaded foo(int) and foo(float) are encoded as distinct symbols by name mangling</text>
+  </g>
+</svg>

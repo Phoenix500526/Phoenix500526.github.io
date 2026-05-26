@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <linearGradient id="ladder" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"  stop-color="#bbf7d0"/>
+      <stop offset="50%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fecaca"/>
+    </linearGradient>
+    <linearGradient id="ladder-dark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"  stop-color="#14532d"/>
+      <stop offset="50%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <style>
+      .bar-light  { fill:url(#ladder); stroke:none; }
+      .bar-dark   { display:none; }
+      .box        { fill:#fff; stroke:#334155; stroke-width:1.4; }
+      .header     { fill:#eef2f7; stroke:#334155; stroke-width:1.4; }
+      .title      { font-weight:700; fill:#1f2937; font-size:15px; }
+      .subtitle   { fill:#475569; font-size:12px; font-style:italic; }
+      .mono       { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:13px; }
+      .dim        { fill:#475569; font-size:11px; }
+      .axis       { stroke:#334155; stroke-width:1.5; fill:none; }
+      .arrow-head { fill:#334155; }
+
+      @media (prefers-color-scheme: dark) {
+        .bar-light  { display:none; }
+        .bar-dark   { display:inline; fill:url(#ladder-dark); }
+        .box        { fill:#0f172a; stroke:#94a3b8; }
+        .header     { fill:#1e293b; stroke:#94a3b8; }
+        .title      { fill:#f1f5f9; }
+        .subtitle   { fill:#cbd5e1; }
+        .mono       { fill:#f1f5f9; }
+        .dim        { fill:#cbd5e1; }
+        .axis       { stroke:#cbd5e1; }
+        .arrow-head { fill:#cbd5e1; }
+      }
+    </style>
+  </defs>
+
+  <!-- gradient strength bar (light & dark variants) -->
+  <rect class="bar-light" x="50" y="40" width="700" height="16" rx="8"/>
+  <rect class="bar-dark"  x="50" y="40" width="700" height="16" rx="8"/>
+  <line class="axis" x1="50" y1="48" x2="750" y2="48" marker-end="url(#ar)"/>
+  <text class="dim" x="50"  y="32">weaker constraint</text>
+  <text class="dim" x="750" y="32" text-anchor="end">stronger constraint</text>
+
+  <!-- column 1: Relaxed -->
+  <g transform="translate(60,90)">
+    <rect class="header" x="0" y="0"   width="200" height="44" rx="6"/>
+    <text class="title"  x="100" y="20" text-anchor="middle">Relaxed Ordering</text>
+    <text class="subtitle" x="100" y="36" text-anchor="middle">atomicity, per-thread order</text>
+    <rect class="box" x="0" y="44" width="200" height="200"/>
+    <text class="mono" x="14" y="74">memory_order_relaxed</text>
+    <text class="dim"  x="14" y="220">No cross-thread</text>
+    <text class="dim"  x="14" y="234">ordering guarantee</text>
+  </g>
+
+  <!-- column 2: Release-Acquire -->
+  <g transform="translate(300,90)">
+    <rect class="header" x="0" y="0" width="200" height="44" rx="6"/>
+    <text class="title"  x="100" y="20" text-anchor="middle">Release-Acquire</text>
+    <text class="subtitle" x="100" y="36" text-anchor="middle">paired sync between two threads</text>
+    <rect class="box" x="0" y="44" width="200" height="200"/>
+    <text class="mono" x="14" y="74">memory_order_acquire</text>
+    <text class="mono" x="14" y="98">memory_order_release</text>
+    <text class="mono" x="14" y="122">memory_order_acq_rel</text>
+    <text class="dim"  x="14" y="220">Pairwise visibility</text>
+    <text class="dim"  x="14" y="234">via synchronizes-with</text>
+  </g>
+
+  <!-- column 3: Sequential Consistent -->
+  <g transform="translate(540,90)">
+    <rect class="header" x="0" y="0" width="200" height="44" rx="6"/>
+    <text class="title"  x="100" y="20" text-anchor="middle">Sequential Consistent</text>
+    <text class="subtitle" x="100" y="36" text-anchor="middle">global total order</text>
+    <rect class="box" x="0" y="44" width="200" height="200"/>
+    <text class="mono" x="14" y="74">memory_order_seq_cst</text>
+    <text class="dim"  x="14" y="98">(default for std::atomic)</text>
+    <text class="dim"  x="14" y="220">All threads agree on</text>
+    <text class="dim"  x="14" y="234">one global ordering</text>
+  </g>
+
+  <!-- footnote -->
+  <text class="dim" x="60" y="365">Note: memory_order_consume is deprecated and not covered.</text>
+</svg>

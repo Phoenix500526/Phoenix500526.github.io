@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13">
+  <style>.canvas{fill:#ffffff}@media (prefers-color-scheme: dark){.canvas{fill:#0f172a}}</style>
+  <rect class="canvas" width="100%" height="100%"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+    <marker id="arr-rsp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head-rsp"/>
+    </marker>
+    <style>
+      .box      { fill:#fff; stroke:#334155; stroke-width:1.2; }
+      .header   { fill:#eef2f7; stroke:#334155; stroke-width:1.2; }
+      .client   { fill:#dcfce7; stroke:#16a34a; stroke-width:1.4; }
+      .server   { fill:#fde68a; stroke:#b45309; stroke-width:1.4; }
+      .inspector{ fill:#dbeafe; stroke:#2b6cb0; stroke-width:1.4; }
+      .module   { fill:#ede9fe; stroke:#7c3aed; stroke-width:1.2; }
+      .title    { font-weight:700; fill:#1f2937; font-size:14px; }
+      .label    { font-weight:600; fill:#1f2937; font-size:13px; }
+      .mono     { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; fill:#1f2937; font-size:12px; }
+      .dim      { fill:#475569; font-size:11px; font-style:italic; }
+      .edge     { stroke:#475569; stroke-width:1.4; fill:none; }
+      .edge-rsp { stroke:#16a34a; stroke-width:1.4; fill:none; stroke-dasharray:5 4; }
+      .arrow-head { fill:#475569; }
+      .arrow-head-rsp { fill:#16a34a; }
+
+      @media (prefers-color-scheme: dark) {
+        .box      { fill:#0f172a; stroke:#94a3b8; }
+        .header   { fill:#1e293b; stroke:#94a3b8; }
+        .client   { fill:#14532d; stroke:#4ade80; }
+        .server   { fill:#78350f; stroke:#f59e0b; }
+        .inspector{ fill:#1e3a8a; stroke:#60a5fa; }
+        .module   { fill:#4c1d95; stroke:#c4b5fd; }
+        .title    { fill:#f1f5f9; }
+        .label    { fill:#f1f5f9; }
+        .mono     { fill:#f1f5f9; }
+        .dim      { fill:#cbd5e1; }
+        .edge     { stroke:#cbd5e1; }
+        .edge-rsp { stroke:#4ade80; }
+        .arrow-head { fill:#cbd5e1; }
+        .arrow-head-rsp { fill:#4ade80; }
+      }
+    </style>
+  </defs>
+
+  <text class="title" x="400" y="26" text-anchor="middle">HttpInspector — REST-style process inspection in muduo</text>
+
+  <!-- Client -->
+  <g transform="translate(20,80)">
+    <rect class="client" x="0" y="0" width="140" height="100" rx="6"/>
+    <text class="label"  x="70" y="22" text-anchor="middle">Client</text>
+    <text class="dim"    x="70" y="40" text-anchor="middle">browser · curl · telnet</text>
+    <text class="mono"   x="14" y="64">GET /proc/pid</text>
+    <text class="mono"   x="14" y="80">GET /sys/version</text>
+    <text class="mono"   x="14" y="96">GET /perf/cpu</text>
+  </g>
+
+  <!-- HttpServer -->
+  <g transform="translate(220,80)">
+    <rect class="server" x="0" y="0" width="150" height="100" rx="6"/>
+    <text class="label" x="75" y="22" text-anchor="middle">HttpServer</text>
+    <text class="dim"   x="75" y="40" text-anchor="middle">muduo::net</text>
+    <text class="mono"  x="14" y="66">parse request line</text>
+    <text class="mono"  x="14" y="82">resolve path</text>
+    <text class="mono"  x="14" y="98">dispatch to Inspector</text>
+  </g>
+
+  <!-- Inspector -->
+  <g transform="translate(420,80)">
+    <rect class="inspector" x="0" y="0" width="150" height="100" rx="6"/>
+    <text class="label" x="75" y="22" text-anchor="middle">Inspector</text>
+    <text class="dim"   x="75" y="40" text-anchor="middle">net/inspect/Inspector</text>
+    <text class="mono"  x="14" y="66">split /module/cmd</text>
+    <text class="mono"  x="14" y="82">lookup module</text>
+    <text class="mono"  x="14" y="98">invoke callback</text>
+  </g>
+
+  <!-- Modules -->
+  <g transform="translate(620,40)">
+    <rect class="header" x="0" y="0" width="160" height="22" rx="3"/>
+    <text class="label"  x="80" y="16" text-anchor="middle">registered modules</text>
+  </g>
+
+  <g transform="translate(620,72)">
+    <rect class="module" x="0" y="0" width="160" height="60" rx="4"/>
+    <text class="label"  x="80" y="18" text-anchor="middle">ProcessInspector</text>
+    <text class="mono"   x="10" y="36">pid · uptime · status</text>
+    <text class="mono"   x="10" y="52">threads · overview</text>
+  </g>
+
+  <g transform="translate(620,142)">
+    <rect class="module" x="0" y="0" width="160" height="60" rx="4"/>
+    <text class="label"  x="80" y="18" text-anchor="middle">PerformanceInspector</text>
+    <text class="mono"   x="10" y="36">cpu · memory · heap</text>
+    <text class="mono"   x="10" y="52">contention</text>
+  </g>
+
+  <g transform="translate(620,212)">
+    <rect class="module" x="0" y="0" width="160" height="60" rx="4"/>
+    <text class="label"  x="80" y="18" text-anchor="middle">SystemInspector</text>
+    <text class="mono"   x="10" y="36">version · loadavg</text>
+    <text class="mono"   x="10" y="52">stats · meminfo</text>
+  </g>
+
+  <!-- request flow arrows -->
+  <line class="edge" x1="160" y1="130" x2="220" y2="130" marker-end="url(#arr)"/>
+  <text class="dim"  x="190" y="120" text-anchor="middle">HTTP</text>
+
+  <line class="edge" x1="370" y1="130" x2="420" y2="130" marker-end="url(#arr)"/>
+  <text class="dim"  x="395" y="120" text-anchor="middle">request</text>
+
+  <line class="edge" x1="570" y1="100" x2="620" y2="100" marker-end="url(#arr)"/>
+  <line class="edge" x1="570" y1="170" x2="620" y2="170" marker-end="url(#arr)"/>
+  <line class="edge" x1="570" y1="240" x2="620" y2="240" marker-end="url(#arr)"/>
+  <text class="dim"  x="595" y="92" text-anchor="middle">route</text>
+
+  <!-- response flow (dashed green return) -->
+  <path class="edge-rsp" d="M620,250 C 500,310 280,310 160,250" marker-end="url(#arr-rsp)"/>
+  <text class="dim" x="400" y="306" text-anchor="middle">HTTP response · text/plain payload from callback</text>
+
+  <!-- Bottom registration note -->
+  <g transform="translate(140,360)">
+    <rect class="box" x="0" y="0" width="520" height="60" rx="6"/>
+    <text class="label" x="260" y="22" text-anchor="middle">Inspector::add(module, command, callback, help)</text>
+    <text class="dim"   x="260" y="42" text-anchor="middle">each module registers its commands at startup; URL path /module/command picks one.</text>
+  </g>
+</svg>
