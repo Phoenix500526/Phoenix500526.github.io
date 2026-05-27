@@ -4,7 +4,8 @@ menu:
   #技术笔记: https://zhousiwei.gitee.io/ibooks/
   #源码剖析: /categories/源码剖析
   学而时嬉之: /categories/学而时嬉之/
-  我的简历: https://hacker-cube.com/Animation-Resume/public/index.html
+  # 我的简历: <TBD>  # 原 Animation-Resume 仓库已重组为私有 Resume，旧域名 hacker-cube.com 已过期。
+                   # 简历重新部署后填回（Resume 仓库 Settings → Pages 启用，或迁到外链如 LinkedIn）
 
 # subNav-子导航
 subNav:
