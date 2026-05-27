@@ -131,8 +131,6 @@ end
 ```
 `skynet.name` 函数也会调用 `c.command` 接口来向对应的服务发送命令，只不过这次发送的是 NAME 命令，并且最终会调用 `cmd_name`函数来为服务进行命名。
 
-
-
 #### 如何在 lua 服务中创建一个新的 lua 服务
 
 在说完上面两个 api 后，我们再来看看 `skynet.newservice` 的作用。skynet 在 lua 层一共有两种不同的创建服务的方式：一种是 `skynet.launch` 创建用 C 编写的服务，而另一种方式则是调用 `skynet.newservice` 创建 lua 服务。以上述的 bootstrap 服务和 service_mgr 服务为例，创建 lua 服务的流程大致如下：

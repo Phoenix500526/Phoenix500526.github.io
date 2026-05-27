@@ -33,7 +33,6 @@ categories: muduo源码剖析
 
 这下就清楚了，Google 不用异常的原因是 Google 有很多旧代码并不是异常安全的，将这些代码中引入异常处理，其工作量之巨大远超过异常所能够带来的好处。**如果你所做的项目没有历史包袱，那么适当的使用异常是利大于弊的(关于异常的优缺点，可以直接查看Google C++ Style Guide中的 Pros and Cons，这里就不做搬运工了)**。
 
-
 #### tmuduo 的异常实现
 ```C++
 class Exception : public std::exception {
@@ -53,7 +52,6 @@ class Exception : public std::exception {
 ```
 注意：本节内容中所用的异常代码和 muduo 网络库中是高度类似的，我仅是对其做了一点点微小的调整以使其适应我自己编写的 Thread 类。为了能和之前的文章保持一致，此处还是用 tmuduo 的代码。
 从上述代码来看，整个异常类的代码非常简单，重点还是在于 `CurrentThread::stackTrace` 函数的实现上。不过在展示 `CurrentThread::stackTrace` 的代码实现之前，需要先了解两个基本概念 mangle 与 demangle
-
 
 #### C++ 的 mangle 与 demangle
 先简单地解释一下一些相关的概念：
@@ -152,7 +150,6 @@ tmuduo 当中有关于 Exception 的测试，代码路径为 test/Exception_test
 <div class="image-caption" align="center">Exception without demangle</div> 
 
 从上述结果可以看出，同一个函数 Bar::test 在经过 demangle 处理的异常信息中显示为 `Bar::test(...)`， 在没有经过 demangle 处理的异常信息中显示为 `_ZN3Bar4testEbSt6vectorINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESaIS6_EE+0x1c`
-
 
 #### 参考资料
 [1]. [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)

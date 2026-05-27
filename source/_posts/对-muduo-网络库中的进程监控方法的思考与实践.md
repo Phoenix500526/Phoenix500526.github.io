@@ -92,7 +92,6 @@ std::string ProcessInfo::procStatus() {
 </div>
 <div class="image-caption" align="center">HttpInspector框图</div>
 
-
 muduo 中相关代码位于 net/inspect/ 下
 ```C++
 class Inspector : noncopyable {

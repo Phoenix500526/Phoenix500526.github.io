@@ -341,8 +341,6 @@ string LogFile::getLogFileName(const string& basename, time_t* now){
 
 对于第二个条件，`append_unlock()` 会记录所插入的日志条数，每当插入日志的记录数超过 checkEveryN 时就检测当前时间，并从中取出天数和 startOfPeriod_ 进行比较，如果不在同一天，则执行 `rollFile()`
 
-
-
 #### 一些其他的问题
 
 为什么 AsyncLogging 中的部分函数需要使用到锁，而 LogFile 当中要提供无锁版本？

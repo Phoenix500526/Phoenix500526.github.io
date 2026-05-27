@@ -88,7 +88,6 @@ class SyncQueue : noncopyable {
 SyncQueue 整体的实现也不复杂，如果看了之前的文章：[《clang 的线程安全注解TSA》](/2020/11/05/clang-%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%B3%A8%E8%A7%A3TSA/)以及 [《对 muduo 网络库中互斥量与条件变量的思考与实践》](/2020/11/05/%E5%AF%B9-muduo-%E7%BD%91%E7%BB%9C%E5%BA%93%E4%B8%AD%E4%BA%92%E6%96%A5%E9%87%8F%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E7%9A%84%E6%80%9D%E8%80%83%E4%B8%8E%E5%AE%9E%E8%B7%B5/)，理解上应该不会有什么太大的问题。
 这里有个地方稍微提一下：出于效率的考虑，running\_ 不需要是 atomic 类型。这主要是因在同步队列当中，只有在初始化队列和停止队列时才会修改到 running\_ 而使用频繁的 `take` 和 `put` 函数会不断访问 running\_ 的值，因此我将 running\_ 设置为普通的 bool 类型，而在 `stop` 函数中采用上锁访问的方式来避免 data race.
 
-
 #### ThreadPool 的实现
 ThreadPool 的具体代码放在 tmuduo/base/ThreadPool.{h, cc} 当中，有需要的可以自行下下来研究。这里出于篇幅问题，只展示了一些关键代码。
 ```C++

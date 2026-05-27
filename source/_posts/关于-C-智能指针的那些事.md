@@ -70,7 +70,6 @@ std::vector<shared_ptr<Object>> vec{p1, p2, p3};
 
 除了上述的三种行为外，使用`weak_ptr`来构造`shared_ptr`、或者通过拷贝构造、拷贝赋值、移动构造、移动赋值的方式构造`shared_ptr`也不会导致`Control Block`的创建。其中，**出于效率的考虑，使用移动赋值和移动构造也不会更新`reference count`信息**。
 
-
 #### make_shared 的优劣
 
 针对前面结论三中所提到的效率及安全问题，我们先上一小段代码来进一步说明问题：
@@ -407,9 +406,6 @@ int main(){
 | move assignment : operator=(P&&)      | C          | I          |
 | reset()                               | C          | I          |
 | reset(A*)                             | C          | C          |
-
-
-
 
 #### Reference
 [0]. 《Effective Modern C++》

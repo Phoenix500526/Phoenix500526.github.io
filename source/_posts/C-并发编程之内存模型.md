@@ -93,7 +93,6 @@ struct my_data{
 </div>
 <div class="image-caption" align="center">Memory Layout</div>
 
-
 ### C++ 内存模型之内存序
 
 ##### 操作间的关系
@@ -148,8 +147,6 @@ void read_thread(){
 
 从上述代码中，① sequenced-before ②、③ sequenced-before ④、② synchronizes-with ④，因此我们有 ① happens-before ④， ② happens-before ④。
 
-
-
 ##### 修改顺序 和 Visible side-effects
 
 C++ 标准中对 side-effects 的定义如下：
@@ -161,8 +158,6 @@ C++ 标准中对 side-effects 的定义如下：
 **简单地说，所谓的 side-effect 就是指当执行完一个对表达式的求值操作后，导致了被操作对象状态的改变**。例如 执行完 `int var = 10; int i = var++;`后，表达式 `var++`的结果是 10，但 var 的状态发生了改变(从10 变成11)，那么 `var++`就产生了一个 side-effect.
 
 在 C++ 中对于某个特定的原子变量的所有访问操作都存在一个修改序列。对于程序的每次运行而言，这一修改序列可能不同，但针对具体的某一次运行，都必然有一个确定的顺序。而**所谓的修改顺序的一致性，就是指所有访问该原子变量的线程都只会看到同一个修改序列**。换句话讲，**一旦这个原子变量的状态发生改变，那么这个改变后的状态应当同步给所有的线程，这样就避免了在访问同个原子变量的多个线程之间出现数据不一致的问题**。
-
-
 
 ##### C++ 内存序模型
 
@@ -228,8 +223,6 @@ int main(){
 
 在下面这段代码中，`assert(z.load()!=0);` 是有可能会被触发的。这是因为对于线程 a 而言，交换 ① 和 ② 并不违背 Relaxed Ordering 所作出的承诺：① 和 ② 分别操作的是 x 和 y 两个原子变量，且 x 和 y 各自的修改序列中就只包含了一个操作，因此**C++ 允许编译器或 CPU 对 ① 或 ② 进行指令重排**。一旦 ① 和 ② 的指令顺序对调，且线程 a 与 b 的执行序列变成 ② => ③ => ④ => ①，那么 `assert(z.load()!=0);` 就会发生。
 
-
-
 ###### Release-Acquire Ordering
 
 在讨论 Release-Acquire ordering 之前，我们需要先知道以下两个概念以及一个例子：
@@ -269,8 +262,6 @@ void read_y_then_x(){
 另外，在一些重视指令执行序列(strongly-ordered)的硬件平台，如 x86 等，大多数操作都是符合 Release-Acquire Ordering 的，编译器在编译程序时无需生成额外的指令来保证 Release-Acquire Ordering。而在一些弱序性(weakly-ordered)的硬件平台，如 ARM 上，则需要通过内存栅栏(memory fence)来实现。
 
 总的来说，**Release-Acquire Ordering 相当于提供了两条"基线"，位于 release 线之前的相关指令不能越过这条线到这条线之后去执行，而位于 acquire 线之后的相关指令则不能越过 acquire 线跑到前面去执行**。另外，由于 std::mutex 本身的 lock 与 unlock 也属于 acquire 和 release 操作，因此也符合 Release-Acquire Ordering，其中临界区的概念就是被 acquire 线和 release 线所包围的那片区域。
-
-
 
 ###### Sequential Consistent Ordering
 
@@ -331,8 +322,6 @@ int main(){
 C++ 并发编程困难不仅在于开发人员需要捋清不同线程之间复杂的协作关系，还需要**在一定程度上对抗编译器和 CPU 所做出的优化**。C++ 提供三种不同的内存序，旨在能够让开发者根据自身需要自行选择，以**最低限度**约束编译器及 CPU 的优化。
 
 从上述三个内存序来看，**Relaxed Ordering 只保证了在同线程内的单个原子变量的修改一致性，而 Release-Acquire Ordering 则通过一对 release 和 acquire 操作，将这种修改一致性扩展到了相关的两个线程当中，而 Sequential Consistent Ordering 则将这种修改一致性扩展到了全局的所有线程当中**。
-
-
 
 ### 内存栅栏(Memory Fence)
 
@@ -402,8 +391,6 @@ void read_y_then_x(){
 		++z;
 }
 ```
-
-
 
 ### Reference
 

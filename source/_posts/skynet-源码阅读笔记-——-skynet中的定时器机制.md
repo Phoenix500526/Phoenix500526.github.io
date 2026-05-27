@@ -11,8 +11,6 @@ tags: [skynet框架, Timer, C语言]
 categories: skynet源码剖析
 ---
 
-
-
 #### 文前导读
 
 skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第四篇文章，探讨了 skynet 的定时器机制，主要包含了以下内容：
@@ -267,7 +265,6 @@ static void timer_shift(struct timer *T) {
  <img src="/img/skynet-timer/time-near-t-relationship.svg"/>
 </div>
 <div class="image-caption" align="center">time 与 near 以及 t 的关系</div>
-
 
 如上图所示，skynet 按照超时时间的紧迫程度为 timer 划分出 5 个槽，其中紧急程度为 near > level0 > level1 > level2 > level3。其中，`near` 中的定时器节点超时时间相差最大不超过 2^8 = 256 次 tick，而对于同一个 level 而言，t[level] 中的定时器超时时间间隔不超过 2^6 = 64 次 tick。 `time` 中不同的位域代表了不同的紧急程度。`timer_execute` 每次只对 `near` 中的定时器执行超时操作。
 

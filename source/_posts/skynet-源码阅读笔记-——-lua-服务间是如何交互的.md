@@ -11,8 +11,6 @@ tags: [skynet框架, C语言]
 categories: skynet源码剖析
 ---
 
-
-
 #### 文前导读
 
 skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文为 skynet 框架源码剖析系列的第七篇文章，探讨了 skynet 框架下，同一 skynet 节点内不同的lua 服务之间是如何通过消息来进行交互，主要包含了以下内容：
