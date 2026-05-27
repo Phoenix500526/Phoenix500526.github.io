@@ -20,7 +20,7 @@ skynet 是一个由云风所写的轻量级在线游戏服务器框架。本文�
 
 <!-- more -->
 
-在上一篇文章中[《skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动》](http://hacker-cube.com/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/)，我们探讨了 bootstrap 服务的启动细节，其中 bootstrap 服务的核心在于 bootstrap.lua 脚本的执行。而这篇博客会借助 bootstrap.lua 脚本中的部分内容来说明如何在一个 lua 服务内启动其他的 lua 服务
+在上一篇文章中[《skynet 源码阅读笔记 —— 引导服务 bootstrap 的启动》](/2020/11/04/skynet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-%E2%80%94%E2%80%94-%E5%BC%95%E5%AF%BC%E6%9C%8D%E5%8A%A1-bootstrap-%E7%9A%84%E5%90%AF%E5%8A%A8/)，我们探讨了 bootstrap 服务的启动细节，其中 bootstrap 服务的核心在于 bootstrap.lua 脚本的执行。而这篇博客会借助 bootstrap.lua 脚本中的部分内容来说明如何在一个 lua 服务内启动其他的 lua 服务
 ```lua
 --引用 skynet.lua 中的接口
 local skynet = require "skynet"
