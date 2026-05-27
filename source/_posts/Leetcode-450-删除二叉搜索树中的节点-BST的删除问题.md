@@ -63,7 +63,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     TreeNode* deleteNode(TreeNode* root, int key) {

@@ -45,7 +45,7 @@ categories: 算法笔记
 
 **代码实现**
 
-```
+```C++
 class Solution {
 public:
     bool visited[10001] = {false};
@@ -89,7 +89,7 @@ public:
 
 **改进代码**：
 
-```
+```C++
 class Solution {
 public:
     //0:未访问，1：已访问；2：成环节点；3：安全节点

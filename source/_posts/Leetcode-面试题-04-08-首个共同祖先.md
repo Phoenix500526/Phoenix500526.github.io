@@ -58,7 +58,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {

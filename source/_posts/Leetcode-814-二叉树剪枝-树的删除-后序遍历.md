@@ -52,7 +52,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     TreeNode* pruneTree(TreeNode* root) {

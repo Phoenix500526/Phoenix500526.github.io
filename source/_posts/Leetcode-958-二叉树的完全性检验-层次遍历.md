@@ -57,7 +57,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool isCompleteTree(TreeNode* root) {

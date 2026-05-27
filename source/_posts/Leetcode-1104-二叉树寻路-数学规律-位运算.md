@@ -53,7 +53,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     void helper(int x, int k, vector<int>& ans){
@@ -107,7 +107,7 @@ public:
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     void helper(int x, int k, vector<int>& ans){

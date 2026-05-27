@@ -93,7 +93,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     inline void getCoordinate(int N,int num, int& row, int& col){

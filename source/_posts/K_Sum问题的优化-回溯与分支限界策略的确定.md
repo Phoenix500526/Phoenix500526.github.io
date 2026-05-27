@@ -18,7 +18,7 @@ categories: 算法笔记
 > *   若第i个数被选中，则下一步动作便是在剩余的n-i个数中选取和为sum-has-a[i]的数
 > *   若第i个数不被选中，则下一步的动作，便是在剩余的n-i个数中选取和为sum-has的数
 
-```
+```C++
 设f(X,idx,sum,has)为输出任意满足条件的组合的函数，则递归模型如下：
 特殊参数声明：X是一个一维布尔数组，用于存放问题的解向量，X[i]=true代表a[i]被选中，
              X[i]=false代表a[i]不被选中
@@ -32,7 +32,7 @@ categories: 算法笔记
 
 代码实现：
 
-```
+```C++
 #include <iostream>
 using namespace std;
 int a[] = { -1,3,-2,5,8,-9,15 };
@@ -71,7 +71,7 @@ int main()
 
 代码实现：
 
-```
+```C++
 #include <iostream>
 using namespace std;
 int a[] = { -1,-3,-2,5,-8,9,15 };

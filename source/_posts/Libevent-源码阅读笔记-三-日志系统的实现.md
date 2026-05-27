@@ -15,7 +15,7 @@ categories: Libevent源码阅读笔记
 
 Libevent 的日志系统中定义了四个日志的输出等级，默认情况下会将日志信息输出到终端。不过 Libevent 允许用户设置自定义的日志输出回调函数以及异常日志输出函数，以提供日志信息的进一步解释和输出重定向。回调函数的指针定义如下：
 
-```
+```C
 //event.h
 //日志输出等级
 #define EVENT_LOG_DEBUG 0   
@@ -29,7 +29,7 @@ typedef void (*event_fatal_cb)(int err);
 
 Libevent 默认将这两个回调函数置为 NULL，用户可以通过函数`event_set_log_callback`和`event_set_fatal_callback`进行设置
 
-```
+```C
 //log.c
 static event_log_cb log_fn = NULL;
 void event_set_log_callback(event_log_cb cb)
@@ -45,7 +45,7 @@ void event_set_fatal_callback(event_fatal_cb cb)
 
 若用户没有自定义日志输出函数，那么 Libevent 会根据 severity 的值调用相应的默认日志输出函数，并向 stderr 输出日志信息。具体的实现如下：
 
-```
+```C
 //log.c
 static void event_log(int severity, const char *msg)
 {
@@ -91,7 +91,7 @@ static void event_exit(int errcode)
 
 看完了 Libevent 的日志系统留给用户的两个接口定义后，我们可以来看看 Libevent 默认的日志输出函数。在源码当中，日志系统相关的文件主要有两个: log.c 和 log-internal.h。我们先来看 log-internal.h 文件
 
-```
+```C
 // log-internal.h 
 #ifdef __GNUC__
 #define EV_CHECK_FMT(a,b) __attribute__((format(printf, a, b)))
@@ -141,7 +141,7 @@ void event_logv_(int severity, const char *errstr, const char *fmt, va_list ap)
 
 __attribute__ 是 GNU C 下的一种机制，可以用来设置函数属性、变量属性以及类型属性，它的语法格式如下
 
-```
+```C
 __attribute__((attribute-list))
 ```
 
@@ -165,7 +165,7 @@ visibility属性可以将从动态库中导出可见符号，default 代表可�
 
 对于`event_err`，`event_sock_err`，`event_debugx_`等函数，它们的实现大同小异，区别仅是部分参数的不同，以下选取部分函数进行讨论
 
-```
+```C
 void event_err(int eval, const char *fmt, ...)
 {
     va_list ap;
@@ -226,7 +226,7 @@ void event_logv_(int severity, const char *errstr, const char *fmt, va_list ap)
 
 在 log-internal.h 当中还定义了一个 `event_debug` 的宏，可以用于在调试期间打印出调试信息。利用这个宏来代替`event_debugx_`函数，一方面可以使得调试语义更加清晰，另一方面也可以非常方便地实现调试模式的开关。它的定义如下：
 
-```
+```C
 #ifdef EVENT_DEBUG_LOGGING_ENABLED
 #define event_debug(x) do {         \
     if (event_debug_get_logging_mask_()) {  \

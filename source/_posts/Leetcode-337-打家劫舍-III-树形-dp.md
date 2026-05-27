@@ -74,7 +74,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 /**
  * Definition for a binary tree node.
  * struct TreeNode {

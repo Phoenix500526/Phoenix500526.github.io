@@ -46,7 +46,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     typedef unsigned long long ull;

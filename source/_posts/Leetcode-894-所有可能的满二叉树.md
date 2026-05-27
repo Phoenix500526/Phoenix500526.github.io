@@ -58,7 +58,7 @@ N = 1, 3, 5 的情况
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     vector<TreeNode*> allPossibleFBT(int N) {

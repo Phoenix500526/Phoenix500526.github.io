@@ -58,7 +58,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool isSymmetricHelper(TreeNode* ltree, TreeNode* rtree){

@@ -47,7 +47,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     // p_idx 代表当前 pattern 中字符下标

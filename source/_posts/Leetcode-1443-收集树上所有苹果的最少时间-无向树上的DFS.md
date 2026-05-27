@@ -59,7 +59,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     int dfs(int root, vector<vector<int>>& graph, vector<bool>& hasApple,vector<bool>& visited){

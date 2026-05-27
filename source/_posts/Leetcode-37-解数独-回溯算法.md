@@ -54,7 +54,7 @@ Output
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool row_tab[9][9] = {false};

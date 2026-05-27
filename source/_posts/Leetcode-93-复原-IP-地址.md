@@ -35,7 +35,7 @@ categories: 算法笔记
 
 ## 代码实现
 
-```
+```C++
 class Solution {
 public:
     vector<string> res;

@@ -53,7 +53,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool flipEquiv(TreeNode* root1, TreeNode* root2) {

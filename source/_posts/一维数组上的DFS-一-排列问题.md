@@ -35,7 +35,7 @@ categories: 算法笔记
 
 ## 模板(枚举全排列)
 
-```
+```C++
 vector<int> res(len, 0);  // 存放临时结果
 vector<vector<int>> ans;
 bool visited[16];  //标记已访问过的元素
@@ -69,7 +69,7 @@ void dfs(vector<int>& nums, int idx, int len){
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool visited[16] = {false};

@@ -71,7 +71,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     int rob(vector<int>& nums) {

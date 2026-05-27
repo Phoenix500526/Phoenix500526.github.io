@@ -19,7 +19,7 @@ categories: 算法笔记
 
 对于这样的一个问题，一般暴力算法主要是枚举所有子串的中心位置，并在该位置上进行扩展，记录并更新最长回文子串的距离。代码实现如下：
 
-```
+```C++
 #include "pch.h"
 #include <iostream>
 using namespace std;
@@ -88,7 +88,7 @@ Manacher算法是对暴力算法的一个优化。面对暴力算法的第一个
 
  代码实现：
 
-```
+```C++
 #include "pch.h"
 #include <iostream>
 #include <algorithm> 

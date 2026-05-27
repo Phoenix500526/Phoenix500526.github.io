@@ -85,7 +85,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     //使用广度优先搜索，从起点向终点最多跨越 k + 1 层次

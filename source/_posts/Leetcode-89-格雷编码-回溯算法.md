@@ -60,7 +60,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     static const int MAX = 1 << 16;

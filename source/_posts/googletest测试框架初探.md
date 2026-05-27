@@ -15,7 +15,7 @@ categories: 瑞士军刀
 
 示例目录的源码树：
 
-```
+```C++
 $ tree
 .
 ├── 3rd_party
@@ -38,7 +38,7 @@ $ make test
 
 测试通过：
 
-```
+```C++
 $ make test
 Running tests...
 Test project /home/phoenix/Project/cmake-examples/05-unit-testing/google-test-download/build
@@ -52,7 +52,7 @@ Total Test time (real) =   0.01 sec
 
 测试失败:
 
-```
+```C++
 $ make test
 Running tests...
 Test project /home/phoenix/Project/cmake-examples/05-unit-testing/google-test-download/build
@@ -74,13 +74,13 @@ make: ** [test] Error 8
 
 注1：googletest 也可以使用 clang 或 g++ 进行单独编译，编译命令为：
 
-```
+```C++
 $ clang++ UnitTest.cc -I ../google-test/googletest-src/googletest/include/ -L../google-test/googletest-build/googlemock/gtest -lgtest -lgtest_main -lpthread -std=c++11 -Wall
 ```
 
 注2：若测试时需要有配置文件，例如一个 ConfigUnittest.cc 会读取一个测试专用的配置文件：Config_unittest.ini 时，可以在对应目录下的 CMakeLists.txt 文件中添加
 
-```
+```C++
 # Config_unitest
 add_executable(ConfigUnitTest Config_unittest.cc ${CMAKE_SOURCE_DIR}/Config.cc)
 target_include_directories(ConfigUnitTest PUBLIC ${CMAKE_SOURCE_DIR})
@@ -100,7 +100,7 @@ add_custom_command(TARGET ConfigUnitTest POST_BUILD
 
 注3：若希望将拷贝形式变成执行 `make copy_ini_file` 的形式，则可以采用下面的 cmake 命令
 
-```
+```C++
 add_custom_target(copy_ini_file)
 add_custom_command(TARGET copy_ini_file 
     COMMAND ${CMAKE_COMMAND} -E 
@@ -109,7 +109,7 @@ add_custom_command(TARGET copy_ini_file
 
 **3rd_party/google-test/CmakeLists.txt.in 文件**
 
-```
+```C++
 cmake_minimum_required(VERSION 3.0)
 
 # NONE 代表该项目是非语言项目(通常语言默认为 C 或 CXX)
@@ -135,7 +135,7 @@ ExternalProject_Add(googletest
 
 **3rd_party/google-test/CmakeLists.txt 文件**
 
-```
+```C++
 # Download and unpack googletest at configure time
 # See: http://crascit.com/2015/07/25/cmake-gtest/
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -180,7 +180,7 @@ endif()
 
 **CMakeLists.txt 文件**
 
-```
+```C++
 cmake_minimum_required(VERSION 3.5)
 
 # Set the project name
@@ -230,7 +230,7 @@ add_test(test_all unit_tests)
 
 **unit_tests.cpp**
 
-```
+```C++
 #include <string>
 #include "Reverse.h"
 #include "Palindrome.h"
@@ -295,7 +295,7 @@ TEST_F(ReverseTests,  is_palindrome )
 
 示例代码：
 
-```
+```C++
 // 可在测试断言后用 << 运算符打印自己的信息
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
 
@@ -318,7 +318,7 @@ for (int i = 0; i < x.size(); ++i) {
 
 一个简单的示例：
 
-```
+```C++
 // Tests factorial of 0.
 TEST(FactorialTest, HandlesZeroInput) {
   EXPECT_EQ(Factorial(0), 1);
@@ -339,7 +339,7 @@ TEST(FactorialTest, HandlesPositiveInput) {
 
 一个简单的示例：
 
-```
+```C++
 //待测试的源文件
 template <typename E>  // E is the element type.
 class Queue {
@@ -429,7 +429,7 @@ TEST_F(QueueTest, DequeueWorks) {
 
 一个简单的示例：
 
-```
+```C++
 #include "this/package/foo.h"
 #include "gtest/gtest.h"
 

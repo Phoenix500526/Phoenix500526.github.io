@@ -49,7 +49,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     void BFS(vector<vector<int>>& red_graph, vector<vector<int>>& blue_graph, vector<int>& ans, bool flag){

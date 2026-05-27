@@ -43,7 +43,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 private:
     typedef pair<int, int> pair;

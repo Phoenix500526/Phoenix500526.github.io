@@ -81,7 +81,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     bool dfs(TreeNode* &root, int sum, int limit){

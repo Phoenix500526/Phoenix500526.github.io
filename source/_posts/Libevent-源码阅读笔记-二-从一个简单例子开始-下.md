@@ -27,7 +27,7 @@ categories: Libevent源码阅读笔记
 
 要了解如何将事件处理器插入到注册事件队列中，就需要先知道 Libevent 是如何将句柄和注册事件之间的联系定义出来。其相关的数据结构主要定义在 event-internal.h 和 evmap.c 文件中
 
-```
+```C
 //event-internal.h
 //若定义了 EVMAP_USE_HT 则将 event_io_map 定义为哈希表。该哈希表存储了 event_map_entry 对象和 I/O 事件队列之间的映射关系
 #ifdef EVMAP_USE_HT
@@ -87,7 +87,7 @@ struct event_map_entry {
 
 创建好的 event 事件可以利用 `event_add()`插入相应的注册事件队列中
 
-```
+```C
 //向注册事件队列中添加事件处理器
 int event_add(struct event *ev, const struct timeval *tv)
 {
@@ -276,7 +276,7 @@ int event_add_nolock_(struct event *ev, const struct timeval *tv,int tv_is_absol
 
 接下来，对于注册事件，Libevent 通过`evmap_io_add_`、 `evmap_signal_add_` 以及 `event_queue_insert_inserted`进行将它们插入到对应的事件队列当中，其中`evmap_io_add_`、 `evmap_signal_add_` 被定义在 evmap.c 文件中，而`event_queue_insert_inserted`被定义在 event.c 文件中
 
-```
+```C
 // evmap.c 文件
 int evmap_io_add_(struct event_base *base, evutil_socket_t fd, struct event *ev)
 {
@@ -412,7 +412,7 @@ static void event_queue_insert_inserted(struct event_base *base, struct event *e
 
 对于超时事件，Libevent 则调用了`event_queue_insert_timeout`来将定时器插入到通用定时器队列或时间堆。
 
-```
+```C
 static void event_queue_insert_timeout(struct event_base *base, struct event *ev)
 {
     EVENT_BASE_ASSERT_LOCKED(base);
@@ -443,7 +443,7 @@ static void event_queue_insert_timeout(struct event_base *base, struct event *ev
 
 正如前面提到，Libevent 是基于事件驱动的，整个框架库的运转核心在于事件驱动：Reactor 在接收到相应事件后，通过 `event_base_dispatch()` 的方法，将事件分派给对应的事件处理器去处理。`event_base_dispatch()`定义在 event.c 文件中
 
-```
+```C
 int event_base_dispatch(struct event_base *event_base)
 {
     return (event_base_loop(event_base, 0));
@@ -559,7 +559,7 @@ done:
 
 #### 释放资源
 
-```
+```C
 static int event_base_free_queues_(struct event_base *base, int run_finalizers)
 {
     int deleted = 0, i;

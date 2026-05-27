@@ -40,7 +40,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     vector<vector<int>> pathSum(TreeNode* root, int sum) {

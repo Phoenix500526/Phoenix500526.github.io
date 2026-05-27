@@ -43,7 +43,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     //利用中序遍历是递增序列来做即可,tmp代表中序前趋

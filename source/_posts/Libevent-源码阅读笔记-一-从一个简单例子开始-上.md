@@ -49,7 +49,7 @@ Libevent 的源码链接：git clone [https://github.com/libevent/libevent.git](
 
 #### 一个简单的 libevent 示例代码：
 
-```
+```C
 //helloworld.cpp
 #include <sys/signal.h>
 #include <event.h>
@@ -98,7 +98,7 @@ int main(void){
 
 在了解 `event_int()`函数做了何种操作之前，我们需要了解 event_base、eventop 这两个数据结构，它们都定义在 libevent-2.1.12-stable/event-internal.h 中。其中 event_base 构成了 Reactor 的角色， 而 eventop 则构成了 EventDemultiplexer 角色
 
-```
+```C
 /** Structure to define the backend of a given event_base. */
 struct eventop {
     //后端 I/O 复用技术的名称
@@ -259,7 +259,7 @@ struct event_base {
 
 正如先前所提到的那样，Libevent 向用户提供了统一的 I/O 复用接口，屏蔽了底层系统的之间的差异，而这一起都要通过定义在 event.c 文件中的 eventops 数组来实现。在不同的系统下有不同的优先级，对于 Linux 系统而言，默认使用的 I/O 复用技术是 epoll。
 
-```
+```C
 //优先级
 #ifdef EVENT__HAVE_WORKING_KQUEUE
 #include "kqueue-internal.h"
@@ -316,7 +316,7 @@ static const struct eventop *eventops[] = {
 
 `event_init()`定义在 event.c 中，它的主要作用是执行 `event_base_new_with_config(NULL)`来创建一个 event_base 实例并将其保存在全局静态变量 current_base 当中。其中 ``event_base_new_with_config(NULL)`的参数为 NULL 代表根据程序的环境设置相应的 event_base 配置
 
-```
+```C
 struct event_base *event_init(void)
 {
     struct event_base *base = event_base_new_with_config(NULL);
@@ -473,7 +473,7 @@ struct event_base *event_base_new_with_config(const struct event_config *cfg)
 
 要了解 Libevent 的事件类型，我们需要了解位于 libevent-2.1.12-stable\include\event2\event_struct.h 中的 event 结构体和 event_callback 结构体。
 
-```
+```C
 //TAILQ_ENTRY：尾队列中的节点类型
 #define TAILQ_ENTRY(type)                       \
 struct {                                \
@@ -562,7 +562,7 @@ struct event {
 
 一旦了解了事件以及相应的处理器的定义后，我们就需要去看一看如何创建这两个数据结构，并将它们插入到注册事件列表中。event 的创建可以通过定义在 event.c 中的 `event_new()`来创建
 
-```
+```C
 //evsignal_new 和 evtimer_new 都是定义在 include/event2/event.h 中的宏,都是调用了 event.c 中的 event_new() 来实现
 #define evsignal_new(b, x, cb, arg)             \
     event_new((b), (x), EV_SIGNAL|EV_PERSIST, (cb), (arg))

@@ -45,7 +45,7 @@ categories: 算法笔记
 
 ## 代码
 
-```
+```C++
 class Solution {
 public:
     TreeNode* buildTree(vector<int>& inorder, int l_in, int r_in, vector<int>& postorder, int l_post, int r_post){
