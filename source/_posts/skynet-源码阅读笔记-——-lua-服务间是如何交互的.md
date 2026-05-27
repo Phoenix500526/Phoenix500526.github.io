@@ -128,7 +128,7 @@ skynet.start(function()
     skynet.dispatch("lua", monitor)
 end)
 ```
-如以往的文章所提到的那样，当使用 `skynet.newservice` 函数启动一个新的 lua 服务时，会执行相应的脚本来完成服务的初始化。在 simplemonitor.lua 脚本中，先执行了 `require "skynet"`，这不仅会将相应的函数导入到当前 lua 脚本当中，还会执行 `skynet.register_protocol`为 simplemonitor 注册三种默认消息协议。随后，simplemonitor.lua 又调用了 `skynet.register_protocol` 注册了一个 client 类型的 lua 消息协议，并指定了对应的 dispatch 函数。随后调用 `skynet.start` 来启动 simplemonitor 服务。在上一篇文章[《skynet 源码阅读笔记 —— 如何在 lua 服务中启动另一个 lua 服务》](https://www.jianshu.com/p/bc37152b6413) 中提到了 `skynet.start` 会将 simplemonitor 服务的消息回调函数设置为 `skynet.dispatch_message`,然后执行 `skynet.dipatch("lua", monitor)`进行服务的初始化。
+如以往的文章所提到的那样，当使用 `skynet.newservice` 函数启动一个新的 lua 服务时，会执行相应的脚本来完成服务的初始化。在 simplemonitor.lua 脚本中，先执行了 `require "skynet"`，这不仅会将相应的函数导入到当前 lua 脚本当中，还会执行 `skynet.register_protocol`为 simplemonitor 注册三种默认消息协议。随后，simplemonitor.lua 又调用了 `skynet.register_protocol` 注册了一个 client 类型的 lua 消息协议，并指定了对应的 dispatch 函数。随后调用 `skynet.start` 来启动 simplemonitor 服务。在上一篇文章[《skynet 源码阅读笔记 —— 如何在 lua 服务中启动另一个 lua 服务》](/2020/11/04/skynet-源码阅读笔记-——-如何在-lua-服务中启动另一个-lua-服务/) 中提到了 `skynet.start` 会将 simplemonitor 服务的消息回调函数设置为 `skynet.dispatch_message`,然后执行 `skynet.dipatch("lua", monitor)`进行服务的初始化。
 
 #### lua 服务是如何接受消息的？
 讨论完 lua 服务是如何注册自己的消息类型及定义消息对应的回调函数后，我们来看看 lua 服务是如何接受消息的。我们先来看看 `skynet.dispatch` 函数的实现：
@@ -297,4 +297,4 @@ static int send_message(lua_State *L, int source, int idx_type) {
     return 1;
 }
 ```
-结合上述代码及注释，当一个 lua 服务向另一个 lua 服务发送消息时，会调用`skynet.send` 函数，这个函数最终会调用 C 层的 `send_message`函数，通过对调用参数的解析，为消息添加上 type 和 session 字段，并最终调用 `skynet_send` 函数，这个函数在之前的[skynet 源码阅读笔记 —— 消息调度机制](https://www.jianshu.com/p/6aa32e53856a)说明了它的作用，这里就不多做说明。`skynet_send`函数将消息压入到指定服务的次级消息队列中，发送的过程就结束了。接下来只需要等待 worker 线程从全局消息队列中取出对应的次级消息队列，并消费相应的消息即可。
+结合上述代码及注释，当一个 lua 服务向另一个 lua 服务发送消息时，会调用`skynet.send` 函数，这个函数最终会调用 C 层的 `send_message`函数，通过对调用参数的解析，为消息添加上 type 和 session 字段，并最终调用 `skynet_send` 函数，这个函数在之前的[skynet 源码阅读笔记 —— 消息调度机制](/2020/11/04/skynet-源码阅读笔记-——-消息调度机制/)说明了它的作用，这里就不多做说明。`skynet_send`函数将消息压入到指定服务的次级消息队列中，发送的过程就结束了。接下来只需要等待 worker 线程从全局消息队列中取出对应的次级消息队列，并消费相应的消息即可。

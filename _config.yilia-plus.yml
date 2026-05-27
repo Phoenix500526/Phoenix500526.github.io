@@ -10,7 +10,6 @@ menu:
 # subNav-子导航
 subNav:
   - github: https://github.com/Phoenix500526
-  - jianshu: https://www.jianshu.com/u/d2aa8a7f1468
   # - cnblog: "#"
   # - blog: "#"
   # - csdn: "#"
@@ -270,13 +269,6 @@ smart_menu:
 
 # 友情链接
 friends:
-  简书:  #网站名称
-    #网站地址
-    url: https://www.jianshu.com/u/d2aa8a7f1468
-    #网站图片(可忽略不写)
-    #img: https://zhousiwei.gitee.io/ibooks/favicon.ico
-    #网站简介(可忽略不写)
-    description: 早期自己的一个博客，用于记录所学的点滴
   
 # 关于我
 aboutme: 主要涉及技术：<br>C++, 后端开发, lua语言<br>开源爱好者、Linux<br><br>热爱阅读，健身，旅游及美食<br><br>联系QQ:519788069<br>

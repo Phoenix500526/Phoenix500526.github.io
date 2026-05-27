@@ -89,7 +89,7 @@ struct skynet_context*  skynet_context_new(const char * name, const char *param)
 ```
 
 #### snlua 的加载及初始化
-从前面 `skynet_context_new` 函数中，我们可以看出 `snlua` 服务的启动需要利用到 `skynet_module_instance_create`函数进行实例的创建，利用`skynet_module_instance_init`函数进行初始化，这两个函数最终会调用到对应模块中的 \*\_create 和 \*\_init 函数。对于 snlua 模块而言，其对应代码保存在 service-src/service_snlua.c 文件中，最终会编译成为 snlua.so 文件。由于在前面的文章 [skynet 源码阅读笔记 —— skynet 的模块与服务](https://www.jianshu.com/p/de2d10867aa6) 中已经说明了模块加载的详细方式，因此这里不多着笔墨说明。我们先来看看 snlua 的基本数据结构，然后直接看相关的模块函数
+从前面 `skynet_context_new` 函数中，我们可以看出 `snlua` 服务的启动需要利用到 `skynet_module_instance_create`函数进行实例的创建，利用`skynet_module_instance_init`函数进行初始化，这两个函数最终会调用到对应模块中的 \*\_create 和 \*\_init 函数。对于 snlua 模块而言，其对应代码保存在 service-src/service_snlua.c 文件中，最终会编译成为 snlua.so 文件。由于在前面的文章 [skynet 源码阅读笔记 —— skynet 的模块与服务](/2020/11/04/skynet-源码阅读笔记-——-skynet-的模块与服务/) 中已经说明了模块加载的详细方式，因此这里不多着笔墨说明。我们先来看看 snlua 的基本数据结构，然后直接看相关的模块函数
 ```C
 //service-src/service_snlua.c
 //内存阈值，当 snlua 占用的内存超过阈值则触发警报
