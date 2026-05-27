@@ -30,7 +30,9 @@ jobs:
         run: npm install -g hexo-cli
 
       - name: Install site dependencies
-        run: npm install --force --no-audit --no-fund
+        run: |
+          rm -f package-lock.json
+          npm install --no-audit --no-fund
 
       - name: Build with Hexo
         run: hexo generate
