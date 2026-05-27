@@ -27,7 +27,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/aaf3d355d3fa/4114134-bde30cd27edeffda.webp)
+> ![](/img/jianshu-imports/aaf3d355d3fa/4114134-bde30cd27edeffda.webp)
 > 
 > 
 > 输出: 7
@@ -42,7 +42,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/aaf3d355d3fa/4114134-768e448104957f36.webp)
+> ![](/img/jianshu-imports/aaf3d355d3fa/4114134-768e448104957f36.webp)
 > 
 > 
 > 输出: 9

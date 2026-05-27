@@ -23,7 +23,7 @@ categories: 算法笔记
 
 > 示例1
 > 
-> ![Image 2](/img/jianshu-imports/76bb293143af/4114134-6ad0274d544f4666.webp)
+> ![](/img/jianshu-imports/76bb293143af/4114134-6ad0274d544f4666.webp)
 > 
 > 
 > 输入
@@ -37,7 +37,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/76bb293143af/4114134-b67a3745b0cb416c.webp)
+> ![](/img/jianshu-imports/76bb293143af/4114134-b67a3745b0cb416c.webp)
 > 
 > 
 > 输出
@@ -48,7 +48,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 4](/img/jianshu-imports/76bb293143af/4114134-b7bbfbfe540bc3cf.webp)
+> ![](/img/jianshu-imports/76bb293143af/4114134-b7bbfbfe540bc3cf.webp)
 > 
 > 
 > 输入

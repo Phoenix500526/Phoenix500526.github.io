@@ -37,7 +37,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/2222bbf6fae4/4114134-28d595323d23528a.webp)
+> ![](/img/jianshu-imports/2222bbf6fae4/4114134-28d595323d23528a.webp)
 > 
 > 
 > 从城市 0 到城市 2 在 1 站中转以内的最便宜价格是 200，如图中红色所示。
@@ -60,7 +60,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/2222bbf6fae4/4114134-a416c86c1f538b88.webp)
+> ![](/img/jianshu-imports/2222bbf6fae4/4114134-a416c86c1f538b88.webp)
 > 
 > 
 > 从城市 0 到城市 2 在 0 站中转以内的最便宜价格是 500，如图中蓝色所示。

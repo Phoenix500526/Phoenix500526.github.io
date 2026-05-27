@@ -29,7 +29,7 @@ categories: 算法笔记
 > 
 > Here is a diagram of the above graph.
 > 
-> ![Image 2](/img/jianshu-imports/8cf25a2cf8eb/4114134-99bc08c3b4f37a44.webp)
+> ![](/img/jianshu-imports/8cf25a2cf8eb/4114134-99bc08c3b4f37a44.webp)
 
 ## Note
 

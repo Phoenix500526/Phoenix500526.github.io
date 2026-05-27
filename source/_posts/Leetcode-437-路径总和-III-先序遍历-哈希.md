@@ -29,7 +29,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/8677e051bb8d/4114134-58947074824ee9da.webp)
+> ![](/img/jianshu-imports/8677e051bb8d/4114134-58947074824ee9da.webp)
 > 
 > 
 > 返回 3。和等于 8 的路径有:

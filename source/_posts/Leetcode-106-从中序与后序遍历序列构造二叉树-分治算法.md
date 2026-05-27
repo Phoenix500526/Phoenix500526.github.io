@@ -27,7 +27,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/07defec2c660/4114134-c4a08a9f426b6f41.webp)
+> ![](/img/jianshu-imports/07defec2c660/4114134-c4a08a9f426b6f41.webp)
 
 ## 题目链接：[106. 从中序与后序遍历序列构造二叉树 (难度:中等)](https://leetcode-cn.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
 
@@ -35,11 +35,11 @@ categories: 算法笔记
 
 树的后序遍历顺序为 LRN，中序遍历顺序为 LNR。因此，我们可以采用分治的思想，以后序序列 postorder 中的 postorder[r_post] 为树的根节点 root，然后通过 root 我们可以中序序列划分为左右两棵子树，分别对左右两棵子树递归处理，即可完成建树，如下图所示
 
-![Image 3](/img/jianshu-imports/07defec2c660/4114134-a56d891452798f9f.webp)
+![](/img/jianshu-imports/07defec2c660/4114134-a56d891452798f9f.webp)
 
 选择根节点，划分左右子树
 
-![Image 4](/img/jianshu-imports/07defec2c660/4114134-1274154d1a1f59bb.webp)
+![](/img/jianshu-imports/07defec2c660/4114134-1274154d1a1f59bb.webp)
 
 递归处理右子树
 

@@ -29,7 +29,7 @@ categories: 算法笔记
 > 
 > 解释：从树的根结点开始，我们将一枚硬币移到它的左子结点上，一枚硬币移到它的右子结点上。
 > 
-> ![Image 2](/img/jianshu-imports/f5b463796098/4114134-f65dddc1772715a7.webp)
+> ![](/img/jianshu-imports/f5b463796098/4114134-f65dddc1772715a7.webp)
 > 
 > 
 > 示例1
@@ -42,11 +42,8 @@ categories: 算法笔记
 > 
 > 解释：从根结点的左子结点开始，我们将两枚硬币移到根结点上 [移动两次]。然后，我们把一枚硬币从根结点移到右子结点上。
 > 
-> ![Image 3](/img/jianshu-imports/f5b463796098/4114134-e6a8b3d82346644e.webp)
+> ![](/img/jianshu-imports/f5b463796098/4114134-e6a8b3d82346644e.webp)
 > 
-> 
-> 示例2.png
-
 ## Note：
 
 > 1<= N <= 100

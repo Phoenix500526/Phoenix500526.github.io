@@ -21,7 +21,7 @@ categories: 算法笔记
 
 ## Example
 
-> ![Image 2](/img/jianshu-imports/4d22e4581456/4114134-2351bb7f48fd128e.webp)
+> ![](/img/jianshu-imports/4d22e4581456/4114134-2351bb7f48fd128e.webp)
 > 
 > 
 > 输入：head = [4,2,8], root = [1,4,4,null,2,2,null,1,null,6,8,null,null,null,null,1,3]

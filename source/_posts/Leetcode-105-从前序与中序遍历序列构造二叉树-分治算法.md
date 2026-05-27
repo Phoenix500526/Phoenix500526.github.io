@@ -27,7 +27,7 @@ categories: 算法笔记
 > 
 > 返回如下的二叉树：
 > 
-> ![Image 2](/img/jianshu-imports/08d01f5f1e1b/4114134-39408e3a647c21be.webp)
+> ![](/img/jianshu-imports/08d01f5f1e1b/4114134-39408e3a647c21be.webp)
 
 ## 题目链接：[105. 从前序与中序遍历序列构造二叉树 (难度:中等)](https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
 
@@ -35,11 +35,11 @@ categories: 算法笔记
 
 树的先序遍历顺序为 NLR，中序遍历顺序为 LNR。因此，我们可以采用分治的思想，以先序序列 preorder 中的 preorder[0] 为树的根节点 root，然后通过 root 我们可以中序序列划分为左右两棵子树，分别对左右两棵子树递归处理，即可完成建树，如下图所示
 
-![Image 3](/img/jianshu-imports/08d01f5f1e1b/4114134-e5cd6be7a194c400.webp)
+![](/img/jianshu-imports/08d01f5f1e1b/4114134-e5cd6be7a194c400.webp)
 
 选择根节点，并划分左右子树
 
-![Image 4](/img/jianshu-imports/08d01f5f1e1b/4114134-8a76baf4473333c8.webp)
+![](/img/jianshu-imports/08d01f5f1e1b/4114134-8a76baf4473333c8.webp)
 
 处理右子树
 

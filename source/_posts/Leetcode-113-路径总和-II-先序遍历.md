@@ -19,7 +19,7 @@ categories: 算法笔记
 
 > 给定如下二叉树，以及目标和 sum = 22，
 > 
-> ![Image 2](/img/jianshu-imports/f36eb3f4702c/4114134-3a5309e3888c3945.webp)
+> ![](/img/jianshu-imports/f36eb3f4702c/4114134-3a5309e3888c3945.webp)
 > 
 > 
 > 返回：

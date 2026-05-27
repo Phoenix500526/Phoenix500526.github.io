@@ -43,7 +43,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/5452cca9b2c0/4114134-833781672c0dc760.webp)
+> ![](/img/jianshu-imports/5452cca9b2c0/4114134-833781672c0dc760.webp)
 
 ## 题目链接：[95. 不同的二叉搜索树 II (难度：中等)](https://leetcode-cn.com/problems/unique-binary-search-trees-ii/)
 

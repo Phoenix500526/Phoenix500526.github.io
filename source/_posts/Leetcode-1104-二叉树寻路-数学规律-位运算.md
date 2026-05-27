@@ -23,7 +23,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/10a007616878/4114134-d26975fab64643a7.webp)
+> ![](/img/jianshu-imports/10a007616878/4114134-d26975fab64643a7.webp)
 > 
 > 
 > 给你树上某一个节点的标号 label，请你返回从根节点到该标号为 label 节点的路径，该路径是由途经的节点标号所组成的。

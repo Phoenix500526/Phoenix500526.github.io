@@ -17,7 +17,7 @@ Libevent 是一款基于 Reactor 模式实现，由事件驱动的高性能开�
 
  一个基于 Reactor 模式实现的 I/O 框架库大致上应当包含如下几个组件：
 
-![Image 2](/img/jianshu-imports/a21a8b200275/4114134-f239be1bef63c78c.webp)
+![](/img/jianshu-imports/a21a8b200275/4114134-f239be1bef63c78c.webp)
 
 I/O 框架库组件
 
@@ -29,7 +29,7 @@ I/O 框架库组件
     *   `register_handler()`：调用事件多路分发器的 `register_event()` 方法来向事件多路分发器中注册一个事件
     *   `remove_handler()`：调用事件多路分发器的 `remove_event()` 方法来删除事件多路分发器中的一个事件
 
-![Image 3](/img/jianshu-imports/a21a8b200275/4114134-4bc3054e11c22467.webp)
+![](/img/jianshu-imports/a21a8b200275/4114134-4bc3054e11c22467.webp)
 
 I/O 框架库的工作时序
 

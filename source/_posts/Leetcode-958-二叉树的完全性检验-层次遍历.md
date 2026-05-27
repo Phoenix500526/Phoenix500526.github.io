@@ -33,7 +33,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/7492114203a2/4114134-03b0fdd900d162ab.webp)
+> ![](/img/jianshu-imports/7492114203a2/4114134-03b0fdd900d162ab.webp)
 
 > 示例2：
 > 
@@ -47,7 +47,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/7492114203a2/4114134-7a75511e40cedc9d.webp)
+> ![](/img/jianshu-imports/7492114203a2/4114134-7a75511e40cedc9d.webp)
 
 ## 题目链接：[958. 二叉树的完全性检验 (难度:中等)](https://leetcode-cn.com/problems/check-completeness-of-a-binary-tree/)
 

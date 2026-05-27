@@ -55,7 +55,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/d367026a9d2d/4114134-d910c27a4a590d2e.webp)
+> ![](/img/jianshu-imports/d367026a9d2d/4114134-d910c27a4a590d2e.webp)
 > 
 > 
 > 示例解释

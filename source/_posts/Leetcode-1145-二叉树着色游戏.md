@@ -31,7 +31,7 @@ categories: 算法笔记
 
 ## Example
 
-> ![Image 2](/img/jianshu-imports/8015cc903be7/4114134-66928656cdc938d8.webp)
+> ![](/img/jianshu-imports/8015cc903be7/4114134-66928656cdc938d8.webp)
 > 
 > 
 > 输入：root = [1,2,3,4,5,6,7,8,9,10,11], n = 11, x = 3

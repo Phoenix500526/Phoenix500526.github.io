@@ -29,7 +29,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/bd45896b6882/4114134-f0e8a0f5c62adb04.webp)
+> ![](/img/jianshu-imports/bd45896b6882/4114134-f0e8a0f5c62adb04.webp)
 
 ## 题目链接：[230. 二叉搜索树中第K小的元素](https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst/)
 

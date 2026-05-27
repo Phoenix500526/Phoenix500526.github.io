@@ -23,7 +23,7 @@ categories: 算法笔记
 
 ## 示例
 
-![Image 2](/img/jianshu-imports/002e0d06cd75/4114134-567b449820b7e79a.webp)
+![](/img/jianshu-imports/002e0d06cd75/4114134-567b449820b7e79a.webp)
 
 示例1
 
@@ -33,7 +33,7 @@ categories: 算法笔记
 > 
 >  输出：[]
 
-![Image 3](/img/jianshu-imports/002e0d06cd75/4114134-3d38ee850f57cb73.webp)
+![](/img/jianshu-imports/002e0d06cd75/4114134-3d38ee850f57cb73.webp)
 
 示例2
 

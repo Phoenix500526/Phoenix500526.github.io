@@ -37,11 +37,11 @@ categories: 算法笔记
 
  对于这个问题采取分治法，先确定根节点，然后将序列分割为左右子树的序列，各个击破即可。在实现上，使用了 unordered_map 对序列进行缓存，既可以提高递归时的查找效率，同时也避免了查找过程当中的越界情况。具体过程可见下图：
 
-![Image 2](/img/jianshu-imports/024bf158678f/4114134-e84711c72d4e6c50.webp)
+![](/img/jianshu-imports/024bf158678f/4114134-e84711c72d4e6c50.webp)
 
 左右子树同，则统一当作左子树处理
 
-![Image 3](/img/jianshu-imports/024bf158678f/4114134-c3ed027ec958d435.webp)
+![](/img/jianshu-imports/024bf158678f/4114134-c3ed027ec958d435.webp)
 
 左右子树不同，则分治处理左右子树
 

@@ -34,24 +34,21 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/746d0f6980bc/4114134-346ca1f2e4198156.webp)
+> ![](/img/jianshu-imports/746d0f6980bc/4114134-346ca1f2e4198156.webp)
 > 
 > 
 > 给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。
 > 
 > 一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。
 > 
-> ![Image 3](/img/jianshu-imports/746d0f6980bc/4114134-dedc990532c31b4c.webp)
+> ![](/img/jianshu-imports/746d0f6980bc/4114134-dedc990532c31b4c.webp)
 > 
 > 
 > 
 > 另一个正确答案是 [5,2,6,null,4,null,7], 如下图所示。
 > 
-> ![Image 4](/img/jianshu-imports/746d0f6980bc/4114134-9cc040f36ed25c6e.webp)
+> ![](/img/jianshu-imports/746d0f6980bc/4114134-9cc040f36ed25c6e.webp)
 > 
-> 
-> image.png
-
 ## 题目链接：[450. 删除二叉搜索树中的节点 (难度：中等)](https://leetcode-cn.com/problems/delete-node-in-a-bst/)
 
 ## 思路

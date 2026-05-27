@@ -35,7 +35,7 @@ categories: 算法笔记
 > 
 > 解释：
 > 
-> ![Image 2](/img/jianshu-imports/392736402566/4114134-97ff686622e75865.webp)
+> ![](/img/jianshu-imports/392736402566/4114134-97ff686622e75865.webp)
 
 ## 题目链接：[894. 所有可能的满二叉树 (难度:中等)](https://leetcode-cn.com/problems/all-possible-full-binary-trees/)
 
@@ -43,7 +43,7 @@ categories: 算法笔记
 
 由题目所给出的定义可知，对于任一棵满足 2 - 正则树定义的树，其节点个数必定为奇数个。**若为偶数个节点，则必定存在一个分支节点，其子节点仅有 1 个，与定义矛盾**。我们可以设 func(N) 代表了 N 个节点所能构成 2 - 正则树的所有树形，那么我们可以先看看当 N 为奇数 1，3，5, 7 的情况(对于 N == 7 的情况，可以参考题目示例，这里不赘述)
 
-![Image 3](/img/jianshu-imports/392736402566/4114134-0c8dffe157977fa3.webp)
+![](/img/jianshu-imports/392736402566/4114134-0c8dffe157977fa3.webp)
 
 N = 1, 3, 5 的情况
 

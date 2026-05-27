@@ -25,7 +25,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/033b7edabfea/4114134-9c24d7c2629aa1e5.webp)
+> ![](/img/jianshu-imports/033b7edabfea/4114134-9c24d7c2629aa1e5.webp)
 > 
 > 
 > 输出:[[2,4],[4]]
@@ -34,7 +34,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/033b7edabfea/4114134-bc0089fe0a8d1c2a.webp)
+> ![](/img/jianshu-imports/033b7edabfea/4114134-bc0089fe0a8d1c2a.webp)
 
 ## 思路
 

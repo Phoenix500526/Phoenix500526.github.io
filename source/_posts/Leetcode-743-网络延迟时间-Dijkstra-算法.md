@@ -21,7 +21,7 @@ categories: 算法笔记
 
 ## Example
 
-> ![Image 2](/img/jianshu-imports/e1e4b04e7b39/4114134-bd3cfa94f6172fb9.webp)
+> ![](/img/jianshu-imports/e1e4b04e7b39/4114134-bd3cfa94f6172fb9.webp)
 > 
 > 
 > 输入：times = [[2,1,1],[2,3,1],[3,4,1]], N = 4, K = 2

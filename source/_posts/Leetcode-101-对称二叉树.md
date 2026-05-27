@@ -23,7 +23,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/6265008379b0/4114134-ce2267e1057b0822.webp)
+> ![](/img/jianshu-imports/6265008379b0/4114134-ce2267e1057b0822.webp)
 > 
 > 
 > 但是下面这个 [1,2,2,null,3,null,3] 则不是镜像对称的:
@@ -32,7 +32,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 3](/img/jianshu-imports/6265008379b0/4114134-15f30389f56784cd.webp)
+> ![](/img/jianshu-imports/6265008379b0/4114134-15f30389f56784cd.webp)
 
 ## 题目链接：[101. 对称二叉树 (难度:简单)](https://leetcode-cn.com/problems/symmetric-tree/)
 

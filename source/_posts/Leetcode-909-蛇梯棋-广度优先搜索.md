@@ -21,7 +21,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/a7b5f7051509/4114134-03eadfac6516bce9.webp)
+> ![](/img/jianshu-imports/a7b5f7051509/4114134-03eadfac6516bce9.webp)
 > 
 > 
 > r行 c 列的棋盘，按前述方法编号，棋盘格中可能存在 “蛇” 或 “梯子”；如果 board[r][c] != -1，那个蛇或梯子的目的地将会是 board[r][c]。

@@ -27,11 +27,11 @@ categories: 算法笔记
 
 ## Example
 
-![Image 2](/img/jianshu-imports/8ae8bc6916f0/4114134-62c9c7051609a02e.webp)
+![](/img/jianshu-imports/8ae8bc6916f0/4114134-62c9c7051609a02e.webp)
 
 Input
 
-![Image 3](/img/jianshu-imports/8ae8bc6916f0/4114134-48d93e336a3ad9a3.webp)
+![](/img/jianshu-imports/8ae8bc6916f0/4114134-48d93e336a3ad9a3.webp)
 
 Output
 

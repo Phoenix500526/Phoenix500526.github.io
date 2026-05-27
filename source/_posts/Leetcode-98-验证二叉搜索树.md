@@ -26,7 +26,7 @@ categories: 算法笔记
 
 > 输入：
 > 
-> ![Image 2](/img/jianshu-imports/5b0b595a0f31/4114134-2fccebd39b6a319a.webp)
+> ![](/img/jianshu-imports/5b0b595a0f31/4114134-2fccebd39b6a319a.webp)
 > 
 > 
 > 输出: false

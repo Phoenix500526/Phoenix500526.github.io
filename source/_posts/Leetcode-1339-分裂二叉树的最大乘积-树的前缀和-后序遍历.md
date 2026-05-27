@@ -19,7 +19,7 @@ categories: 算法笔记
 
 ## Example
 
-> ![Image 2](/img/jianshu-imports/efbd6bb0cd26/4114134-51a00bee94b6808f.webp)
+> ![](/img/jianshu-imports/efbd6bb0cd26/4114134-51a00bee94b6808f.webp)
 > 
 > 
 > 输入：root = [1,2,3,4,5,6]

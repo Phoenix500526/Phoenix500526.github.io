@@ -29,7 +29,7 @@ categories: 算法笔记
 > 
 > 解释：
 > 
-> ![Image 2](/img/jianshu-imports/7579c45e870d/4114134-272232803826a5ac.webp)
+> ![](/img/jianshu-imports/7579c45e870d/4114134-272232803826a5ac.webp)
 > 
 > 
 > 

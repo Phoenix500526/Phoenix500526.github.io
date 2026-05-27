@@ -25,7 +25,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/44f98b4152c9/4114134-495743514919ded2.webp)
+> ![](/img/jianshu-imports/44f98b4152c9/4114134-495743514919ded2.webp)
 > 
 > 
 > 输入：n = 7, edges = [[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]], hasApple = [false,false,true,false,false,true,false]

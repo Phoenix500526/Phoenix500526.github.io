@@ -33,7 +33,7 @@ categories: 算法笔记
 > 
 > 
 > 
-> ![Image 2](/img/jianshu-imports/52ab38665b27/4114134-3b892f77b76fa2aa.webp)
+> ![](/img/jianshu-imports/52ab38665b27/4114134-3b892f77b76fa2aa.webp)
 
 ## Note
 

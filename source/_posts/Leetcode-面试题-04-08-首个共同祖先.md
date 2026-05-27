@@ -19,7 +19,7 @@ categories: 算法笔记
 
 ## Example
 
-> ![Image 2](/img/jianshu-imports/ef853ff9f6de/4114134-6c58542851be01ee.webp)
+> ![](/img/jianshu-imports/ef853ff9f6de/4114134-6c58542851be01ee.webp)
 > 
 > 
 > 示例1
