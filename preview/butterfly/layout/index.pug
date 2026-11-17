@@ -65,13 +65,4 @@ block content
     include includes/pagination.pug
 
   if page.current === 1
-    section.ph-city-walk(aria-label='蓝帽小狗的城市散步')
-      p.ph-walk-heading 写完代码，出去走走。
-      .ph-walk-scene(style='--ph-street-preview: url("' + ph_city_walk_preview() + '")' data-street=url_for('/img/city-walk/street.webp') data-dog=url_for('/img/city-walk/dog.webp') role='img' aria-label='蓝帽小狗沿着有树木、书店和路灯的像素街道散步')
-        .ph-walk-sign(aria-hidden='true')
-          span HACKER CUBE
-          small 慢慢走，慢慢想
-        .ph-dog-track(aria-hidden='true')
-          .ph-dog-facing
-            .ph-dog-sprite
-    script(src=url_for('/js/city-walk.js?v=4') defer)
+    include includes/city-walk.pug

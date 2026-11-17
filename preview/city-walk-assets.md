@@ -11,7 +11,7 @@ The two original PNGs are retained as source masters. The page uses smaller WebP
 - Rendering: CSS background positions select the atlas regions; transforms move and mirror the character.
 - Motion starts only when the scene is visible, pauses in background tabs, and respects reduced-motion preferences. There are no visible playback controls.
 - The inline street is visible immediately, including with JavaScript disabled. After the page load event, the two full-size WebPs load with low priority even while offscreen. When both decode, they replace the preview and reveal the dog. If either fails, the static preview remains visible.
-- The scene appears only on the first homepage. Article and archive pages keep their existing footer.
+- The shared `layout/includes/city-walk.pug` scene appears on the first homepage and after the article card on every article page, above the site footer. Archive, category, tag and paginated index pages keep their existing footer.
 
 ## Rebuild optimized assets
 
