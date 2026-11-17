@@ -54,6 +54,8 @@ the Butterfly preview theme and need no standalone source pages.
    collapses, covers move above text, and the article title becomes 28px.
 9. **Interaction:** native Butterfly search, TOC, copy, code expansion/fullscreen,
    reading mode and zoom; keyboard enhancements and reduced-motion overrides.
+   Light/dark mode follows the OS by default; a manual choice takes precedence
+   for Butterfly's native two-day preference lifetime.
 
 Editorial choices live in `butterfly/scripts/phoenix.js`: featured titles,
 summaries, selected covers and topic labels. Cards without a cover remain valid.

@@ -81,7 +81,7 @@ theme_config:
   darkmode:
     enable: true
     button: true
-    autoChangeMode: false
+    autoChangeMode: 1
   rightside_config_animation: false
   rightside_scroll_percent: true
   anchor:
