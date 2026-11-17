@@ -33,3 +33,26 @@ aside#aside-content.aside-content
       .ph-tag-list
         each tag in site.tags.sort('length', -1).limit(10).data
           a(href=url_for(tag.path))= tag.name
+    section.card-widget.ph-webinfo(aria-labelledby='website-info-title')
+      h2#website-info-title
+        i.fas.fa-chart-line(aria-hidden='true')
+        | 网站信息
+      dl
+        div
+          dt 文章总数
+          dd= site.posts.length
+        div
+          dt 全站字数
+          dd= totalcount(site)
+        div
+          dt 访客数
+          dd(id=theme.busuanzi.site_uv ? 'busuanzi_value_site_uv' : undefined)= theme.busuanzi.site_uv ? '加载中…' : '本地不统计'
+        div
+          dt 总浏览量
+          dd(id=theme.busuanzi.site_pv ? 'busuanzi_value_site_pv' : undefined)= theme.busuanzi.site_pv ? '加载中…' : '本地不统计'
+        - const latestPost = site.posts.sort('updated', -1).first()
+        if latestPost
+          div
+            dt 最近内容更新
+            dd
+              time(datetime=date_xml(latestPost.updated) title='最近一次文章发布或内容更新')= date(latestPost.updated, 'YYYY-MM-DD')

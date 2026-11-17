@@ -166,6 +166,12 @@ p { text-wrap: pretty; }
 .ph-tag-list { display: flex; flex-wrap: wrap; gap: 5px 14px; }
 .ph-tags .ph-tag-list { margin-top: 13px; }
 .ph-tag-list a { color: var(--muted); font-size: 12px; padding: 8px 0; min-height: 40px; }
+.ph-webinfo h2 { display: flex; align-items: center; gap: 9px; }
+.ph-webinfo h2 i { color: var(--muted); font-size: 13px; }
+.ph-webinfo dl { margin: 14px 0 0; }
+.ph-webinfo dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 13px; line-height: 1.8; }
+.ph-webinfo dt { color: var(--muted); }
+.ph-webinfo dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 #pagination { margin-top: 28px; }
 #pagination .page-number, #pagination .extend { background: var(--surface); color: var(--ink); border-radius: 4px; box-shadow: none; min-width: 40px; height: 40px; line-height: 40px; }
 #pagination .page-number.current { background: var(--accent); color: var(--paper); }

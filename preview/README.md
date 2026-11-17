@@ -30,7 +30,12 @@ the site.** Keep commits local until deployment is explicitly approved. The old
 
 The pinned official npm theme is copied into ignored `themes/butterfly-preview`;
 `preview/butterfly` is overlaid on it. CSS, scripts, icon fonts, image zoom, and
-MathJax are local. Preview pages live in `.preview-butterfly`; production pages
+MathJax are local. Production pages additionally load the official Busuanzi
+script for site visitor and page-view counts. Preview disables this service.
+The website info card shows article count, total word count, visitor count,
+page views, and the latest article content update (not the build date).
+Unavailable statistics fall back to a status label rather than a zero count.
+Preview pages live in `.preview-butterfly`; production pages
 live in `public`. Hexo databases and merged configurations live separately in
 `.butterfly-cache/preview` and `.butterfly-cache/production`. Every build rejects
 an artifact containing `db.json`, `_multiconfig.yml`, or `.env`.

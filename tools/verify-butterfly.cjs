@@ -32,6 +32,7 @@ for (const file of pages) {
   check(!['db.json', '_multiconfig.yml', '.env'].includes(path.basename(file)), `Build state in artifact: ${relative}`);
   if (!file.endsWith('.html')) continue;
   const html = fs.readFileSync(file, 'utf8');
+  if (mode === 'preview') check(!html.includes('busuanzi.ibruce.info'), `Analytics enabled in preview: ${relative}`);
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/);
   check(canonical && canonical[1].startsWith(origin + '/'), `Invalid canonical: ${relative}`);
   const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
@@ -50,6 +51,19 @@ for (const file of pages) {
   }
 }
 const sleepPost = path.join(output, '2020/11/04/睡眠的奥秘-——-关于睡眠，你可能不知道的事/index.html');
+const homepage = fs.readFileSync(path.join(output, 'index.html'), 'utf8');
+check(homepage.includes('id="website-info-title"'), 'Missing website info card');
+if (mode === 'production') {
+  for (const metric of ['site_uv', 'site_pv']) {
+    check(homepage.includes(`id="busuanzi_value_${metric}"`), `Missing statistics value: ${metric}`);
+  }
+  for (const file of [path.join(output, 'index.html'), sleepPost]) {
+    const html = fs.readFileSync(file, 'utf8');
+    check((html.match(/src="https:\/\/busuanzi\.ibruce\.info\/busuanzi\/2\.3\/busuanzi\.pure\.mini\.js"/g) || []).length === 1, `Expected one Busuanzi script: ${path.relative(output, file)}`);
+  }
+} else {
+  check(!homepage.includes('id="busuanzi_value_') && homepage.includes('本地不统计'), 'Wrong preview statistics state');
+}
 check(fs.existsSync(sleepPost) && fs.readFileSync(sleepPost, 'utf8').includes('id="R90睡眠法-amp-达芬奇睡眠法"'), 'Missing legacy sleep article anchor');
 check(articleCount === posts.length, `Post count: ${articleCount}, expected ${posts.length}`);
 for (const name of ['categories/index.html', 'tags/index.html', 'archives/index.html', '404.html', 'search.json', 'atom.xml', 'sitemap.xml']) {

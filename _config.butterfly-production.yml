@@ -2,3 +2,10 @@
 public_dir: public
 url: https://phoenix500526.github.io
 butterfly_preview: false
+theme_config:
+  busuanzi:
+    site_uv: true
+    site_pv: true
+  CDN:
+    option:
+      busuanzi: https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js
