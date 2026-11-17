@@ -1,11 +1,11 @@
 nav#nav
   span#blog-info
     a.nav-site-title(href=url_for('/'))
-      span.ph-brand-mark(aria-hidden='true') H
+      span.ph-brand-mark(aria-hidden='true') A
       span.site-name= config.title
   #menus
     .menus_items
-      each href, label in {'首页':'/', '分类':'/categories/', '归档':'/archives/', '关于我':'/about/', 'GitHub':'https://github.com/Phoenix500526'}
+      each href, label in {'首页':'/', '分类':'/categories/', '归档':'/archives/', '关于我':'/about/'}
         .menus_item
           a.site-page(href=url_for(href) aria-current=((label === '首页' && globalPageType === 'home') || (label === '关于我' && page.layout === 'about') ? 'page' : undefined))= label
     button.ph-theme-toggle(type='button' aria-label='切换深浅色模式' title='切换深浅色模式')

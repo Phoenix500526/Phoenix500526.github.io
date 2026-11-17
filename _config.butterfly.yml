@@ -17,7 +17,6 @@ theme_config:
     分类: /categories/ || fas fa-folder
     归档: /archives/ || fas fa-archive
     关于我: /about/ || fas fa-user
-    GitHub: https://github.com/Phoenix500526 || fab fa-github
   avatar:
     img: /img/Phoenix.png
     effect: false
