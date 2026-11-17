@@ -99,7 +99,6 @@ p { text-wrap: pretty; }
 .ph-intro .ph-eyebrow { letter-spacing: .16em; font-size: 10px; }
 .ph-intro h1 { margin: 0 0 13px; font: 400 34px/1.5 var(--serif); letter-spacing: -.025em; }
 .ph-intro > p:last-child { color: var(--muted); font-size: 14px; margin: 0; }
-.ph-intro-break { display: none; }
 #content-inner.layout { width: calc(100% - 56px); max-width: 1180px; padding: 0; margin: 34px auto 70px; gap: 30px; align-items: flex-start; }
 .ph-intro + #content-inner.layout { margin-top: 0; }
 #recent-posts.ph-home { width: calc(100% - 310px); min-width: 0; }
@@ -399,7 +398,6 @@ p { text-wrap: pretty; }
   #nav #search-button .search span { display: none; }
   .ph-intro { width: calc(100% - 40px); margin: 0 20px; padding: 28px 0; }
   .ph-intro h1 { font-size: 25px; line-height: 1.65; letter-spacing: -.035em; }
-  .ph-intro-break { display: block; }
   .ph-intro .ph-eyebrow { font-size: 8px; letter-spacing: .10em; }
   .ph-intro > p:last-child { font-size: 12px; line-height: 1.8; }
   #content-inner.layout { width: calc(100% - 32px); margin-top: 24px; margin-bottom: 40px; }
@@ -463,4 +461,14 @@ p { text-wrap: pretty; }
   .ph-dog-track, .ph-dog-facing, .ph-dog-sprite { animation: none !important; }
   html { scroll-behavior: auto !important; }
   *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* UI language choices share the navigation's quiet, text-first styling. */
+.ph-language-switch { display: flex; align-items: center; gap: 3px; white-space: nowrap; color: var(--muted); font-size: 12px; }
+.ph-language-switch button { min-height: 40px; padding: 0 5px; border: 0; background: none; color: var(--muted); font: inherit; cursor: pointer; }
+.ph-language-switch button[aria-pressed='true'] { color: var(--accent); text-decoration: underline; text-underline-offset: 5px; }
+#sidebar-menus > .ph-language-switch { justify-content: center; margin: 8px 0 16px; }
+html[lang='en'] .ph-intro h1 { max-width: 980px; }
+@media (max-width: 760px) {
+  #nav .ph-language-switch { display: none; }
 }

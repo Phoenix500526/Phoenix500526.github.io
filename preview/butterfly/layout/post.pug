@@ -24,7 +24,7 @@ block content
           span= '查看全部 ' + series.posts.length + ' 篇 →'
       if showToc
         button.ph-mobile-toc(type='button' aria-controls='card-toc' aria-expanded='false') 本文目录 #[span(aria-hidden='true') ☰]
-    article#article-container.container.post-content!= page.content
+    article#article-container.container.post-content(lang=page.lang || 'zh-CN')!= page.content
     if series
       != partial('includes/series-reading', { series, readingId: 'series-reading', readingClass: 'ph-series-mobile' })
     else

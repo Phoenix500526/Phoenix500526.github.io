@@ -150,3 +150,4 @@ theme_config:
       - '<link rel="stylesheet" href="/css/phoenix.css">'
     bottom:
       - '<script src="/js/phoenix.js" defer></script>'
+      - '<script src="/js/ui-language.js" defer></script>'
