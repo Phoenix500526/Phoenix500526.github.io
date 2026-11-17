@@ -1,0 +1,12 @@
+nav.ph-series-reading(id=readingId class=readingClass aria-label='本系列文章')
+  .ph-section-label
+    h2= series.label + ' · 继续阅读'
+    a(href=url_for(series.path))= '全部 ' + series.posts.length + ' 篇 ↗'
+  ol
+    each post in series.posts
+      li(class=post.path === page.path ? 'is-current' : '')
+        if post.path === page.path
+          span(aria-current='page')= post.title
+          small 正在阅读
+        else
+          a(href=url_for(post.path))= post.title

@@ -1,8 +1,12 @@
 aside#aside-content.aside-content
   if globalPageType === 'post'
-    if showToc
+    - const sidebarSeries = ph_series(page)
+    if showToc || sidebarSeries
       .sticky_layout
-        include ./card_post_toc.pug
+        if showToc
+          include ./card_post_toc.pug
+        if sidebarSeries
+          != partial('includes/series-reading', { series: sidebarSeries, readingId: 'series-reading-sidebar', readingClass: 'ph-series-sidebar' })
   else
     section.card-widget.ph-author(aria-labelledby='author-name')
       .ph-author-top

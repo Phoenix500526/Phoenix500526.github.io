@@ -228,6 +228,7 @@ p { text-wrap: pretty; }
 #card-toc .item-headline { font-size: 13px; margin-bottom: 18px; }
 #card-toc .item-headline > i { display: none; }
 #aside-content #card-toc .toc-percentage { font: 14px var(--serif); color: var(--accent); margin-top: 0; }
+#aside-content #card-toc .toc-percentage:not(:empty)::after { content: '%'; }
 #aside-content #card-toc .toc-content { margin: 0; width: 100%; max-height: calc(100vh - 170px); font-size: 12px; }
 #aside-content #card-toc .toc-content > * { margin: 0 !important; }
 #aside-content #card-toc .toc-link { padding: 8px; margin: 1px 0; border-radius: 4px; transition: color 150ms ease, background-color 150ms ease; }
@@ -243,6 +244,27 @@ p { text-wrap: pretty; }
 .ph-series-reading li { padding: 10px 12px; border-radius: 4px; font-size: 13px; line-height: 1.8; }
 .ph-series-reading li.is-current { background: var(--accent-soft); color: var(--accent); }
 .ph-series-reading li small { display: block; font-size: 10px; }
+.ph-series-sidebar, .ph-series-entry-desktop { display: none; }
+@media (min-width: 901px) {
+  .ph-series-mobile, .ph-series-entry-mobile { display: none; }
+  .ph-series-entry-desktop { display: flex; }
+  #content-inner #aside-content > .sticky_layout:has(.ph-series-sidebar) { max-height: calc(100vh - 120px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  #aside-content .sticky_layout:has(.ph-series-sidebar) #card-toc .toc-content { max-height: 28vh; }
+  .ph-series-sidebar { display: block; margin: 16px 18px 0; padding-top: 18px; }
+  .ph-series-sidebar .ph-section-label { align-items: flex-start; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  #aside-content .ph-series-sidebar h2 { font-size: 14px; }
+  .ph-series-sidebar .ph-section-label a { font-size: 11px; }
+  .ph-series-sidebar ol { max-height: 28vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--muted) var(--rule); --scrollbar-color: var(--muted); }
+  .ph-series-sidebar ol:hover { scrollbar-color: var(--accent) var(--rule); --scrollbar-color: var(--accent); }
+  @supports selector(::-webkit-scrollbar) {
+    .ph-series-sidebar ol, .ph-series-sidebar ol:hover { scrollbar-width: auto; scrollbar-color: auto; }
+  }
+  .ph-series-sidebar ol::-webkit-scrollbar { width: 6px; }
+  .ph-series-sidebar ol::-webkit-scrollbar-track { background: var(--rule); border-radius: 3px; }
+  .ph-series-sidebar ol::-webkit-scrollbar-thumb { background: var(--scrollbar-color); border-radius: 3px; }
+  .ph-series-sidebar li { padding: 8px 10px; font-size: 12px; }
+  .ph-series-sidebar li a { display: block; }
+}
 .ph-article-footer { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--rule); }
 .ph-article-footer p { color: var(--muted); font-size: 11px; }
 #footer { background: var(--paper); color: var(--muted); border-top: 1px solid var(--rule); }

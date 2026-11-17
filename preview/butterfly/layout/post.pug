@@ -16,25 +16,17 @@ block content
         each tag in page.tags.data.slice(0, 3)
           a(href=url_for(tag.path))= tag.name
       if series
-        a.ph-series-entry(href='#series-reading')
+        a.ph-series-entry.ph-series-entry-mobile(href='#series-reading')
           span= '所属系列 · ' + series.label + ' 源码阅读'
           span= '查看全部 ' + series.posts.length + ' 篇 ↓'
+        a.ph-series-entry.ph-series-entry-desktop(href='#series-reading-sidebar')
+          span= '所属系列 · ' + series.label + ' 源码阅读'
+          span= '查看全部 ' + series.posts.length + ' 篇 →'
       if showToc
         button.ph-mobile-toc(type='button' aria-controls='card-toc' aria-expanded='false') 本文目录 #[span(aria-hidden='true') ☰]
     article#article-container.container.post-content!= page.content
     if series
-      nav#series-reading.ph-series-reading(aria-label='本系列文章')
-        .ph-section-label
-          h2= series.label + ' · 继续阅读'
-          a(href=url_for(series.path))= '全部 ' + series.posts.length + ' 篇 ↗'
-        ol
-          each post in series.posts
-            li(class=post.path === page.path ? 'is-current' : '')
-              if post.path === page.path
-                span(aria-current='page')= post.title
-                small 正在阅读
-              else
-                a(href=url_for(post.path))= post.title
+      != partial('includes/series-reading', { series, readingId: 'series-reading', readingClass: 'ph-series-mobile' })
     else
       - const related = ph_related(page)
       if related.length
