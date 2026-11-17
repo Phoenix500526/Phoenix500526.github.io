@@ -66,11 +66,7 @@ block content
 
   if page.current === 1
     section.ph-city-walk(aria-label='蓝帽小狗的城市散步')
-      .ph-walk-heading
-        p 写完代码，出去走走。
-        button.ph-walk-toggle(type='button' aria-label='暂停散步动画' aria-pressed='false')
-          i.fas.fa-pause(aria-hidden='true')
-          span 暂停
+      p.ph-walk-heading 写完代码，出去走走。
       .ph-walk-scene(data-street=url_for('/img/city-walk/street.png') data-dog=url_for('/img/city-walk/dog.png') role='img' aria-label='蓝帽小狗沿着有树木、书店和路灯的像素街道散步')
         .ph-walk-sign(aria-hidden='true')
           span HACKER CUBE
@@ -78,4 +74,4 @@ block content
         .ph-dog-track(aria-hidden='true')
           .ph-dog-facing
             .ph-dog-sprite
-    script(src=url_for('/js/city-walk.js') defer)
+    script(src=url_for('/js/city-walk.js?v=2') defer)

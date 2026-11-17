@@ -6,7 +6,7 @@ The two original PNGs were copied into the project without image edits.
 - `butterfly/source/img/city-walk/street.png`: 1536 × 1024; day above, night below.
 - `butterfly/source/img/city-walk/dog.png`: 1254 × 1254 with alpha; four frames in a 2 × 2 grid.
 - Rendering: CSS background positions select the atlas regions; transforms move and mirror the character.
-- Motion starts only when the scene is visible, pauses in background tabs, and respects reduced-motion preferences. A pause button is available.
+- Motion starts only when the scene is visible, pauses in background tabs, and respects reduced-motion preferences. There are no visible playback controls.
 - The scene appears only on the first homepage. Article and archive pages keep their existing footer.
 
 ## Generation prompts

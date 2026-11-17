@@ -2,16 +2,10 @@
   const walk = document.querySelector('.ph-city-walk');
   if (!walk) return;
   const scene = walk.querySelector('.ph-walk-scene');
-  const button = walk.querySelector('.ph-walk-toggle');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let visible = false;
-  let paused = false;
   const sync = () => {
-    walk.classList.toggle('is-walking', visible && !paused && !document.hidden && !reducedMotion.matches);
-    button.setAttribute('aria-pressed', String(paused));
-    button.setAttribute('aria-label', paused ? '继续散步动画' : '暂停散步动画');
-    button.querySelector('span').textContent = paused ? '继续' : '暂停';
-    button.querySelector('i').className = paused ? 'fas fa-play' : 'fas fa-pause';
+    walk.classList.toggle('is-walking', visible && !document.hidden && !reducedMotion.matches);
   };
   const observer = new IntersectionObserver(entries => {
     visible = entries[0].isIntersecting;
@@ -22,7 +16,6 @@
     sync();
   });
   observer.observe(scene);
-  button.addEventListener('click', () => { paused = !paused; sync(); });
   document.addEventListener('visibilitychange', sync);
   reducedMotion.addEventListener('change', sync);
   sync();
