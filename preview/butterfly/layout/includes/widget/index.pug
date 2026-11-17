@@ -4,16 +4,33 @@ aside#aside-content.aside-content
       .sticky_layout
         include ./card_post_toc.pug
   else
-    section.card-widget.ph-author
+    section.card-widget.ph-author(aria-labelledby='author-name')
       .ph-author-top
-        img(src=url_for(theme.avatar.img) alt='Phoenix 的头像' width='64' height='64')
-        div
-          h2 Phoenix
-          span 后端开发者 / 写作者
-      p 后端开发者与开源爱好者。记录 C++、系统源码与学习过程中的思考。
+        img(src=url_for(theme.avatar.img) alt='Phoenix 的头像' width='96' height='96')
+        h2#author-name= config.author
+      p.ph-author-signature 唯有热爱可抵岁月漫长
+      nav.ph-author-stats(aria-label='博客统计')
+        a(href=url_for('/archives/'))
+          span 文章
+          strong= site.posts.length
+        a(href=url_for('/tags/'))
+          span 标签
+          strong= site.tags.length
+        a(href=url_for('/categories/'))
+          span 分类
+          strong= site.categories.length
+      a.ph-author-follow(href='https://github.com/Phoenix500526' aria-label='在 GitHub 关注 Phoenix')
+        i.fab.fa-github(aria-hidden='true')
+        | Follow Me
       .ph-author-links
-        a(href='https://github.com/Phoenix500526') #[i.fab.fa-github(aria-hidden='true')] GitHub
-        a(href=url_for('/atom.xml')) #[i.fas.fa-rss(aria-hidden='true')] RSS
+        a(href='https://github.com/Phoenix500526' aria-label='Phoenix 的 GitHub' title='GitHub')
+          i.fab.fa-github(aria-hidden='true')
+        a(href='mailto:Phoenix500526@163.com' aria-label='发送邮件给 Phoenix' title='Phoenix500526@163.com')
+          i.fas.fa-envelope(aria-hidden='true')
+        a(href='https://twitter.com/Lancelo92664230' aria-label='Phoenix 的推特' title='Twitter / X')
+          i.fab.fa-twitter(aria-hidden='true')
+        a(href=url_for('/atom.xml') aria-label='RSS 订阅' title='RSS 订阅')
+          i.fas.fa-rss(aria-hidden='true')
     section.card-widget.ph-topics
       h2 源码阅读
       p.ph-widget-note 沿着实现，理解设计

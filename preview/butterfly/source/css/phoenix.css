@@ -148,13 +148,22 @@ p { text-wrap: pretty; }
 .ph-post-cover.is-broken { display: none; }
 #aside-content .card-widget { border: 1px solid var(--rule); border-radius: var(--radius-card); padding: 24px; box-shadow: none; margin: 0 0 20px; background: var(--surface); }
 #aside-content h2 { margin: 0; font-size: 15px; }
-.ph-author-top { display: flex; gap: 14px; align-items: center; }
-.ph-author-top img { border-radius: 50%; object-fit: cover; width: 57px; height: 57px; }
+.ph-author { text-align: center; }
+.ph-author-top { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.ph-author-top img { border-radius: 50%; object-fit: cover; width: 96px; height: 96px; }
 #aside-content .ph-author h2 { font: 600 25px var(--serif); }
-.ph-author-top span { font-size: 10px; color: var(--muted); }
-.ph-author > p { font-size: 13px; line-height: 1.95; color: var(--muted); margin: 18px 0 11px; }
-.ph-author-links { display: flex; gap: 22px; font-size: 12px; }
-.ph-author-links a { display: inline-flex; gap: 7px; align-items: center; min-height: 40px; }
+.ph-author-signature { font-size: 13px; line-height: 1.8; color: var(--muted); margin: 8px 0 20px; }
+.ph-author-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.ph-author-stats a { display: flex; flex-direction: column; gap: 2px; padding: 5px 0; border-radius: 4px; }
+.ph-author-stats span { font-size: 12px; color: var(--muted); }
+.ph-author-stats strong { font-size: 18px; font-weight: 500; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.ph-author-follow { display: flex; justify-content: center; align-items: center; gap: 9px; min-height: 40px; margin-top: 18px; border-radius: 4px; background: var(--paper); font-size: 13px; font-weight: 500; transition: transform 150ms ease; }
+.ph-author-follow:active { transform: scale(.98); }
+.ph-author-links { display: flex; justify-content: center; gap: 8px; margin-top: 8px; font-size: 18px; }
+.ph-author-links a { display: inline-flex; justify-content: center; align-items: center; width: 40px; min-height: 40px; border-radius: 4px; }
+@media (hover: hover) {
+  .ph-author-stats a:hover, .ph-author-follow:hover, .ph-author-links a:hover { color: var(--accent); background: var(--accent-soft); }
+}
 .ph-widget-note { color: var(--muted); font-size: 11px; margin: 5px 0 14px; }
 .ph-topic { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .ph-topic strong { display: block; font-size: 14px; font-weight: 500; }
