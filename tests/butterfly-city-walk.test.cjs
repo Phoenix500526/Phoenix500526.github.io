@@ -34,17 +34,17 @@ function setup(t, readyState = 'loading') {
   return { window, images, media, state, walk, scene, intersect, loaded, running: () => walk.classList.contains('is-walking') };
 }
 
-test('city walk preloads after page load and waits for both decoded images', async t => {
-  const s = setup(t);
-  assert.equal(s.images.length, 0, 'decorative images must not compete with initial page resources');
+test('city walk preloads without window load and waits for both decoded images', async t => {
+  const s = setup(t, 'interactive');
+  assert.equal(s.images.length, 2, 'a pending page resource must not delay the city walk');
   s.intersect(true);
   assert.equal(s.running(), false);
-  s.loaded();
   assert.deepEqual(s.images.map(i => i.src).sort(), ['/dog.webp', '/street.webp']);
   assert.ok(s.images.every(i => i.priority === 'low'));
   s.images.find(i => i.src === '/dog.webp').resolve();
   await flush();
-  assert.equal(s.images.length, 2, 'background loading starts only once');
+  s.loaded();
+  assert.equal(s.images.length, 2, 'the later load event must not download images again');
   assert.equal(s.running(), false, 'a fast dog must wait for the slow street');
   assert.equal(s.walk.classList.contains('is-ready'), false);
   assert.equal(s.scene.style.backgroundImage, '');

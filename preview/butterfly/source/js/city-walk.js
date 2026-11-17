@@ -28,8 +28,8 @@
     visible = entries[0].isIntersecting;
     sync();
   });
-  if (document.readyState === 'complete') preload();
-  else window.addEventListener('load', preload, { once: true });
+  // This script is deferred; slow page resources must not hold up the scene.
+  preload();
   observer.observe(scene);
   document.addEventListener('visibilitychange', sync);
   reducedMotion.addEventListener('change', sync);
