@@ -354,7 +354,8 @@ p { text-wrap: pretty; }
 #content-inner.layout:has(> .ph-city-walk) { flex-wrap: wrap; }
 .ph-city-walk { flex: 0 0 100%; width: 100%; order: 1; margin-top: 22px; }
 .ph-walk-heading { margin: 0 0 12px; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
-.ph-walk-scene { position: relative; height: 220px; overflow: hidden; isolation: isolate; background-color: #f4dfc1; background-size: auto 200%; background-repeat: repeat-x; background-position: center top; image-rendering: pixelated; }
+.ph-walk-scene { position: relative; height: 220px; overflow: hidden; isolation: isolate; background-color: #f4dfc1; background-image: var(--ph-street-preview); background-size: auto 200%; background-repeat: repeat-x; background-position: center top; image-rendering: pixelated; }
+.ph-city-walk:not(.is-ready) .ph-dog-track { visibility: hidden; }
 [data-theme='dark'] .ph-walk-scene { background-color: #202b40; background-position: center bottom; }
 .ph-walk-sign { position: absolute; right: 12%; bottom: 31px; z-index: 1; padding: 7px 9px; border: 2px solid #d5ad74; background: #2a332e; color: #f8e1b7; box-shadow: 2px 2px 0 #1a2424; text-align: center; line-height: 1.4; }
 .ph-walk-sign:after { content: ''; position: absolute; top: 100%; left: calc(50% - 2px); width: 4px; height: 18px; background: #544a3f; }

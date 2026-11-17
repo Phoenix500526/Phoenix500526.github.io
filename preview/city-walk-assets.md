@@ -1,13 +1,27 @@
 # City walk preview assets
 
 Generated with the built-in imagegen tool for the local blog preview.
-The two original PNGs were copied into the project without image edits.
+The two original PNGs are retained as source masters. The page uses smaller WebP derivatives.
 
 - `butterfly/source/img/city-walk/street.png`: 1536 × 1024; day above, night below.
 - `butterfly/source/img/city-walk/dog.png`: 1254 × 1254 with alpha; four frames in a 2 × 2 grid.
+- `butterfly/source/img/city-walk/street.webp`: 1320 × 880, quality 82, for the clear street.
+- `butterfly/source/img/city-walk/dog.webp`: 336 × 336, lossless with alpha; 168px frames for the 84px display size.
+- `butterfly/assets/city-walk/street-preview.webp`: 192 × 128, quality 50. A build helper embeds this small day/night atlas in the homepage HTML, so it needs no separate image request.
 - Rendering: CSS background positions select the atlas regions; transforms move and mirror the character.
 - Motion starts only when the scene is visible, pauses in background tabs, and respects reduced-motion preferences. There are no visible playback controls.
+- The inline street is visible immediately, including with JavaScript disabled. After the page load event, the two full-size WebPs load with low priority even while offscreen. When both decode, they replace the preview and reveal the dog. If either fails, the static preview remains visible.
 - The scene appears only on the first homepage. Article and archive pages keep their existing footer.
+
+## Rebuild optimized assets
+
+Run from the repository root with `cwebp` (generated with version 1.6.0):
+
+```sh
+cwebp -quiet -resize 1320 880 -q 82 -m 6 -sharp_yuv preview/butterfly/source/img/city-walk/street.png -o preview/butterfly/source/img/city-walk/street.webp
+cwebp -quiet -resize 336 336 -lossless -m 6 preview/butterfly/source/img/city-walk/dog.png -o preview/butterfly/source/img/city-walk/dog.webp
+cwebp -quiet -resize 192 128 -q 50 -m 6 preview/butterfly/source/img/city-walk/street.png -o preview/butterfly/assets/city-walk/street-preview.webp
+```
 
 ## Generation prompts
 

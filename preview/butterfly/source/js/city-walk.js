@@ -4,17 +4,32 @@
   const scene = walk.querySelector('.ph-walk-scene');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let visible = false;
+  let ready = false;
   const sync = () => {
-    walk.classList.toggle('is-walking', visible && !document.hidden && !reducedMotion.matches);
+    walk.classList.toggle('is-walking', ready && visible && !document.hidden && !reducedMotion.matches);
+  };
+  const preload = () => {
+    Promise.all([scene.dataset.street, scene.dataset.dog].map(src => {
+      const image = new Image();
+      image.fetchPriority = 'low';
+      image.src = src;
+      return image.decode();
+    })).then(() => {
+      scene.style.backgroundImage = `url("${scene.dataset.street}")`;
+      walk.querySelector('.ph-dog-sprite').style.backgroundImage = `url("${scene.dataset.dog}")`;
+      ready = true;
+      walk.classList.add('is-ready');
+      sync();
+    }).catch(() => {
+      // Keep the embedded street visible if either full-size image fails.
+    });
   };
   const observer = new IntersectionObserver(entries => {
     visible = entries[0].isIntersecting;
-    if (visible && !scene.style.backgroundImage) {
-      scene.style.backgroundImage = `url("${scene.dataset.street}")`;
-      walk.querySelector('.ph-dog-sprite').style.backgroundImage = `url("${scene.dataset.dog}")`;
-    }
     sync();
   });
+  if (document.readyState === 'complete') preload();
+  else window.addEventListener('load', preload, { once: true });
   observer.observe(scene);
   document.addEventListener('visibilitychange', sync);
   reducedMotion.addEventListener('change', sync);
