@@ -267,6 +267,10 @@ p { text-wrap: pretty; }
 }
 .ph-article-footer { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--rule); }
 .ph-article-footer p { color: var(--muted); font-size: 11px; }
+.ph-comments { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--rule); }
+.ph-comments h2 { margin: 0 0 8px; font-size: 20px; }
+.ph-comments-note { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.ph-comments #giscus-wrap { min-height: 260px; }
 #footer { background: var(--paper); color: var(--muted); border-top: 1px solid var(--rule); }
 #footer:before { display: none; }
 .ph-footer { max-width: 1180px; margin: 0 auto; padding: 26px 0 36px; display: flex; align-items: center; gap: 24px; text-align: left; font-size: 10px; }

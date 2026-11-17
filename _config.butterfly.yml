@@ -107,7 +107,24 @@ theme_config:
   share:
     use: false
   comments:
-    use: []
+    use: [Giscus]
+    lazyload: true
+    count: false
+    card_post_count: false
+  giscus:
+    repo: Phoenix500526/Phoenix500526.github.io
+    repo_id: MDEwOlJlcG9zaXRvcnkzMDkzODMzNDI=
+    category_id: DIC_kwDOEnDQrs4DLUbV
+    light_theme: gruvbox_light
+    dark_theme: gruvbox_dark
+    option:
+      data-category: Announcements
+      data-mapping: pathname
+      data-strict: '1'
+      data-lang: zh-CN
+      data-input-position: top
+      data-reactions-enabled: '1'
+      data-loading: lazy
   busuanzi:
     site_uv: false
     site_pv: false

@@ -96,6 +96,24 @@ lockfile. Legacy Taobao mirror URLs failed certificate validation on a fresh CI
 runner even though local cached installs passed; cold-cache installs must work
 against the official npm registry without changing versions or integrity hashes.
 
+## Article comments
+
+Giscus uses the public `Phoenix500526/Phoenix500526.github.io` repository's
+Discussions and its Announcements category. The repository must have Discussions
+enabled and the Giscus GitHub App installed for that repository. Repository and
+category IDs in `_config.butterfly.yml` are public identifiers, not credentials.
+
+Article comments appear after the author footer and before the city walk. The
+native Butterfly integration loads Giscus when the comment container enters the
+viewport and updates its theme when the blog switches between light and dark.
+Set `comments: false` in a post's front matter to disable its comment section.
+
+Strict `pathname` mapping keeps comments associated when a title or domain
+changes. Changing a permalink requires updating the corresponding discussion's
+mapping. Local preview and production share the same paths and therefore the
+same discussions: posting a comment or reaction locally writes to the real
+GitHub repository. Previewing without posting does not create a discussion.
+
 ## Review before a future deployment
 
 - Read an algorithm post, a long Libevent post, skynet diagrams and a nontechnical

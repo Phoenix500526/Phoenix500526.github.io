@@ -44,4 +44,11 @@ block content
       p= '作者：' + config.author + ' · 转载请注明作者与原文链接。'
       a.ph-text-link(href=url_for('/')) ← 返回首页
 
+    if page.comments !== false && theme.comments.use.includes('Giscus')
+      - var commentsJsLoad = true
+      section#post-comment.ph-comments(aria-labelledby='comments-title')
+        h2#comments-title 留言与讨论
+        p.ph-comments-note 欢迎交流想法、补充资料，或指出文中的问题。使用 GitHub 账号即可参与。
+        #giscus-wrap
+
   include includes/city-walk.pug
