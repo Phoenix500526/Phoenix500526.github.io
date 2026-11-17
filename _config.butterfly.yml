@@ -108,7 +108,7 @@ theme_config:
     use: false
   comments:
     use: [Giscus]
-    lazyload: true
+    lazyload: false
     count: false
     card_post_count: false
   giscus:
@@ -124,7 +124,7 @@ theme_config:
       data-lang: zh-CN
       data-input-position: top
       data-reactions-enabled: '1'
-      data-loading: lazy
+      data-loading: eager
   busuanzi:
     site_uv: false
     site_pv: false
