@@ -1,0 +1,65 @@
+extends includes/layout.pug
+
+block content
+  #recent-posts.recent-posts.ph-home.nc
+    if page.current === 1
+      - const picks = ph_featured()
+      section.ph-featured(aria-labelledby='featured-heading')
+        .ph-section-label
+          h2#featured-heading 从这里开始
+          span 精选阅读 / Selected notes
+        if picks.length
+          article.ph-lead
+            .ph-lead-copy
+              p.ph-eyebrow 源码阅读 · MUDUO
+              h3
+                a(href=url_for(picks[0].path))= picks[0].title
+              p.ph-summary= ph_summary(picks[0])
+              a.ph-text-link(href=url_for(picks[0].path)) 阅读这篇文章 #[span(aria-hidden='true') ↗]
+            .ph-thread-diagram(aria-label='线程封装与线程局部上下文示意')
+              span.ph-diagram-caption THREAD CONTEXT
+              .ph-thread-node Thread
+              span.ph-thread-connector(aria-hidden='true') ↓
+              .ph-thread-local
+                span thread_local
+                small 每个线程自己的上下文
+              .ph-thread-fields
+                span tid
+                span name
+              span.ph-diagram-foot C++ / 从源码到实践
+          .ph-secondary-picks
+            each post, index in picks.slice(1)
+              a.ph-secondary-pick(href=url_for(post.path))
+                span.ph-pick-number= '0' + (index + 2)
+                div
+                  small= post.categories.first().name
+                  h3= post.title
+                span.ph-pick-arrow(aria-hidden='true') ↗
+      nav.ph-mobile-topics(aria-label='源码阅读系列')
+        each topic in ph_topics().filter(topic => topic.series)
+          a(href=url_for(topic.path))= topic.label
+    .ph-section-label.ph-list-label
+      h2 全部文章
+      span= site.posts.length + ' 篇笔记 · 按发布日期'
+    .recent-post-items
+      - let imageIndex = 0
+      each post in page.posts.data
+        - const cover = ph_cover(post)
+        - const imageOnRight = cover && imageIndex++ % 2 === 1
+        article.ph-post-card(class=[cover ? 'has-cover' : 'text-only', imageOnRight ? 'image-right' : ''])
+          if cover
+            a.ph-post-cover(href=url_for(post.path) aria-label=post.title)
+              img(src=url_for(cover) alt='' loading='lazy' width='800' height='505')
+          .ph-post-copy
+            .ph-eyebrow
+              each category in post.categories.data
+                a(href=url_for(category.path))= category.name
+            h3
+              a(href=url_for(post.path))= post.title
+            p.ph-summary= ph_summary(post)
+            .ph-post-meta
+              time(datetime=date_xml(post.date))= date(post.date, 'YYYY-MM-DD')
+              each tag in post.tags.data.slice(0, 2)
+                a(href=url_for(tag.path))= tag.name
+              a.ph-read-link(href=url_for(post.path) aria-label='阅读：' + post.title) 阅读 #[span(aria-hidden='true') ↗]
+    include includes/pagination.pug

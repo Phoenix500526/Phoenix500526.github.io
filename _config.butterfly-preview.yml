@@ -1,0 +1,136 @@
+# Local preview only; the production configuration remains yilia-plus.
+theme: butterfly-preview
+public_dir: .preview-butterfly
+url: http://localhost:4187
+language: zh-CN
+deploy: false
+search:
+  path: search.json
+  field: post
+  content: true
+theme_config:
+  nav:
+    fixed: true
+    display_post_title: false
+  menu:
+    首页: / || fas fa-home
+    分类: /categories/ || fas fa-folder
+    归档: /archives/ || fas fa-archive
+    GitHub: https://github.com/Phoenix500526 || fab fa-github
+  avatar:
+    img: /img/Phoenix.png
+    effect: false
+  favicon: /img/Phoenix.png
+  error_404:
+    enable: true
+  disable_top_img: true
+  display_mode: light
+  index_layout: 3
+  category_ui: default
+  tag_ui: default
+  theme_color:
+    enable: true
+    main: '#8b4a32'
+    paginator: '#8b4a32'
+    button_hover: '#70402e'
+    text_selection: '#e7d5c8'
+    link_color: '#8b4a32'
+    hr_color: '#cec3b8'
+    meta_theme_color_light: '#eee8df'
+    meta_theme_color_dark: '#211d19'
+  index_post_content:
+    method: 2
+    length: 150
+  code_blocks:
+    theme: darker
+    copy: true
+    language: true
+    shrink: none
+    height_limit: 560
+    word_wrap: false
+    fullpage: true
+    macStyle: false
+  toc:
+    post: true
+    number: false
+    expand: false
+    style_simple: true
+    scroll_percent: true
+  post_meta:
+    post:
+      date_type: created
+      date_format: date
+  post_copyright:
+    enable: false
+  post_pagination: false
+  related_post:
+    enable: false
+  aside:
+    enable: true
+    position: right
+    button: false
+    card_author:
+      description: 后端开发者与开源爱好者。记录 C++、系统源码与学习过程中的思考。
+    card_announcement:
+      enable: false
+    card_recent_post:
+      enable: false
+    card_webinfo:
+      enable: false
+  readmode: true
+  darkmode:
+    enable: true
+    button: true
+    autoChangeMode: false
+  rightside_config_animation: false
+  rightside_scroll_percent: true
+  anchor:
+    auto_update: false
+    click_to_scroll: true
+  search:
+    use: local_search
+    placeholder: 搜索文章、源码与算法…
+    local_search:
+      preload: false
+      top_n_per_article: 2
+      pagination:
+        enable: true
+        hitsPerPage: 8
+  lightbox: medium_zoom
+  lazyload:
+    enable: true
+    native: true
+    field: post
+  math:
+    use: mathjax
+    per_page: false
+  share:
+    use: false
+  comments:
+    use: []
+  busuanzi:
+    site_uv: false
+    site_pv: false
+    page_pv: false
+  pjax:
+    enable: false
+  hr_icon:
+    enable: false
+  font:
+    global_font_size: 16px
+    code_font_size: 14px
+    font_family: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    code_font_family: '"SFMono-Regular", Consolas, "Liberation Mono", monospace'
+  CDN:
+    internal_provider: local
+    third_party_provider: local
+    option:
+      fontawesome: /vendor/fontawesome/css/all.min.css
+      medium_zoom: /vendor/medium-zoom.min.js
+      mathjax: /vendor/mathjax/tex-chtml.js
+  inject:
+    head:
+      - '<meta name="robots" content="noindex,nofollow">'
+      - '<link rel="stylesheet" href="/css/phoenix.css">'
+    bottom:
+      - '<script src="/js/phoenix.js" defer></script>'

@@ -1,0 +1,19 @@
+nav#nav
+  span#blog-info
+    a.nav-site-title(href=url_for('/'))
+      span.ph-brand-mark(aria-hidden='true') H
+      span.site-name= config.title
+  #menus
+    .menus_items
+      each href, label in {'首页':'/', '分类':'/categories/', '归档':'/archives/', 'GitHub':'https://github.com/Phoenix500526'}
+        .menus_item
+          a.site-page(href=url_for(href) aria-current=(label === '首页' && globalPageType === 'home' ? 'page' : undefined))= label
+    button.ph-theme-toggle(type='button' aria-label='切换深浅色模式' title='切换深浅色模式')
+      i.fas.fa-adjust(aria-hidden='true')
+    #search-button
+      button.site-page.search(type='button' aria-label='搜索文章')
+        i.fas.fa-search(aria-hidden='true')
+        span 搜索
+    #toggle-menu
+      button.site-page(type='button' aria-label='打开导航菜单')
+        i.fas.fa-bars(aria-hidden='true')

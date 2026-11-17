@@ -1,0 +1,35 @@
+aside#aside-content.aside-content
+  if globalPageType === 'post'
+    if showToc
+      .sticky_layout
+        include ./card_post_toc.pug
+  else
+    section.card-widget.ph-author
+      .ph-author-top
+        img(src=url_for(theme.avatar.img) alt='Phoenix 的头像' width='64' height='64')
+        div
+          h2 Phoenix
+          span 后端开发者 / 写作者
+      p 后端开发者与开源爱好者。记录 C++、系统源码与学习过程中的思考。
+      .ph-author-links
+        a(href='https://github.com/Phoenix500526') #[i.fab.fa-github(aria-hidden='true')] GitHub
+        a(href=url_for('/atom.xml')) #[i.fas.fa-rss(aria-hidden='true')] RSS
+    section.card-widget.ph-topics
+      h2 源码阅读
+      p.ph-widget-note 沿着实现，理解设计
+      each topic in ph_topics().filter(topic => topic.series)
+        a.ph-topic(href=url_for(topic.path))
+          div
+            strong= topic.label
+            small= topic.description
+          span= String(topic.count).padStart(2, '0')
+      h2.ph-topic-subtitle 其他主题
+      each topic in ph_topics().filter(topic => !topic.series)
+        a.ph-topic.ph-topic-small(href=url_for(topic.path))
+          strong= topic.label
+          span= String(topic.count).padStart(2, '0')
+    section.card-widget.ph-tags
+      h2 常用标签
+      .ph-tag-list
+        each tag in site.tags.sort('length', -1).limit(10).data
+          a(href=url_for(tag.path))= tag.name

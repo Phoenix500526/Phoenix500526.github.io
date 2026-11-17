@@ -1,0 +1,8 @@
+script.
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], tags: 'none' },
+    options: { enableMenu: false, skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] },
+    chtml: { scale: 1.05 },
+    startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => MathJax.typesetPromise([document.getElementById('article-container')])); } }
+  };
+script(async src=url_for(theme.asset.mathjax))
