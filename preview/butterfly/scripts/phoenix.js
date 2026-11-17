@@ -28,6 +28,13 @@ hexo.extend.filter.register('before_post_render', data => {
   data.mathjax = /\$\$|\$[^\n$]+\$/.test(data.content);
   return data;
 });
+hexo.extend.filter.register('after_post_render', data => {
+  // Marked 15 decodes &amp; before forming IDs; retain this existing deep link.
+  if (data.slug === '睡眠的奥秘-——-关于睡眠，你可能不知道的事') {
+    data.content = data.content.replace('<h4 id="R90睡眠法-达芬奇睡眠法">', '<span id="R90睡眠法-amp-达芬奇睡眠法" aria-hidden="true"></span><h4 id="R90睡眠法-达芬奇睡眠法">');
+  }
+  return data;
+});
 
 // This theme has its own preview database; source Markdown is never rewritten.
 hexo.extend.filter.register('before_generate', async () => {
@@ -44,6 +51,15 @@ hexo.extend.generator.register('phoenix-tags', () => ({
 hexo.extend.generator.register('phoenix-categories', () => ({
   path: 'categories/index.html', layout: 'page', data: { title: '分类', type: 'categories', comments: false }
 }));
+hexo.extend.generator.register('phoenix-category-redirect', () => {
+  const target = encodeURI('/categories/skynet源码剖析/');
+  const canonical = new URL(target, hexo.config.url).href;
+  const robots = hexo.config.butterfly_preview ? '<meta name="robots" content="noindex,nofollow">' : '';
+  return {
+    path: 'categories/skynet码剖析/index.html',
+    data: `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><title>分类已迁移</title><link rel="canonical" href="${canonical}">${robots}<meta http-equiv="refresh" content="0;url=${target}"></head><body><p>分类已迁移至 <a href="${target}">skynet 源码剖析</a>。</p></body></html>`
+  };
+});
 
 hexo.extend.helper.register('ph_featured', function () {
   const posts = this.site.posts.toArray();

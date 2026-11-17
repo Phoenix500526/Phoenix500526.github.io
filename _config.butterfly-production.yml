@@ -1,0 +1,4 @@
+# Build only; deployment is handled separately by GitHub Pages.
+public_dir: public
+url: https://phoenix500526.github.io
+butterfly_preview: false

@@ -24,18 +24,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install Hexo CLI globally
-        run: npm install -g hexo-cli
+          node-version: '24'
+          cache: npm
 
       - name: Install site dependencies
-        run: |
-          rm -f package-lock.json
-          npm install --no-audit --no-fund
+        run: npm ci --no-fund
 
-      - name: Build with Hexo
-        run: hexo generate
+      - name: Test navigation accessibility
+        run: npm test
+
+      - name: Build and verify Butterfly production site
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

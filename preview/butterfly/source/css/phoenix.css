@@ -214,6 +214,7 @@ p { text-wrap: pretty; }
 #aside-content #card-toc .toc-link { padding: 8px; margin: 1px 0; border-radius: 4px; transition: color 150ms ease, background-color 150ms ease; }
 #aside-content #card-toc .toc-content .toc-link.active { color: var(--accent); background: var(--accent-soft); }
 #sidebar-menus:not(.open) { visibility: hidden; }
+#sidebar #sidebar-menus { transition: transform 300ms ease; }
 .ph-panel-close { display: block; margin: 0 0 8px auto; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--muted); cursor: pointer; }
 #sidebar-menus > .ph-panel-close { margin: 16px 16px 0 auto; }
 #card-toc > .ph-panel-close { display: none; }

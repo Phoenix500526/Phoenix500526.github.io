@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate",
+    "build": "node tools/butterfly.cjs production",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "butterfly:build": "node tools/butterfly-preview.cjs build",
-    "butterfly:serve": "node tools/butterfly-preview.cjs serve",
-    "server": "hexo server"
+    "butterfly:build": "node tools/butterfly.cjs build",
+    "butterfly:serve": "node tools/butterfly.cjs serve",
+    "server": "hexo server",
+    "butterfly:verify": "node tools/verify-butterfly.cjs preview && node tools/verify-butterfly.cjs production",
+    "test": "node --test tests/*.test.cjs"
   },
   "hexo": {
     "version": "8.1.2"
@@ -24,14 +26,15 @@
     "hexo-generator-sitemap": "^2.1.0",
     "hexo-generator-tag": "^1.0.0",
     "hexo-renderer-ejs": "^2.0.0",
-    "hexo-renderer-marked": "^3.0.0",
-    "hexo-renderer-stylus": "^2.0.0",
+    "hexo-renderer-marked": "7.0.1",
+    "hexo-renderer-stylus": "3.0.1",
     "hexo-server": "^2.0.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "7.3.1",
     "hexo-generator-searchdb": "1.5.0",
     "hexo-theme-butterfly": "5.7.2",
+    "jsdom": "25.0.1",
     "mathjax": "3.2.2",
     "medium-zoom": "1.1.2"
   }

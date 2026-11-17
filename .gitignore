@@ -7,5 +7,6 @@ public/
 .deploy*/
 .preview/
 .preview-butterfly/
+.butterfly-cache/
 themes/butterfly-preview/
 _multiconfig.yml

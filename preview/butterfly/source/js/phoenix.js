@@ -51,11 +51,49 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   addCloseButton(toc, '关闭目录', closeToc);
   const menu = document.getElementById('sidebar-menus');
+  const menuButton = document.querySelector('#toggle-menu button');
   const closeMenu = () => {
     document.getElementById('menu-mask')?.click();
-    document.querySelector('#toggle-menu button')?.focus();
   };
   addCloseButton(menu, '关闭导航菜单', closeMenu);
+  if (menu && menuButton) {
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', '网站导航');
+    menu.setAttribute('aria-modal', 'true');
+    const background = [...document.querySelectorAll('#body-wrap, #rightside')];
+    let wasOpen = false;
+    // Observe native Butterfly open/close so mask clicks and resizing stay in sync.
+    const syncMenu = () => {
+      const open = menu.classList.contains('open');
+      menuButton.setAttribute('aria-expanded', String(open));
+      menu.inert = !open;
+      background.forEach(element => { element.inert = open; });
+      if (open !== wasOpen) {
+        // Wait for WebKit to apply inert/visibility changes before moving focus.
+        requestAnimationFrame(() => {
+          if (menu.classList.contains('open') !== open) return;
+          const target = open ? menu.querySelector('button') : menuButton.getClientRects().length ? menuButton : document.querySelector('.nav-site-title');
+          target?.focus({ preventScroll: true });
+        });
+      }
+      wasOpen = open;
+    };
+    new MutationObserver(syncMenu).observe(menu, { attributes: true, attributeFilter: ['class'] });
+    const nav = document.getElementById('nav');
+    if (nav) new MutationObserver(() => {
+      // Native menu layout updates on a later frame than its resize close check.
+      if (menu.classList.contains('open') && !menuButton.getClientRects().length) closeMenu();
+    }).observe(nav, { attributes: true, attributeFilter: ['class'] });
+    syncMenu();
+    menu.addEventListener('keydown', event => {
+      if (event.key !== 'Tab') return;
+      const items = [...menu.querySelectorAll('button, a[href]')].filter(element => element.getClientRects().length);
+      const first = items[0];
+      const last = items.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+  }
   tocButton?.addEventListener('click', () => {
     const open = toc.classList.toggle('open');
     tocButton.setAttribute('aria-expanded', String(open));
@@ -85,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', event => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
+      if (menu?.classList.contains('open')) return;
       document.querySelector('#search-button .search')?.click();
     }
     if (event.key === 'Escape') {
