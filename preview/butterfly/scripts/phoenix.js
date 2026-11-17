@@ -26,7 +26,6 @@ const topics = [
 
 hexo.extend.filter.register('before_post_render', data => {
   data.mathjax = /\$\$|\$[^\n$]+\$/.test(data.content);
-  if (data.source === 'categories/index.md') { data.layout = 'page'; data.type = 'categories'; data.title = '分类'; }
   return data;
 });
 
@@ -42,7 +41,7 @@ hexo.extend.filter.register('before_generate', async () => {
 hexo.extend.generator.register('phoenix-tags', () => ({
   path: 'tags/index.html', layout: 'page', data: { title: '标签', type: 'tags', comments: false }
 }));
-hexo.extend.generator.register('phoenix-categories', locals => locals.pages.findOne({ source: 'categories/index.md' }) ? [] : ({
+hexo.extend.generator.register('phoenix-categories', () => ({
   path: 'categories/index.html', layout: 'page', data: { title: '分类', type: 'categories', comments: false }
 }));
 
