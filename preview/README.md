@@ -30,8 +30,11 @@ the site.** Keep commits local until deployment is explicitly approved. The old
 
 The pinned official npm theme is copied into ignored `themes/butterfly-preview`;
 `preview/butterfly` is overlaid on it. CSS, scripts, icon fonts, image zoom, and
-MathJax are local. Production pages additionally load the official Busuanzi
-script for site visitor and page-view counts. Preview disables this service.
+MathJax are local. Production pages use a local client to request site visitor
+and page-view counts from the official Busuanzi HTTPS endpoint. Failed script
+requests retry at most twice; successful requests are never retried. A slow
+response can still update the card after its eight-second status timeout.
+Preview disables this service.
 The website info card shows article count, total word count, visitor count,
 page views, and the latest article content update (not the build date).
 Unavailable statistics fall back to a status label rather than a zero count.

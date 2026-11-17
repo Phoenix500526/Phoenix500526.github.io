@@ -1,13 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.ph-theme-toggle')?.addEventListener('click', () => document.getElementById('darkmode')?.click());
 
-  const siteStats = document.querySelectorAll('#busuanzi_value_site_uv, #busuanzi_value_site_pv');
-  if (siteStats.length) setTimeout(() => {
-    siteStats.forEach(element => {
-      if (element.textContent === '加载中…') element.textContent = '暂不可用';
-    });
-  }, 8000);
-
   document.querySelectorAll('.ph-post-cover img').forEach(image => {
     const hide = () => image.parentElement.classList.add('is-broken');
     image.addEventListener('error', hide);

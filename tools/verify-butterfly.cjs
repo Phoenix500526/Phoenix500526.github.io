@@ -32,7 +32,7 @@ for (const file of pages) {
   check(!['db.json', '_multiconfig.yml', '.env'].includes(path.basename(file)), `Build state in artifact: ${relative}`);
   if (!file.endsWith('.html')) continue;
   const html = fs.readFileSync(file, 'utf8');
-  if (mode === 'preview') check(!html.includes('busuanzi.ibruce.info'), `Analytics enabled in preview: ${relative}`);
+  if (mode === 'preview') check(!html.includes('busuanzi.ibruce.info') && !html.includes('src="/js/site-stats.js"'), `Analytics enabled in preview: ${relative}`);
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/);
   check(canonical && canonical[1].startsWith(origin + '/'), `Invalid canonical: ${relative}`);
   const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
@@ -59,7 +59,8 @@ if (mode === 'production') {
   }
   for (const file of [path.join(output, 'index.html'), sleepPost]) {
     const html = fs.readFileSync(file, 'utf8');
-    check((html.match(/src="https:\/\/busuanzi\.ibruce\.info\/busuanzi\/2\.3\/busuanzi\.pure\.mini\.js"/g) || []).length === 1, `Expected one Busuanzi script: ${path.relative(output, file)}`);
+    check((html.match(/src="\/js\/site-stats\.js"/g) || []).length === 1, `Expected one statistics client: ${path.relative(output, file)}`);
+    check(!html.includes('busuanzi.pure.mini.js'), `Duplicate statistics provider client: ${path.relative(output, file)}`);
   }
 } else {
   check(!homepage.includes('id="busuanzi_value_') && homepage.includes('本地不统计'), 'Wrong preview statistics state');

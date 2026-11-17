@@ -8,4 +8,4 @@ theme_config:
     site_pv: true
   CDN:
     option:
-      busuanzi: https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js
+      busuanzi: /js/site-stats.js
