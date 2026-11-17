@@ -78,6 +78,10 @@ Run `npm audit` to recheck current advisories; its result is time-dependent.
 indexing policy, canonical/feed origins, content update dates, compatibility
 links, and build-state isolation. `npm test` checks menu focus containment and
 restoration after button, mask, Escape, and desktop-resize close paths.
+The registry regression test also rejects non-official tarball URLs in the
+lockfile. Legacy Taobao mirror URLs failed certificate validation on a fresh CI
+runner even though local cached installs passed; cold-cache installs must work
+against the official npm registry without changing versions or integrity hashes.
 
 ## Review before a future deployment
 
