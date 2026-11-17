@@ -1,0 +1,26 @@
+extends includes/layout.pug
+
+block content
+  article.ph-about(aria-labelledby='about-title')
+    header.ph-about-intro
+      div
+        p.ph-eyebrow PHOENIX / ABOUT
+        h1#about-title 你好，我是 Phoenix。
+        p.ph-about-name Jiawei Zhao · Rust / C++ Developer
+        p.ph-about-bio 我关注分布式系统、AI Agent、数据基础设施与 eBPF。参与开源、解决实际问题，是我学习和理解系统的方式。
+        p.ph-about-motto 热爱可抵岁月漫长
+        .ph-about-links
+          a(href='https://github.com/Phoenix500526') GitHub ↗
+          a(href='mailto:Phoenix500526@163.com') 邮箱 ↗
+          a(href='https://twitter.com/Lancelo92664230') Twitter / X ↗
+      img.ph-about-avatar(src=url_for(theme.avatar.img) alt='Phoenix 的蓝帽小狗头像' width='160' height='160')
+    .ph-about-body
+      nav.ph-about-nav(aria-label='开源贡献分区')
+        p.ph-eyebrow OPEN SOURCE
+        h2 开源贡献
+        a(href='#consensus') 分布式系统与共识
+        a(href='#agents') AI Agent 系统
+        a(href='#data') 数据基础设施
+        a(href='#ebpf') eBPF 与内核
+        a.ph-about-all(href='https://github.com/Phoenix500526?tab=overview') GitHub 上的更多记录 ↗
+      .ph-contributions(lang='en')!= page.content
