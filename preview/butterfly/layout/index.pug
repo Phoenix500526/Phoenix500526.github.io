@@ -63,3 +63,19 @@ block content
                 a(href=url_for(tag.path))= tag.name
               a.ph-read-link(href=url_for(post.path) aria-label='阅读：' + post.title) 阅读 #[span(aria-hidden='true') ↗]
     include includes/pagination.pug
+
+  if page.current === 1
+    section.ph-city-walk(aria-label='蓝帽小狗的城市散步')
+      .ph-walk-heading
+        p 写完代码，出去走走。
+        button.ph-walk-toggle(type='button' aria-label='暂停散步动画' aria-pressed='false')
+          i.fas.fa-pause(aria-hidden='true')
+          span 暂停
+      .ph-walk-scene(data-street=url_for('/img/city-walk/street.png') data-dog=url_for('/img/city-walk/dog.png') role='img' aria-label='蓝帽小狗沿着有树木、书店和路灯的像素街道散步')
+        .ph-walk-sign(aria-hidden='true')
+          span HACKER CUBE
+          small 慢慢走，慢慢想
+        .ph-dog-track(aria-hidden='true')
+          .ph-dog-facing
+            .ph-dog-sprite
+    script(src=url_for('/js/city-walk.js') defer)

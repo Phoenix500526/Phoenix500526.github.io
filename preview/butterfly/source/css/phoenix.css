@@ -347,7 +347,36 @@ p { text-wrap: pretty; }
   #rightside { right: 8px; }
   #rightside > div > button { width: 36px; height: 40px; opacity: .9; }
 }
+#content-inner.layout:has(> .ph-city-walk) { flex-wrap: wrap; }
+.ph-city-walk { flex: 0 0 100%; width: 100%; order: 1; margin-top: 22px; }
+.ph-walk-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 12px; }
+.ph-walk-heading p { margin: 0; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+.ph-walk-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 4px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; cursor: pointer; }
+.ph-walk-scene { position: relative; height: 220px; overflow: hidden; isolation: isolate; background-color: #f4dfc1; background-size: auto 200%; background-repeat: repeat-x; background-position: center top; image-rendering: pixelated; }
+[data-theme='dark'] .ph-walk-scene { background-color: #202b40; background-position: center bottom; }
+.ph-walk-sign { position: absolute; right: 12%; bottom: 31px; z-index: 1; padding: 7px 9px; border: 2px solid #d5ad74; background: #2a332e; color: #f8e1b7; box-shadow: 2px 2px 0 #1a2424; text-align: center; line-height: 1.4; }
+.ph-walk-sign:after { content: ''; position: absolute; top: 100%; left: calc(50% - 2px); width: 4px; height: 18px; background: #544a3f; }
+.ph-walk-sign span { display: block; font: 600 11px/1.4 'SFMono-Regular', Consolas, monospace; letter-spacing: 1px; }
+.ph-walk-sign small { display: block; font-size: 9px; letter-spacing: 1px; }
+.ph-dog-track { position: absolute; z-index: 2; left: 24px; bottom: 10px; width: calc(100% - 132px); height: 84px; animation: ph-city-stroll 36s linear infinite; }
+.ph-dog-facing { width: 84px; height: 84px; animation: ph-city-facing 36s steps(1, end) infinite; }
+.ph-dog-sprite { width: 84px; height: 84px; background-size: 200% 200%; background-repeat: no-repeat; animation: ph-city-steps .8s steps(1, end) infinite; image-rendering: pixelated; }
+.ph-dog-track, .ph-dog-facing, .ph-dog-sprite { animation-play-state: paused; }
+.is-walking .ph-dog-track, .is-walking .ph-dog-facing, .is-walking .ph-dog-sprite { animation-play-state: running; }
+@keyframes ph-city-stroll { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(100%); } }
+@keyframes ph-city-facing { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+@keyframes ph-city-steps { 0%, 100% { background-position: 0 0; } 25% { background-position: 100% 0; } 50% { background-position: 0 100%; } 75% { background-position: 100% 100%; } }
+@media (hover: hover) { .ph-walk-toggle:hover { color: var(--ink); background: var(--surface); } }
+@media (max-width: 900px) {
+  .ph-city-walk { flex-basis: auto; margin-top: 0; }
+  .ph-walk-scene { height: 200px; }
+  .ph-walk-sign { right: 8%; }
+  .ph-dog-track, .ph-dog-facing { animation-duration: 18s; }
+}
 @media (prefers-reduced-motion: reduce) {
+  .ph-walk-toggle { display: none; }
+  .ph-dog-track { left: 32%; }
+  .ph-dog-track, .ph-dog-facing, .ph-dog-sprite { animation: none !important; }
   html { scroll-behavior: auto !important; }
   *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
