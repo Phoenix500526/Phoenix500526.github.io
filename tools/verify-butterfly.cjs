@@ -3,6 +3,7 @@ const path = require('node:path');
 const frontMatter = require('hexo-front-matter');
 const { unescapeHTML } = require('hexo-util');
 const moment = require('moment-timezone');
+const { createHash } = require('node:crypto');
 
 const mode = process.argv[2] || 'preview';
 if (!['preview', 'production'].includes(mode)) throw new Error('Use preview or production.');
@@ -18,6 +19,7 @@ function files(dir) {
   });
 }
 const pages = files(output);
+const styleHash = createHash('sha256').update(fs.readFileSync(path.join(output, 'css/phoenix.css'))).digest('hex').slice(0, 12);
 const posts = files(path.join(root, 'source/_posts')).filter(file => file.endsWith('.md'))
   .map(file => frontMatter.parse(fs.readFileSync(file, 'utf8'))).filter(post => post.published !== false);
 const contentDate = value => {
@@ -32,6 +34,9 @@ for (const file of pages) {
   check(!['db.json', '_multiconfig.yml', '.env'].includes(path.basename(file)), `Build state in artifact: ${relative}`);
   if (!file.endsWith('.html')) continue;
   const html = fs.readFileSync(file, 'utf8');
+  if (html.includes('href="/css/phoenix.css')) {
+    check(html.includes(`href="/css/phoenix.css?v=${styleHash}"`) && !html.includes('href="/css/phoenix.css"'), `Stale stylesheet cache key: ${relative}`);
+  }
   if (mode === 'preview') check(!html.includes('busuanzi.ibruce.info') && !html.includes('src="/js/site-stats.js"'), `Analytics enabled in preview: ${relative}`);
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/);
   check(canonical && canonical[1].startsWith(origin + '/'), `Invalid canonical: ${relative}`);

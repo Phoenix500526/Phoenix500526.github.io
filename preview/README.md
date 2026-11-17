@@ -30,7 +30,10 @@ the site.** Keep commits local until deployment is explicitly approved. The old
 
 The pinned official npm theme is copied into ignored `themes/butterfly-preview`;
 `preview/butterfly` is overlaid on it. CSS, scripts, icon fonts, image zoom, and
-MathJax are local. Production pages use a local client to request site visitor
+MathJax are local. The custom stylesheet URL includes a content hash so a new
+layout does not reuse an older cached stylesheet. Build verification checks
+the hash against the generated CSS on every page that references it.
+Production pages use a local client to request site visitor
 and page-view counts from the official Busuanzi HTTPS endpoint. Failed script
 requests retry at most twice; successful requests are never retried. A slow
 response can still update the card after its eight-second status timeout.
