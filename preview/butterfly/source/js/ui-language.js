@@ -167,7 +167,10 @@
     document.querySelectorAll(textSelectors).forEach(translateText);
     document.querySelectorAll(attrSelectors).forEach(translateAttributes);
     document.querySelectorAll('[data-ui-language]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.uiLanguage === language));
+      button.dataset.uiLanguage = language === 'en' ? 'zh-CN' : 'en';
+      const label = language === 'en' ? 'Switch to Chinese' : '切换到英文';
+      button.setAttribute('aria-label', label);
+      button.title = label;
     });
     if (typeof GLOBAL_CONFIG !== 'undefined') {
       for (const key of Object.keys(GLOBAL_CONFIG.copy || {})) {

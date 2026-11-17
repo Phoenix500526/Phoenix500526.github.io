@@ -8,9 +8,9 @@ const script = fs.readFileSync(path.join(__dirname, '../preview/butterfly/source
 async function setup({ browserLanguage = 'en-US', saved, blocked = false, clock, quoteCatalog } = {}) {
   const dom = new JSDOM(`<!doctype html><html lang="zh-CN"><body>
     <nav id="nav"><a class="site-page" href="/about/">关于我</a>
-      <div class="ph-language-switch"><button data-ui-language="zh-CN">中文</button><button data-ui-language="en">EN</button></div>
+      <button class="ph-language-switch" data-ui-language="en" aria-label="切换到英文"></button>
     </nav>
-    <div id="sidebar-menus"><button data-ui-language="zh-CN">中文</button><button data-ui-language="en">EN</button></div>
+    <div id="sidebar-menus"><button class="ph-language-switch" data-ui-language="en" aria-label="切换到英文"></button></div>
     <section class="ph-intro"><h1 class="ph-daily-quote">默认句子</h1></section>
     <h1 class="post-title">关于我</h1><article id="article-container" lang="zh-CN"><h2>分类</h2><code>搜索</code></article>
     <p class="ph-summary">首页</p><a class="category-list-link">分类</a>
@@ -43,6 +43,9 @@ async function setup({ browserLanguage = 'en-US', saved, blocked = false, clock,
   return dom;
 }
 const tick = () => new Promise(resolve => setImmediate(resolve));
+const switchLanguage = (document, locale, scope = '#nav') => {
+  if (document.documentElement.lang !== locale) document.querySelector(`${scope} .ph-language-switch`).click();
+};
 
 test('UI follows browser language, remembers explicit choice, and preserves content and URLs', async () => {
   const dom = await setup();
@@ -54,11 +57,12 @@ test('UI follows browser language, remembers explicit choice, and preserves cont
     assert.equal(d.documentElement.lang, 'en');
     assert.equal(d.querySelector('#nav a').textContent, 'About Me');
     for (const locale of ['zh-CN', 'en', 'zh-CN']) {
-      d.querySelector(`#sidebar-menus [data-ui-language="${locale}"]`).click();
+      switchLanguage(d, locale, '#sidebar-menus');
       assert.equal(d.documentElement.lang, locale);
       assert.equal(window.localStorage.getItem('ph-ui-language'), locale);
       assert.equal(d.querySelector('#nav a').textContent, locale === 'en' ? 'About Me' : '关于我');
-      assert.equal(d.querySelector(`#nav [data-ui-language="${locale}"]`).getAttribute('aria-pressed'), 'true');
+      assert.equal(d.querySelector('#nav .ph-language-switch').dataset.uiLanguage, locale === 'en' ? 'zh-CN' : 'en');
+      assert.equal(d.querySelector('#nav .ph-language-switch').getAttribute('aria-label'), locale === 'en' ? 'Switch to Chinese' : '切换到英文');
       assert.deepEqual(preserved.map(selector => d.querySelector(selector).outerHTML), originals);
       assert.equal(window.location.href, 'http://localhost:4187/article/#section');
     }
@@ -73,7 +77,7 @@ test('Chinese variants default to Chinese; invalid or blocked storage does not b
     const dom = await setup(options);
     try {
       assert.equal(dom.window.document.documentElement.lang, 'zh-CN');
-      dom.window.document.querySelector('[data-ui-language="en"]').click();
+      switchLanguage(dom.window.document, 'en');
       assert.equal(dom.window.document.querySelector('#nav a').textContent, 'About Me');
     } finally { await tick(); dom.window.close(); }
   }
@@ -96,12 +100,12 @@ test('late search and statistics updates stay localized without translating resu
     assert.equal(result.textContent, 'No results for: <img src=x onerror=alert(1)> $&');
     assert.equal(result.children.length, 0);
     stats.textContent = '12345'; await tick();
-    d.querySelector('[data-ui-language="zh-CN"]').click();
+    switchLanguage(d, 'zh-CN');
     assert.equal(stats.textContent, '12345');
     assert.equal(result.textContent, '未找到符合您查询的内容：<img src=x onerror=alert(1)> $&');
     assert.equal(d.querySelector('#local-search-results a').textContent, '搜索');
     const expand = d.querySelector('.code-expand-btn');
-    d.querySelector('[data-ui-language="en"]').click();
+    switchLanguage(d, 'en');
     expand.setAttribute('aria-label', '收起代码'); await tick();
     assert.equal(expand.getAttribute('aria-label'), 'Collapse code');
   } finally { await tick(); dom.window.close(); }
@@ -117,7 +121,7 @@ test('Giscus receives only a language update after lazy loading and on language 
     const calls = [];
     frame.contentWindow.postMessage = (message, origin) => calls.push({ lang: message.giscus.setConfig.lang, keys: Object.keys(message.giscus.setConfig), origin });
     await tick(); frame.dispatchEvent(new window.Event('load'));
-    d.querySelector('[data-ui-language="zh-CN"]').click();
+    switchLanguage(d, 'zh-CN');
     assert.equal(calls.at(-2).lang, 'en');
     assert.deepEqual(calls.at(-1), { lang: 'zh-CN', keys: ['lang'], origin: 'https://giscus.app' });
     assert.equal(d.querySelector('#giscus-wrap iframe'), frame);
@@ -129,7 +133,7 @@ test('daily quotes stay stable within a local day, across reloads and language s
   const clock = { now: new Date(2026, 10, 17, 0, 1).getTime() };
   const morning = await setup({ clock, blocked: true });
   const quote = dom => dom.window.document.querySelector('.ph-daily-quote').textContent;
-  const switchTo = (dom, locale) => dom.window.document.querySelector(`[data-ui-language="${locale}"]`).click();
+  const switchTo = (dom, locale) => switchLanguage(dom.window.document, locale);
   let evening;
   try {
     const english = quote(morning);
@@ -159,7 +163,7 @@ test('different dates select from all three supplied quotes in each language', a
     const dom = await setup({ clock: { now: new Date(2026, 11, day, 12).getTime() } });
     try {
       for (const locale of ['zh-CN', 'en']) {
-        dom.window.document.querySelector(`[data-ui-language="${locale}"]`).click();
+        switchLanguage(dom.window.document, locale);
         seen[locale].add(dom.window.document.querySelector('.ph-daily-quote').textContent);
       }
     } finally { await tick(); dom.window.close(); }
@@ -188,7 +192,7 @@ test('quote lists can grow independently and have different lengths', async () =
       const dom = await setup({ quoteCatalog, clock: { now: new Date(2026, 0, day, 12).getTime() } });
       try {
         for (const locale of ['zh-CN', 'en']) {
-          dom.window.document.querySelector(`[data-ui-language="${locale}"]`).click();
+          switchLanguage(dom.window.document, locale);
           const selected = dom.window.document.querySelector('.ph-daily-quote').textContent;
           assert.ok(quoteCatalog[locale].includes(selected), `${locale}: invalid quote ${selected}`);
           seen[locale].add(selected);

@@ -8,9 +8,10 @@ nav#nav
       each href, label in {'首页':'/', '分类':'/categories/', '归档':'/archives/', '关于我':'/about/'}
         .menus_item
           a.site-page(href=url_for(href) aria-current=((label === '首页' && globalPageType === 'home') || (label === '关于我' && page.layout === 'about') ? 'page' : undefined))= label
-    include ../language-switch.pug
-    button.ph-theme-toggle(type='button' aria-label='切换深浅色模式' title='切换深浅色模式')
-      i.fas.fa-adjust(aria-hidden='true')
+    .ph-nav-tools
+      include ../language-switch.pug
+      button.ph-theme-toggle(type='button' aria-label='切换深浅色模式' title='切换深浅色模式')
+        i.fas.fa-adjust(aria-hidden='true')
     #search-button
       button.site-page.search(type='button' aria-label='搜索文章')
         i.fas.fa-search(aria-hidden='true')
