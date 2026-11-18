@@ -76,7 +76,7 @@
     'Phoenix 的蓝帽小狗头像': 'Phoenix’s blue-hat dog avatar',
     '开源贡献分区': 'Open source contribution sections', '开源贡献': 'Open source contributions',
     '分布式系统与共识': 'Distributed systems & consensus', 'AI Agent 系统': 'AI agent systems',
-    '数据基础设施': 'Data infrastructure', 'eBPF 与内核': 'eBPF & the kernel',
+    '数据基础设施': 'Data infrastructure', 'eBPF 与内核': 'eBPF & the kernel', '其他贡献': 'Other contributions',
     'GitHub 上的更多记录 ↗': 'More on GitHub ↗',
     '这页笔记不在这里。': 'This note isn’t here.',
     '可以返回首页，或者使用右上角搜索查找文章。': 'Head back home, or use search to find an article.',

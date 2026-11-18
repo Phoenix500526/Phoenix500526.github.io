@@ -89,6 +89,10 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <span class="lead">Hardened leader removal across recovery and consecutive membership changes.</span>
           Enabled committed voters to campaign when the final configuration remained uncommitted, removed a debug panic when an excluded but still-leading node proposed the next configuration, and added double-shrink Jepsen coverage under both step-down policies so reconfiguration and writes recover without manual storage repair.
         </li>
+        <li>
+          <span class="lead">Prevented snapshot rollback in the OpenDAL storage example.</span>
+          Fixed a race where an older snapshot upload could finish after a newer snapshot had been installed and replace it. Compared log IDs under the snapshot lock so late uploads cannot overwrite an equal or newer snapshot.
+        </li>
       </ul>
     </article>
   </section>
@@ -101,7 +105,7 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <h3 class="repo"><a href="https://github.com/0xPlaygrounds/rig">rig</a></h3>
           <span class="scope">&middot; Rust &middot; LLM application framework</span>
         </div>
-        <span class="role"><a href="https://github.com/0xPlaygrounds/rig/pulls?q=is%3Apr+state%3Aclosed+author%3APhoenix500526">Contributor</a></span>
+        <span class="role">Contributor</span>
       </div>
 
       <div class="link-row period-right">
@@ -134,7 +138,7 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <h3 class="repo"><a href="https://github.com/apache/maka">Apache/Maka</a></h3>
           <span class="scope">&middot; TypeScript &middot; local-first AI agent workspace</span>
         </div>
-        <span class="role"><a href="https://github.com/apache/maka/pulls?q=is%3Apr+state%3Aclosed+author%3APhoenix500526">Contributor</a></span>
+        <span class="role">Contributor</span>
       </div>
 
       <div class="link-row period-right">
@@ -162,6 +166,10 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <span class="lead">Moved repository invariants into fast local quality gates.</span>
           Added pre-commit checks for formatting, lint, ASF headers, protocol epochs, and diff errors plus Conventional Commit validation, catching violations before push and reducing avoidable CI cycles.
         </li>
+        <li>
+          <span class="lead">Made task navigation consistent across grouping modes and macOS interactions.</span>
+          Added a shared pinned-task section to the project view without duplicating tasks or changing their project membership. Fixed pointer-event ordering that caused task context menus to close as soon as the right mouse button was released on macOS.
+        </li>
       </ul>
     </article>
   </section>
@@ -174,7 +182,7 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <h3 class="repo"><a href="https://github.com/apache/datafusion">Apache/DataFusion</a></h3>
           <span class="scope">&middot; Rust &middot; extensible query engine</span>
         </div>
-        <span class="role"><a href="https://github.com/apache/datafusion/pulls?q=is%3Apr+state%3Aclosed+author%3APhoenix500526">Contributor</a></span>
+        <span class="role">Contributor</span>
       </div>
 
       <div class="link-row period-right">
@@ -202,6 +210,18 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <span class="lead">Made the file-statistics cache schema-aware.</span>
           Prevented statistics from being reused against mismatched column layouts and causing panics, while restoring safe cache reuse for repeated explicit-schema reads.
         </li>
+        <li>
+          <span class="lead">Fixed optimizer rewrites that changed SQL results.</span>
+          Preserved residual predicates and ordinary versus NULL-safe equality during join reordering. Kept volatile filters above aggregates so they select groups without changing their counts, and prevented constant-filter pushdown from producing extra rows for global aggregates and empty grouping sets.
+        </li>
+        <li>
+          <span class="lead">Preserved correctness when planning unbounded null-aware joins.</span>
+          Rejected conversions to symmetric hash joins that cannot preserve the NULL semantics required by <code>NOT IN</code> and projected <code>IN</code> subqueries. Affected streaming queries now receive an explicit planning error instead of potentially incorrect rows; bounded queries keep their existing behavior.
+        </li>
+        <li>
+          <span class="lead">Removed duplicate build-key evaluation from eligible NULL-safe hash joins.</span>
+          Reused evaluated key arrays when selecting the join's array map, avoiding a second evaluation of computed integer keys while preserving NULL handling, map selection, and query results.
+        </li>
       </ul>
     </article>
 
@@ -211,7 +231,7 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
           <h3 class="repo"><a href="https://github.com/apache/arrow-rs">Apache/arrow-rs</a></h3>
           <span class="scope">&middot; Rust &middot; Arrow IPC and Parquet</span>
         </div>
-        <span class="role"><a href="https://github.com/apache/arrow-rs/pulls?q=is%3Apr+state%3Aclosed+author%3APhoenix500526">Contributor</a></span>
+        <span class="role">Contributor</span>
       </div>
 
       <div class="link-row period-right">
@@ -225,11 +245,40 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
       <ul>
         <li>
           <span class="lead">Designed and implemented the public sans-I/O <code>StreamEncoder</code>.</span>
-          Decoupled Arrow IPC encoding from <code>std::io::Write</code> so asynchronous and chunk-oriented destinations can handle ordered buffers through their own I/O layer, while preserving the low-copy path; DataFusion later adopted it for asynchronous spill writes.
+          Decoupled Arrow IPC encoding from <code>std::io::Write</code> so asynchronous and chunk-oriented destinations can handle ordered buffers through their own I/O layer, while preserving the low-copy path; DataFusion later adopted it for asynchronous spill writes. Added encoder benchmarks that exclude sink I/O to help detect encoding regressions.
         </li>
         <li>
           <span class="lead">Restored valid schema-only Arrow IPC streams without an EOS marker.</span>
           Fixed <code>StreamDecoder</code>'s zero-length-body loop so it completes pending schema messages instead of dropping the schema and reporting <code>Unexpected End of Stream</code>, with regression coverage and no public API change.
+        </li>
+        <li>
+          <span class="lead">Corrected decimal validation and extreme-scale error handling.</span>
+          Allowed valid negative-scale arrays across Decimal32, Decimal64, Decimal128, and Decimal256 while retaining precision checks. Fixed Variant decimal conversion at <code>scale = -128</code> so unrepresentable values return an overflow error rather than panic, with regression coverage in debug and release builds.
+        </li>
+        <li>
+          <span class="lead">Reorganized Parquet reader and writer tests around the behavior they cover.</span>
+          Split 80 existing synchronous reader tests into focused modules and moved writer roundtrip tests into the integration suite, including scalar, nested, dictionary, and run-end encoded cases. Preserved existing assertions and configurations so related coverage is easier to find and maintain.
+        </li>
+      </ul>
+    </article>
+
+    <article class="contribution">
+      <div class="contrib-head">
+        <div>
+          <h3 class="repo"><a href="https://github.com/apache/datasketches-rust">Apache/DataSketches Rust</a></h3>
+          <span class="scope">&middot; Rust &middot; probabilistic data sketches</span>
+        </div>
+        <span class="role">Contributor</span>
+      </div>
+      <div class="link-row period-right"><div>Jul. 2026</div></div>
+      <ul>
+        <li>
+          <span class="lead">Simplified inverse-power calculations shared by CPC and HLL sketches.</span>
+          Replaced a table of precomputed powers with a shared inline calculation and updated the sketch implementations and tests.
+        </li>
+        <li>
+          <span class="lead">Reused compatibility-test snapshots in CI.</span>
+          Downloaded fixtures from the Apache DataSketches TCK instead of rebuilding Java and C++ implementations in each CI job.
         </li>
       </ul>
     </article>
@@ -240,7 +289,7 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
     <article class="contribution">
       <div class="contrib-head">
         <div>
-          <h3 class="repo"><a href="https://github.com/bpftrace/bpftrace/pulls?q=is%3Apr+state%3Aclosed+author%3APhoenix500526">bpftrace</a></h3>
+          <h3 class="repo"><a href="https://github.com/bpftrace/bpftrace">bpftrace</a></h3>
           <span class="scope">&middot; C++ / LLVM &middot; Linux tracing language</span>
         </div>
         <span class="role"><a href="https://github.com/orgs/bpftrace/teams/bpftrace-committers">Committer</a></span>
@@ -302,6 +351,42 @@ description: Phoenix（Jiawei Zhao）的个人介绍与开源贡献，涵盖分�
         &middot;
         <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tag/?h=v6.18">Linux 6.18</a>
       </div>
+    </article>
+
+    <article class="contribution">
+      <div class="contrib-head">
+        <div>
+          <h3 class="repo"><a href="https://github.com/libbpf/libbpf-rs">libbpf-rs</a></h3>
+          <span class="scope">&middot; Rust &middot; libbpf bindings</span>
+        </div>
+        <span class="role">Contributor</span>
+      </div>
+      <div class="link-row period-right"><div>Nov. 2026</div></div>
+      <ul>
+        <li>
+          <span class="lead">Restored dependency-policy checks and reduced duplicate dependencies.</span>
+          Updated the license and Git-source allowlists for existing dependencies, then aligned example dependencies to remove duplicate versions of <code>nix</code>, <code>cfg_aliases</code>, and <code>hashbrown</code>. Kept the affected examples building without Rust source changes.
+        </li>
+      </ul>
+    </article>
+  </section>
+  <section class="topic-section" id="other">
+    <h2 class="section-title">Other Contributions</h2>
+    <article class="contribution">
+      <div class="contrib-head">
+        <div>
+          <h3 class="repo"><a href="https://github.com/apache/asyncband">Apache/Asyncband</a></h3>
+          <span class="scope">&middot; Rust &middot; asynchronous synchronization primitives</span>
+        </div>
+        <span class="role">Contributor</span>
+      </div>
+      <div class="link-row period-right"><div>Aug. 2026</div></div>
+      <ul>
+        <li>
+          <span class="lead">Clarified two distinct semaphore permit operations.</span>
+          Replaced ambiguous <code>forget</code> APIs with <code>drain_permits</code> for removing currently available permits and <code>reduce_permits</code> for reducing the logical balance by an exact amount, including debt against future releases. Updated documentation, examples, and tests to make each contract explicit.
+        </li>
+      </ul>
     </article>
   </section>
 {% endraw %}
